@@ -6,7 +6,7 @@
   <title>Puentes | Open Agentic AI for Youth Civic Information Integrity</title>
   <meta
     name="description"
-    content="Puentes is an open, agentic AI system that helps young people, educators, and trusted creators turn civic information into source-linked, depolarizing media."
+    content="Puentes is an open, agentic AI system that helps young people, educators, and trusted creators turn civic information into source-linked, creator-ready civic media."
   >
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -22,8 +22,8 @@
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="#mission">Mission</a>
-        <a href="#workflow">Workflow</a>
-        <a href="#outputs">Outputs</a>
+        <a href="#creator-lens">Creator Lens</a>
+        <a href="#prototype">Prototype</a>
         <a href="#safeguards">Safeguards</a>
       </nav>
     </header>
@@ -31,35 +31,41 @@
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Civic clarity for algorithmic spaces</p>
-          <h1>Turn public information into youth-ready media without turning up the heat.</h1>
+          <p class="eyebrow">Civic clarity that fits the feed</p>
+          <h1>Turn dense public info into source-linked posts, scripts, and prompts young people will actually open.</h1>
           <p class="hero-text">
-            Puentes is an open agentic AI system that helps young people, educators, and trusted
-            creators translate complex civic issues into source-linked explainers, short-form
-            scripts, classroom prompts, and community discussion tools. It detects manipulation,
-            surfaces amplification risk, and keeps a human reviewer in control before anything is published.
+            Puentes is an open agentic AI system for young people, educators, youth groups, and trusted
+            creators. It turns dense civic info into carousel packs, short-video scripts, classroom prompts,
+            and creator-ready explainers that feel familiar without dropping nuance. No panic bait. No
+            wall-of-text PDF energy. Every draft keeps receipts, flags manipulation, and waits for human review.
           </p>
+          <div class="hero-badges" aria-label="Puentes use cases">
+            <span class="badge-pill">Carousel-ready</span>
+            <span class="badge-pill">Short-video scripts</span>
+            <span class="badge-pill">Classroom safe</span>
+            <span class="badge-pill">Creator handoff</span>
+          </div>
           <div class="hero-actions">
-            <a class="button button-primary" href="#workflow">Explore the system</a>
-            <a class="button button-secondary" href="#blueprint">See the blueprint</a>
+            <a class="button button-primary" href="#prototype">Open the prototype</a>
+            <a class="button button-secondary" href="#blueprint">See the architecture</a>
           </div>
         </div>
 
         <aside class="hero-panel" aria-label="Puentes system snapshot">
           <div class="signal-card">
-            <span class="signal-label">Input layer</span>
-            <strong>Public documents, reliable reporting, and community questions</strong>
+            <span class="signal-label">What goes in</span>
+            <strong>Public documents, reliable reporting, community questions, creator prompts</strong>
           </div>
           <div class="signal-card">
-            <span class="signal-label">Agent layer</span>
-            <strong>Retrieval, verification, rhetoric analysis, and format generation</strong>
+            <span class="signal-label">What Puentes does</span>
+            <strong>Checks claims, spots hype tactics, and reshapes facts into youth-native formats</strong>
           </div>
           <div class="signal-card">
-            <span class="signal-label">Review layer</span>
-            <strong>Human approval required. No autopublishing.</strong>
+            <span class="signal-label">What never happens</span>
+            <strong>No autoposting. No partisan steering. No source-free hot takes.</strong>
           </div>
           <div class="hero-badge">
-            <span>Built for ages 13-24, educators, school media clubs, youth organizations, and trusted creators.</span>
+            <span>Built for ages 13-24, student creators, school media clubs, youth organizers, educators, and trusted community voices.</span>
           </div>
         </aside>
       </section>
@@ -67,107 +73,245 @@
       <section class="impact-strip" id="mission">
         <article>
           <span>Problem</span>
-          <p>Institutions publish dense civic information while platforms reward outrage, speed, and identity conflict.</p>
+          <p>Public information shows up as dense docs while the feed rewards outrage, certainty, and identity conflict.</p>
         </article>
         <article>
           <span>Response</span>
-          <p>Puentes makes public issues understandable, source-linked, and safer for youth-facing discussion spaces.</p>
+          <p>Puentes turns the same civic material into carousel posts, short scripts, and prompts that keep context attached.</p>
         </article>
         <article>
           <span>Principle</span>
-          <p>It does not tell people what to think. It helps them understand, verify, and discuss with more context.</p>
+          <p>It does not tell young people what to think. It helps them see what is true, what is missing, and what is being manipulated.</p>
         </article>
       </section>
 
-      <section class="section section-grid" id="workflow">
+      <section class="section creator-section" id="creator-lens">
         <div class="section-heading">
-          <p class="eyebrow">How it works</p>
-          <h2>An agentic workflow built for integrity, not engagement hacking.</h2>
+          <p class="eyebrow">Creator lens</p>
+          <h2>Built for student creators, youth orgs, classroom teams, and trusted messengers who need better civic media tools.</h2>
           <p>
-            Each stage is explicit and reviewable. Select a stage to inspect what Puentes does,
-            what it produces, and where humans stay in the loop.
+            The system is designed to feel familiar to Gen Z and younger audiences without becoming cringe or careless.
+            It uses plain language, strong hooks, and format-native structure while keeping sources visible and uncertainty honest.
           </p>
         </div>
 
-        <div class="workflow-layout">
-          <div class="workflow-steps" role="tablist" aria-label="Puentes workflow">
-            <button class="workflow-step is-active" type="button" data-step="ingest" aria-selected="true">01 Ingest</button>
-            <button class="workflow-step" type="button" data-step="verify" aria-selected="false">02 Verify</button>
-            <button class="workflow-step" type="button" data-step="analyze" aria-selected="false">03 Analyze</button>
-            <button class="workflow-step" type="button" data-step="publish" aria-selected="false">04 Prepare</button>
-          </div>
-
-          <article class="workflow-detail" aria-live="polite">
-            <span class="detail-kicker" id="detail-kicker">Input sources</span>
-            <h3 id="detail-title">Gather civic material from places young people rarely have time to parse.</h3>
-            <p id="detail-text">
-              Puentes ingests public documents, trusted reporting, and questions from communities or classrooms,
-              then structures them into traceable source packets instead of a loose prompt history.
-            </p>
-            <ul class="detail-list" id="detail-list">
-              <li>Public documents and institutional releases</li>
-              <li>Reliable reporting and local context</li>
-              <li>Community and classroom question intake</li>
-            </ul>
+        <div class="creator-grid">
+          <article class="creator-card">
+            <span>Feels native</span>
+            <h3>Short, scrollable, and clear</h3>
+            <p>Outputs are shaped for carousel swipes, 30-45 second explainers, and discussion prompts people can actually use.</p>
+          </article>
+          <article class="creator-card">
+            <span>Keeps receipts</span>
+            <h3>Source-linked by default</h3>
+            <p>Every claim stays tied to reporting, documents, or community questions so creators are not forced into vague summary mode.</p>
+          </article>
+          <article class="creator-card">
+            <span>Protects tone</span>
+            <h3>No rage-bait voice</h3>
+            <p>Puentes flags fear hooks, false binaries, dog whistles, and pressure to perform certainty just to win engagement.</p>
+          </article>
+          <article class="creator-card">
+            <span>Ready for youth spaces</span>
+            <h3>Works across feed, class, and community</h3>
+            <p>One reviewed packet can become a creator caption, a short script, a classroom prompt set, and a youth workshop starter.</p>
           </article>
         </div>
       </section>
 
-      <section class="section" id="outputs">
-        <div class="section-heading">
-          <p class="eyebrow">Outputs</p>
-          <h2>One verified source base, multiple youth-facing formats.</h2>
+      <section class="section prototype-section" id="prototype">
+        <div class="section-heading prototype-heading">
+          <p class="eyebrow">Prototype workspace</p>
+          <h2>A review flow for source intake, claim checks, creator packs, and human approval.</h2>
           <p>
-            The same reviewed information can be adapted for different messengers and settings
-            without losing citations, nuance, or tone controls.
+            This is the product core: a workspace where a reviewer can move from incoming civic material to a creator-ready,
+            classroom-safe draft while seeing evidence, rhetoric risks, and readiness state in one place.
           </p>
         </div>
 
-        <div class="audience-switcher" role="tablist" aria-label="Audience formats">
-          <button class="audience-tab is-active" type="button" data-audience="youth" aria-selected="true">Young people</button>
-          <button class="audience-tab" type="button" data-audience="educators" aria-selected="false">Educators</button>
-          <button class="audience-tab" type="button" data-audience="creators" aria-selected="false">Trusted creators</button>
+        <div class="intake-ribbon panel">
+          <div>
+            <span class="detail-kicker">Question intake</span>
+            <h3>Drop in a student question, creator angle, or community confusion point.</h3>
+            <p>Use this to simulate how Puentes receives prompts from group chats, school clubs, classrooms, youth workshops, or trusted creators.</p>
+          </div>
+          <div class="intake-form">
+            <label class="sr-only" for="question-input">Community question</label>
+            <textarea id="question-input" rows="3" placeholder="Example: People keep posting that the housing vote changed everything. What actually changed, and what is just engagement framing?"></textarea>
+            <div class="intake-actions">
+              <button class="button button-primary" id="queue-question" type="button">Add to queue</button>
+              <button class="button button-secondary" id="load-next-packet" type="button">Switch demo packet</button>
+            </div>
+          </div>
+          <div class="queue-card">
+            <span class="detail-kicker">Live queue</span>
+            <ul class="queue-list" id="queue-list"></ul>
+          </div>
         </div>
 
-        <div class="output-panel">
-          <div>
-            <span class="detail-kicker" id="audience-kicker">Youth-facing media</span>
-            <h3 id="audience-title">Short, source-linked content that explains without flattening.</h3>
-            <p id="audience-text">
-              Puentes can draft explainers, carousel slides, short-video scripts, and discussion prompts
-              in language that respects young audiences without sounding institutional or patronizing.
-            </p>
-          </div>
-          <ul class="output-list" id="audience-list">
-            <li>Carousel outlines with citations</li>
-            <li>Short-video scripts with narration beats</li>
-            <li>Context cards for comments and group chats</li>
-          </ul>
+        <div class="workspace-grid">
+          <section class="panel source-panel">
+            <div class="panel-header">
+              <div>
+                <span class="detail-kicker">01 Source packet</span>
+                <h3>Pick the civic packet the team is working through.</h3>
+                <p class="panel-note">Each packet mixes records, reporting, and youth-facing questions so creators do not have to start from scratch.</p>
+              </div>
+              <div class="meta-pill" id="packet-count"></div>
+            </div>
+            <div class="packet-layout">
+              <div class="packet-list" id="packet-list" role="tablist" aria-label="Source packets"></div>
+              <article class="packet-detail">
+                <div class="packet-meta-row">
+                  <span class="status-chip" id="packet-type"></span>
+                  <span class="meta-pill" id="packet-date"></span>
+                  <span class="meta-pill" id="packet-trust"></span>
+                </div>
+                <h4 id="packet-title"></h4>
+                <p id="packet-summary"></p>
+                <div class="packet-context">
+                  <div>
+                    <span class="detail-kicker">Core question</span>
+                    <p id="packet-question"></p>
+                  </div>
+                  <div>
+                    <span class="detail-kicker">Source mix</span>
+                    <ul class="source-links" id="packet-sources"></ul>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel claim-panel">
+            <div class="panel-header">
+              <div>
+                <span class="detail-kicker">02 Claim check</span>
+                <h3>See what checks out, what gets overstated, and what still needs context.</h3>
+                <p class="panel-note">This keeps the team out of guess mode and helps creators avoid repeating the loudest version of the story.</p>
+              </div>
+              <div class="meta-pill" id="claim-count"></div>
+            </div>
+            <div class="claim-layout">
+              <div class="claim-list" id="claim-list" role="tablist" aria-label="Claims under review"></div>
+              <article class="claim-detail">
+                <div class="claim-header-row">
+                  <h4 id="claim-title"></h4>
+                  <span class="status-chip" id="claim-status"></span>
+                </div>
+                <p id="claim-summary"></p>
+                <div class="detail-columns">
+                  <div>
+                    <span class="detail-kicker">What backs this up</span>
+                    <p id="claim-evidence"></p>
+                  </div>
+                  <div>
+                    <span class="detail-kicker">What still needs checking</span>
+                    <p id="claim-gap"></p>
+                  </div>
+                </div>
+                <div class="detail-columns">
+                  <div>
+                    <span class="detail-kicker">Receipts kept in the draft</span>
+                    <ul class="detail-list" id="claim-citations"></ul>
+                  </div>
+                  <div>
+                    <span class="detail-kicker">Language watchouts</span>
+                    <ul class="detail-list" id="claim-signals"></ul>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel draft-panel">
+            <div class="panel-header">
+              <div>
+                <span class="detail-kicker">03 Output studio</span>
+                <h3>Flip the same verified facts into creator-native and youth-ready formats.</h3>
+                <p class="panel-note">A single review packet can feed carousels, short videos, creator captions, and class prompts without rewriting the truth.</p>
+              </div>
+              <div class="meta-pill" id="draft-state">Review draft</div>
+            </div>
+            <div class="format-tabs" id="format-tabs" role="tablist" aria-label="Draft formats">
+              <button class="format-tab is-active" data-format="carousel" type="button" aria-selected="true">Carousel pack</button>
+              <button class="format-tab" data-format="video" type="button" aria-selected="false">Short video</button>
+              <button class="format-tab" data-format="classroom" type="button" aria-selected="false">Class prompts</button>
+              <button class="format-tab" data-format="creator" type="button" aria-selected="false">Creator caption</button>
+            </div>
+            <article class="draft-view">
+              <span class="detail-kicker" id="draft-kicker"></span>
+              <h4 id="draft-title"></h4>
+              <p id="draft-summary"></p>
+              <ul class="detail-list" id="draft-points"></ul>
+              <div class="draft-footer">
+                <span class="detail-kicker">Source-linked output rule</span>
+                <p id="draft-note"></p>
+              </div>
+            </article>
+          </section>
+
+          <aside class="panel gate-panel">
+            <div class="panel-header">
+              <div>
+                <span class="detail-kicker">04 Human gate</span>
+                <h3>Catch manipulation, pressure-tested framing, and creator risk before anything is shared.</h3>
+                <p class="panel-note">This is where Puentes stays useful instead of becoming another machine for faster civic hype.</p>
+              </div>
+            </div>
+
+            <div class="risk-stack">
+              <article class="risk-card">
+                <span class="detail-kicker">Manipulation signals</span>
+                <ul class="detail-list" id="manipulation-list"></ul>
+              </article>
+              <article class="risk-card">
+                <span class="detail-kicker">Amplification note</span>
+                <p id="amplification-note"></p>
+              </article>
+            </div>
+
+            <div class="checklist-block">
+              <span class="detail-kicker">Reviewer checklist</span>
+              <div class="checklist" id="review-checklist"></div>
+            </div>
+
+            <div class="review-actions">
+              <button class="button button-primary" id="approve-review" type="button">Approve for handoff</button>
+              <button class="button button-secondary" id="request-revision" type="button">Send back for revision</button>
+            </div>
+
+            <article class="gate-status-card" id="gate-status-card" data-state="pending">
+              <span class="detail-kicker">Current gate status</span>
+              <h4 id="gate-status-title">Waiting for reviewer checks</h4>
+              <p id="gate-status-text">Complete the checklist before approving a draft for educator or creator handoff.</p>
+            </article>
+          </aside>
         </div>
       </section>
 
       <section class="section section-alt" id="safeguards">
         <div class="section-heading">
           <p class="eyebrow">Safeguards</p>
-          <h2>Built to reduce manipulation, not just summarize content faster.</h2>
+          <h2>Built to reduce manipulation, not just make civic content faster.</h2>
         </div>
 
         <div class="safeguard-grid">
           <article>
             <h3>Manipulation detection</h3>
-            <p>Flags emotionally coercive language, false binaries, scapegoating, and bait designed to trigger tribal reactions.</p>
+            <p>Flags fear hooks, false binaries, scapegoating, and outrage packaging designed to trigger identity-first reactions.</p>
           </article>
           <article>
             <h3>Amplification awareness</h3>
-            <p>Highlights when a claim or clip may be benefiting from algorithmic acceleration rather than evidentiary quality.</p>
+            <p>Highlights when a claim or clip is spreading because it is algorithmically loud, not because it is well sourced.</p>
           </article>
           <article>
             <h3>Human review gate</h3>
-            <p>Every output is review-ready, not publish-ready. Editors and educators remain accountable decision makers.</p>
+            <p>Every output is handoff-ready, not publish-ready. Teachers, editors, and trusted creators still make the final call.</p>
           </article>
           <article>
             <h3>Nonpartisan framing</h3>
-            <p>Prompts, outputs, and review rubrics are designed to widen understanding instead of optimize for ideological victory.</p>
+            <p>Prompts and outputs are designed to widen understanding, not optimize for clout, ideological victory, or false balance.</p>
           </article>
         </div>
       </section>
@@ -182,12 +326,12 @@
           <article class="blueprint-card">
             <span>01</span>
             <h3>Source graph</h3>
-            <p>Documents, reporting, and community questions are indexed with provenance, date, and trust metadata.</p>
+            <p>Documents, reporting, creator prompts, and community questions are indexed with provenance, date, and trust metadata.</p>
           </article>
           <article class="blueprint-card">
             <span>02</span>
             <h3>Claim workflows</h3>
-            <p>Claims are decomposed, retrieved against evidence, and scored for support, conflict, or uncertainty.</p>
+            <p>Claims are decomposed, checked against evidence, and marked as supported, contested, or still unresolved.</p>
           </article>
           <article class="blueprint-card">
             <span>03</span>
@@ -197,12 +341,12 @@
           <article class="blueprint-card">
             <span>04</span>
             <h3>Format engine</h3>
-            <p>Approved facts are transformed into scripts, explainers, prompts, and educator tools with retained citations.</p>
+            <p>Reviewed facts become carousels, short scripts, creator captions, and classroom tools while citations stay attached.</p>
           </article>
           <article class="blueprint-card">
             <span>05</span>
             <h3>Review workspace</h3>
-            <p>Humans inspect sources, tone, omissions, and risk notes before approving adaptation for real audiences.</p>
+            <p>Humans inspect sources, tone, omissions, and risk notes before approving material for real audiences.</p>
           </article>
           <article class="blueprint-card">
             <span>06</span>
@@ -215,11 +359,12 @@
       <section class="section callout">
         <div>
           <p class="eyebrow">Who benefits</p>
-          <h2>Students, youth organizations, educators, and community creators who need better civic media tools.</h2>
+          <h2>Students, youth organizations, educators, and trusted creators who need civic content that can travel without becoming manipulative.</h2>
         </div>
         <p>
           Through Energia en Accion's mentoring networks, school partnerships, NGOs, and challenge-based learning
-          programs, Puentes can help smaller institutions produce reliable content that can actually travel in youth media environments.
+          programs, Puentes can help smaller institutions and youth messengers make clear, source-linked civic media
+          that feels familiar in the spaces where younger audiences already get information.
         </p>
       </section>
     </main>
