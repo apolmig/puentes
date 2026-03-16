@@ -1,0 +1,454 @@
+:root {
+  --bg: #f6efe3;
+  --bg-alt: #efe4d4;
+  --paper: rgba(255, 250, 240, 0.84);
+  --ink: #13243a;
+  --ink-soft: #425266;
+  --accent: #c25b3c;
+  --accent-dark: #8f3920;
+  --gold: #c79a3b;
+  --line: rgba(19, 36, 58, 0.14);
+  --shadow: 0 20px 50px rgba(31, 34, 52, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(194, 91, 60, 0.18), transparent 32%),
+    radial-gradient(circle at 85% 20%, rgba(199, 154, 59, 0.22), transparent 24%),
+    linear-gradient(180deg, #faf4e9 0%, var(--bg) 45%, var(--bg-alt) 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(19, 36, 58, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 36, 58, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent);
+}
+
+.page-shell {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+.site-header {
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.4rem;
+  background: rgba(250, 244, 233, 0.82);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.wordmark-mark {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, var(--ink), #284462);
+  color: #fff7ed;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.wordmark-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.wordmark-copy strong,
+h1,
+h2,
+h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.wordmark-copy span:last-child {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.site-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.site-nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.96rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.25fr 0.9fr;
+  gap: 1.5rem;
+  align-items: stretch;
+  padding: 5rem 0 3rem;
+}
+
+.hero-copy,
+.hero-panel,
+.workflow-detail,
+.output-panel,
+.callout,
+.blueprint-card,
+.safeguard-grid article {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.hero-copy {
+  padding: 2.2rem;
+  border-radius: 2rem 5rem 2rem 2rem;
+}
+
+.eyebrow,
+.signal-label,
+.detail-kicker,
+.impact-strip span,
+.blueprint-card span {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+
+h1 {
+  margin: 0.7rem 0 1rem;
+  font-size: clamp(2.8rem, 7vw, 5.3rem);
+  line-height: 0.94;
+  max-width: 11ch;
+}
+
+.hero-text,
+.section-heading p,
+.workflow-detail p,
+.output-panel p,
+.safeguard-grid p,
+.blueprint-card p,
+.callout p,
+.impact-strip p {
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.button-primary {
+  background: var(--ink);
+  color: #fff7ed;
+}
+
+.button-secondary {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.hero-panel {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding: 1.5rem;
+  border-radius: 2rem 2rem 4.5rem 2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 249, 240, 0.94), rgba(240, 228, 212, 0.94)),
+    var(--paper);
+}
+
+.signal-card,
+.hero-badge {
+  padding: 1.1rem 1.15rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(19, 36, 58, 0.12);
+  background: rgba(255, 252, 247, 0.78);
+}
+
+.signal-card strong,
+.hero-badge {
+  display: block;
+  line-height: 1.5;
+}
+
+.impact-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.impact-strip article {
+  padding: 1.4rem;
+  border-top: 3px solid rgba(194, 91, 60, 0.55);
+  background: rgba(255, 248, 238, 0.72);
+}
+
+.section {
+  padding: 4rem 0 0;
+}
+
+.section-grid {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.section-heading {
+  max-width: 52rem;
+}
+
+h2 {
+  margin: 0.4rem 0 0.8rem;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.02;
+}
+
+.workflow-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 1.2rem;
+}
+
+.workflow-steps,
+.audience-switcher {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.workflow-step,
+.audience-tab {
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  text-align: left;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  background: rgba(255, 249, 240, 0.75);
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.workflow-step:hover,
+.audience-tab:hover,
+.workflow-step:focus-visible,
+.audience-tab:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(194, 91, 60, 0.45);
+  outline: none;
+}
+
+.workflow-step.is-active,
+.audience-tab.is-active {
+  color: #fff7ed;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+}
+
+.workflow-detail,
+.output-panel,
+.callout {
+  padding: 1.7rem;
+  border-radius: 1.6rem;
+}
+
+.workflow-detail h3,
+.output-panel h3,
+.safeguard-grid h3,
+.blueprint-card h3,
+.callout h2 {
+  margin: 0.5rem 0 0.8rem;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.detail-list,
+.output-list {
+  margin: 1.1rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+.output-panel {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.section-alt {
+  position: relative;
+}
+
+.section-alt::before {
+  content: "";
+  position: absolute;
+  inset: 4rem -1rem -1rem;
+  z-index: -1;
+  border-radius: 2rem;
+  background: linear-gradient(135deg, rgba(19, 36, 58, 0.05), rgba(199, 154, 59, 0.11));
+}
+
+.safeguard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.safeguard-grid article,
+.blueprint-card {
+  padding: 1.4rem;
+  border-radius: 1.3rem;
+}
+
+.blueprint {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.blueprint-card span {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.callout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 1.5rem;
+  align-items: end;
+  margin-top: 4rem;
+  background:
+    linear-gradient(120deg, rgba(19, 36, 58, 0.96), rgba(32, 58, 85, 0.92)),
+    var(--ink);
+  color: #f9efe2;
+}
+
+.callout .eyebrow,
+.callout p {
+  color: rgba(249, 239, 226, 0.85);
+}
+
+.callout h2 {
+  margin-bottom: 0;
+}
+
+@media (max-width: 980px) {
+  .hero,
+  .workflow-layout,
+  .output-panel,
+  .callout,
+  .impact-strip,
+  .blueprint,
+  .safeguard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-header {
+    position: static;
+    border-radius: 1.4rem;
+  }
+
+  .site-nav {
+    display: none;
+  }
+
+  h1 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 1rem, 100%);
+  }
+
+  .hero {
+    padding-top: 2rem;
+  }
+
+  .hero-copy,
+  .hero-panel,
+  .workflow-detail,
+  .output-panel,
+  .callout,
+  .blueprint-card,
+  .safeguard-grid article {
+    padding: 1.25rem;
+  }
+
+  h1 {
+    font-size: 2.7rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  .workflow-detail h3,
+  .output-panel h3,
+  .safeguard-grid h3,
+  .blueprint-card h3,
+  .callout h2 {
+    font-size: 1.4rem;
+  }
+}
