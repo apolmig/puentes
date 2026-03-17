@@ -7,3 +7,11 @@ desktop.png
 mobile.png
 smoke*.png
 smoke*.html
+
+node_modules/
+.npm-cache/
+.localappdata/
+.server.err.log
+.server.out.log
+.server.pid
+output/playwright/*.png
