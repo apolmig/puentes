@@ -1,4 +1,4 @@
-﻿# AI Backend Notes
+# AI Backend Notes
 
 ## Goal
 

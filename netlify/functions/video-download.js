@@ -1,4 +1,4 @@
-﻿const { requireMethod, createError, handleError } = require("./_lib/http");
+const { requireMethod, createError, handleError } = require("./_lib/http");
 const { downloadVideoAsset } = require("./_lib/openai");
 
 exports.handler = async function handler(event) {

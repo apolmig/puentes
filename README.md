@@ -1,4 +1,4 @@
-﻿# Puentes
+# Puentes
 
 Puentes is a creator-first civic media workspace for trusted youth creators, educators, and community messengers. The app turns civic packets into source-linked captions, scripts, slide packs, and read-only share previews without dropping the evidence trail.
 

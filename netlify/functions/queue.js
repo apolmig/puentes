@@ -1,4 +1,4 @@
-﻿const { json, parseJsonBody, requireMethod, handleError } = require("./_lib/http");
+const { json, parseJsonBody, requireMethod, handleError } = require("./_lib/http");
 const { queueQuestion } = require("./_lib/workspace-store");
 
 exports.handler = async function handler(event) {

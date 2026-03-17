@@ -1,4 +1,4 @@
-﻿const { json, requireMethod, handleError } = require("./_lib/http");
+const { json, requireMethod, handleError } = require("./_lib/http");
 const { loadStore, useFileStore } = require("./_lib/workspace-store");
 
 exports.handler = async function handler(event) {

@@ -1,4 +1,4 @@
-﻿const { createError } = require("./http");
+const { createError } = require("./http");
 
 const OPENAI_API_BASE = process.env.OPENAI_API_BASE || "https://api.openai.com/v1";
 

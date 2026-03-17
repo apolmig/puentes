@@ -1,4 +1,4 @@
-﻿const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
+const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
 const { createStructuredTextBundle } = require("./_lib/openai");
 const {
   CREATOR_OUTPUT_SCHEMA,

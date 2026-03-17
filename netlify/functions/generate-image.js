@@ -1,4 +1,4 @@
-﻿const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
+const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
 const { generateImageAsset } = require("./_lib/openai");
 
 exports.handler = async function handler(event) {
