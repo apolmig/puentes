@@ -1,3 +1,12 @@
+(function (root, factory) {
+  const data = factory();
+
+  if (typeof module === "object" && module.exports) {
+    module.exports = data;
+  }
+
+  root.PUENTES_STATIC_DATA = data;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
 const baseChecklist = [
   { id: "sources", label: "Sources checked and citation lines kept in the handoff.", done: false },
   { id: "tone", label: "Tone reviewed for the selected audience, clarity, and nonpartisan framing.", done: false },
@@ -550,7 +559,7 @@ workspaceStateByPacket.housing = createWorkspaceState("housing", {
   ]
 });
 
-module.exports = {
+return {
   meta: { version: 2 },
   audiences,
   packets,
@@ -566,3 +575,4 @@ module.exports = {
   baseChecklist,
   createWorkspaceState
 };
+});

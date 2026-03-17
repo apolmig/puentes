@@ -4,9 +4,13 @@ const store = {
   workspace: null
 };
 
+const STAGES = ["intake", "verify", "draft", "export"];
+const LOCAL_STORAGE_KEY = "puentes-visual-demo-v3";
 const elements = {};
 let readonlyMode = false;
 let feedbackTimer = null;
+let persistenceMode = "api";
+let activeStage = "intake";
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -28,6 +32,13 @@ function cacheElements() {
     heroBefore: document.getElementById("hero-before"),
     heroAfter: document.getElementById("hero-after"),
     heroOutputLabel: document.getElementById("hero-output-label"),
+    visualPacket: document.getElementById("visual-packet"),
+    visualClaim: document.getElementById("visual-claim"),
+    visualShareSummary: document.getElementById("visual-share-summary"),
+    visualHook: document.getElementById("visual-hook"),
+    visualSlides: document.getElementById("visual-slides"),
+    visualComment: document.getElementById("visual-comment"),
+    visualSource: document.getElementById("visual-source"),
     audienceTabs: document.getElementById("audience-tabs"),
     audienceKicker: document.getElementById("audience-kicker"),
     audienceTitle: document.getElementById("audience-title"),
@@ -90,6 +101,11 @@ function cacheElements() {
     stepVerifyStatus: document.getElementById("step-verify-status"),
     stepDraftStatus: document.getElementById("step-draft-status"),
     stepExportStatus: document.getElementById("step-export-status"),
+    stageHost: document.getElementById("stage-host"),
+    nextActionLabel: document.getElementById("next-action-label"),
+    nextActionTitle: document.getElementById("next-action-title"),
+    nextActionText: document.getElementById("next-action-text"),
+    nextActionButton: document.getElementById("next-action-button"),
     appStatus: document.getElementById("app-status"),
     readonlyBanner: document.getElementById("readonly-banner"),
     feedbackToast: document.getElementById("feedback-toast")
@@ -126,6 +142,134 @@ function getBundle(packetId = getPacket()?.id) {
   const packet = getPacket(packetId);
   const workspace = getWorkspace(packetId);
   return packet?.outputBundles?.[workspace?.selectedFormat] || packet?.outputBundles?.carousel || null;
+}
+
+function getFallbackFactory() {
+  return globalThis.PUENTES_STATIC_DATA?.createWorkspaceState || null;
+}
+
+function getSnapshotFromStore() {
+  return {
+    audiences: clone(store.audiences),
+    packets: clone(store.packets),
+    workspace: clone(store.workspace)
+  };
+}
+
+function loadLocalSnapshot() {
+  const staticData = globalThis.PUENTES_STATIC_DATA;
+  if (!staticData) {
+    return null;
+  }
+
+  try {
+    const raw = globalThis.localStorage?.getItem(LOCAL_STORAGE_KEY);
+    if (!raw) {
+      return clone(staticData);
+    }
+
+    const parsed = JSON.parse(raw);
+    if (parsed?.workspace && Array.isArray(parsed?.audiences) && Array.isArray(parsed?.packets)) {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn("Failed to read local demo snapshot", error);
+  }
+
+  return clone(staticData);
+}
+
+function saveLocalSnapshot() {
+  if (!globalThis.localStorage || persistenceMode !== "local") {
+    return;
+  }
+
+  globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(getSnapshotFromStore()));
+}
+
+function sanitizeLocalText(value, maxLength = 240) {
+  return String(value || "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function sanitizeLocalNote(value, maxLength = 1200) {
+  return String(value || "")
+    .replace(/\u0000/g, "")
+    .replace(/\r\n/g, "\n")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function appendLocalHistory(packetId, action, detail) {
+  const workspace = getWorkspace(packetId);
+  if (!workspace || !action) {
+    return;
+  }
+
+  workspace.history = [
+    {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      timestamp: new Date().toISOString(),
+      action: sanitizeLocalText(action, 100),
+      detail: sanitizeLocalText(detail, 240)
+    },
+    ...(workspace.history || [])
+  ].slice(0, 12);
+}
+
+function isValidAudienceId(audienceId) {
+  return store.audiences.some((audience) => audience.id === audienceId);
+}
+
+function getAudienceDefaultFormat(audienceId) {
+  return store.audiences.find((audience) => audience.id === audienceId)?.defaultFormat || "creator";
+}
+
+function normalizeLocalWorkspace(packetId, candidate = {}) {
+  const packet = getPacket(packetId);
+  const factory = getFallbackFactory();
+  const defaults = typeof factory === "function"
+    ? factory(packetId)
+    : clone(store.workspace.workspaceStateByPacket?.[packetId] || {});
+  const audienceId = isValidAudienceId(candidate.selectedAudienceId) ? candidate.selectedAudienceId : defaults.selectedAudienceId;
+  const requestedFormat = typeof candidate.selectedFormat === "string" ? candidate.selectedFormat : defaults.selectedFormat;
+  const selectedFormat = packet?.outputBundles?.[requestedFormat]
+    ? requestedFormat
+    : getAudienceDefaultFormat(audienceId);
+  const nextClaimIndex = Number(candidate.selectedClaimIndex);
+
+  return {
+    ...defaults,
+    ...candidate,
+    selectedAudienceId: audienceId,
+    selectedFormat,
+    selectedClaimIndex: Number.isInteger(nextClaimIndex)
+      ? Math.max(0, Math.min(nextClaimIndex, (packet?.claims.length || 1) - 1))
+      : defaults.selectedClaimIndex,
+    reviewStatus: ["pending", "approved", "revision"].includes(candidate.reviewStatus)
+      ? candidate.reviewStatus
+      : defaults.reviewStatus,
+    checklist: Array.isArray(candidate.checklist) ? clone(candidate.checklist) : clone(defaults.checklist),
+    reviewerNotes: sanitizeLocalNote(candidate.reviewerNotes ?? defaults.reviewerNotes ?? ""),
+    history: Array.isArray(candidate.history) ? clone(candidate.history) : clone(defaults.history || []),
+    exportedFormats: Array.isArray(candidate.exportedFormats)
+      ? [...new Set(candidate.exportedFormats.filter((format) => packet?.outputBundles?.[format]))]
+      : clone(defaults.exportedFormats || []),
+    shareReady: Boolean(candidate.shareReady),
+    shareUrl: sanitizeLocalText(candidate.shareUrl ?? defaults.shareUrl ?? "", 320)
+  };
+}
+
+function saveStatusText(timestamp) {
+  const date = new Date(timestamp);
+  const prefix = persistenceMode === "local" ? "Local demo" : "Saved";
+  if (Number.isNaN(date.getTime())) {
+    return prefix;
+  }
+  return `${prefix} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 function formatSavedTime(timestamp) {
@@ -364,11 +508,19 @@ function renderHero() {
   const audience = getAudience();
   const bundle = getBundle();
   const queue = store.workspace?.queue || [];
+  const claim = getClaim();
 
   elements.heroQuestion.textContent = queue[0] || packet.question;
   elements.heroBefore.textContent = packet.summary;
   elements.heroAfter.textContent = bundle.caption;
   elements.heroOutputLabel.textContent = `${bundle.label} ready for ${audience.label.toLowerCase()} mode`;
+  elements.visualPacket.textContent = packet.shortLabel;
+  elements.visualClaim.textContent = claim.title;
+  elements.visualShareSummary.textContent = bundle.shareSummary;
+  elements.visualHook.textContent = bundle.hook;
+  elements.visualSlides.innerHTML = createListMarkup(bundle.slides.slice(0, 3));
+  elements.visualComment.textContent = bundle.commentPrompt;
+  elements.visualSource.textContent = bundle.citations.slice(0, 2).join(" + ");
 }
 
 function renderAudience() {
@@ -381,7 +533,7 @@ function renderAudience() {
   elements.audienceSummary.textContent = audience.summary;
   elements.audienceFocus.innerHTML = createListMarkup(audience.focus);
   elements.questionInput.placeholder = audience.questionPlaceholder;
-  elements.saveStatus.textContent = formatSavedTime(store.workspace?.lastSavedAt);
+  elements.saveStatus.textContent = saveStatusText(store.workspace?.lastSavedAt);
 }
 
 function renderQueue() {
@@ -450,7 +602,7 @@ function renderDraft() {
   const draft = getDraft();
   const bundle = getBundle();
 
-  elements.draftKicker.textContent = `${bundle.label} · ${audience.label} mode`;
+  elements.draftKicker.textContent = `${bundle.label} / ${audience.label} mode`;
   elements.draftTitle.textContent = bundle.title;
   elements.draftSummary.textContent = `${draft.summary} ${audience.draftRule}`;
   elements.draftHook.textContent = bundle.hook;
@@ -552,6 +704,15 @@ function renderStepRail() {
   const claim = getClaim();
   const blockers = getBlockers(workspace);
   const bundle = getBundle();
+  const completedChecks = workspace.checklist.filter((item) => item.done).length;
+  const verifyComplete = completedChecks > 0 || workspace.selectedClaimIndex > 0;
+  const draftComplete = Boolean(bundle?.caption);
+  const stageState = {
+    intake: Boolean(store.workspace.queue.length),
+    verify: verifyComplete,
+    draft: draftComplete,
+    export: workspace.reviewStatus === "approved"
+  };
 
   elements.stepIntakeStatus.textContent = store.workspace.queue.length ? `${store.workspace.queue.length} queued` : "Ready";
   elements.stepVerifyStatus.textContent = claimStatusText(claim.status);
@@ -563,13 +724,93 @@ function renderStepRail() {
       : "Ready";
 
   elements.questionInput.disabled = readonlyMode;
-  elements.saveStatus.textContent = formatSavedTime(store.workspace.lastSavedAt);
+  elements.saveStatus.textContent = saveStatusText(store.workspace.lastSavedAt);
+  elements.stageHost.classList.add("has-active");
+
+  document.querySelectorAll("[data-stage-trigger]").forEach((button) => {
+    const stage = button.dataset.stageTrigger;
+    const isActive = stage === activeStage;
+    button.classList.toggle("is-active", isActive);
+    button.classList.toggle("is-complete", !isActive && stageState[stage]);
+    button.classList.toggle("is-blocked", stage === "export" && blockers.length > 0 && workspace.reviewStatus !== "approved");
+    button.setAttribute("aria-selected", String(isActive));
+  });
+
+  document.querySelectorAll("[data-stage-panel]").forEach((panel) => {
+    panel.classList.toggle("is-active", panel.dataset.stagePanel === activeStage);
+  });
+
   document.title = `Puentes | ${packet.shortLabel} -> ${bundle.label}`;
 }
 
 function renderReadonlyState() {
   document.body.classList.toggle("is-share-mode", readonlyMode);
   elements.readonlyBanner.hidden = !readonlyMode;
+}
+
+function renderNextAction() {
+  const workspace = getWorkspace();
+  const blockers = getBlockers(workspace);
+  const packet = getPacket();
+  const audience = getAudience();
+
+  let config = {
+    stage: "intake",
+    label: "Now do this",
+    title: "Start with intake",
+    text: "Pick the audience and paste the real question people are circulating.",
+    button: "Go to intake"
+  };
+
+  if (readonlyMode) {
+    config = {
+      stage: "export",
+      label: "Read-only mode",
+      title: "Review the creator handoff",
+      text: "This preview is built for inspecting the packaged output, citations, and final share summary.",
+      button: "Open export"
+    };
+  } else if (!store.workspace.queue.length) {
+    config = {
+      stage: "intake",
+      label: "First move",
+      title: "Add the question people are actually asking",
+      text: "That one prompt makes the whole workflow feel anchored and much easier to understand.",
+      button: "Add a question"
+    };
+  } else if (!allChecklistDone(workspace) && activeStage !== "verify" && activeStage !== "draft") {
+    config = {
+      stage: "verify",
+      label: "Recommended next step",
+      title: `Pressure-test ${packet.shortLabel.toLowerCase()} before you package it`,
+      text: "Open the loudest claim, scan the evidence, and clear the review blockers before approval.",
+      button: "Go to verify"
+    };
+  } else if (workspace.reviewStatus !== "approved") {
+    config = {
+      stage: "export",
+      label: "Almost there",
+      title: `Approve the ${audience.label.toLowerCase()} handoff to unlock export`,
+      text: blockers.length
+        ? `${blockers.length} review item${blockers.length === 1 ? "" : "s"} still block export.`
+        : "The packet is ready for approval and share preview generation.",
+      button: "Go to export"
+    };
+  } else {
+    config = {
+      stage: "export",
+      label: "Ready to move",
+      title: "Copy, download, or share the creator handoff",
+      text: "The export package is unlocked. Hand it off, remix it for another audience, or open the read-only preview.",
+      button: "Open export"
+    };
+  }
+
+  elements.nextActionLabel.textContent = config.label;
+  elements.nextActionTitle.textContent = config.title;
+  elements.nextActionText.textContent = config.text;
+  elements.nextActionButton.textContent = config.button;
+  elements.nextActionButton.dataset.stageTrigger = config.stage;
 }
 
 function renderAll() {
@@ -590,6 +831,92 @@ function renderAll() {
   renderExportCard();
   renderHistory();
   renderStepRail();
+  renderNextAction();
+}
+
+function setActiveStage(stage) {
+  if (!STAGES.includes(stage)) {
+    return;
+  }
+
+  activeStage = stage;
+  if (store.workspace) {
+    renderStepRail();
+  }
+}
+
+function chooseDefaultStage() {
+  const workspace = getWorkspace();
+
+  if (!workspace) {
+    activeStage = "intake";
+    return;
+  }
+
+  if (readonlyMode || workspace.reviewStatus === "approved") {
+    activeStage = "export";
+    return;
+  }
+
+  if (store.workspace.queue.length && activeStage === "intake") {
+    activeStage = "verify";
+  }
+}
+
+function hydrateStore(data) {
+  store.audiences = data.audiences;
+  store.packets = data.packets;
+  store.workspace = data.workspace;
+}
+
+function switchToLocalMode(message) {
+  if (persistenceMode === "local") {
+    return;
+  }
+
+  persistenceMode = "local";
+  saveLocalSnapshot();
+  setAppStatus(message || "API unavailable. Running in local demo mode.", "loading");
+}
+
+function persistStateLocal({ appPatch = {}, packetId, workspacePatch = {} }, action, detail) {
+  if (appPatch.activePacketId && getPacket(appPatch.activePacketId)) {
+    store.workspace.activePacketId = appPatch.activePacketId;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(appPatch, "queue")) {
+    store.workspace.queue = clone(appPatch.queue);
+  }
+
+  const targetPacketId = getPacket(packetId)?.id || store.workspace.activePacketId;
+  const currentWorkspace = getWorkspace(targetPacketId);
+
+  if (Object.keys(workspacePatch).length) {
+    const nextWorkspace = { ...currentWorkspace, ...clone(workspacePatch) };
+
+    if (Object.prototype.hasOwnProperty.call(workspacePatch, "selectedAudienceId")
+      && !Object.prototype.hasOwnProperty.call(workspacePatch, "selectedFormat")) {
+      nextWorkspace.selectedFormat = getAudienceDefaultFormat(nextWorkspace.selectedAudienceId);
+    }
+
+    store.workspace.workspaceStateByPacket[targetPacketId] = normalizeLocalWorkspace(targetPacketId, nextWorkspace);
+  }
+
+  appendLocalHistory(targetPacketId, action, detail);
+  store.workspace.lastSavedAt = new Date().toISOString();
+  saveLocalSnapshot();
+  applyShareModeFromUrl();
+  chooseDefaultStage();
+  renderAll();
+}
+
+function queueQuestionLocal(question) {
+  store.workspace.queue = [sanitizeLocalText(question, 240), ...(store.workspace.queue || [])].filter(Boolean).slice(0, 8);
+  appendLocalHistory(store.workspace.activePacketId, "Queued question", question);
+  store.workspace.lastSavedAt = new Date().toISOString();
+  saveLocalSnapshot();
+  chooseDefaultStage();
+  renderAll();
 }
 
 function applyShareModeFromUrl() {
@@ -600,6 +927,8 @@ function applyShareModeFromUrl() {
   if (!readonlyMode) {
     return;
   }
+
+  activeStage = "export";
 
   store.workspace.activePacketId = sharedPacketId;
 
@@ -618,34 +947,67 @@ function applyShareModeFromUrl() {
 }
 
 async function bootstrap() {
-  const data = await requestJson("/api/bootstrap");
-  store.audiences = data.audiences;
-  store.packets = data.packets;
-  store.workspace = data.workspace;
+  try {
+    const data = await requestJson("/api/bootstrap");
+    persistenceMode = "api";
+    hydrateStore(data);
+  } catch (error) {
+    const snapshot = loadLocalSnapshot();
+    if (!snapshot) {
+      throw error;
+    }
+
+    persistenceMode = "local";
+    hydrateStore(snapshot);
+    setAppStatus("Running in local demo mode because the API is unavailable.", "loading");
+  }
+
   applyShareModeFromUrl();
   renderAll();
 }
 
 async function persistState({ appPatch = {}, packetId, workspacePatch = {} }, action, detail) {
-  const data = await requestJson("/api/state", {
-    method: "POST",
-    body: JSON.stringify({ appPatch, packetId, workspacePatch, action, detail })
-  });
+  if (persistenceMode === "local") {
+    persistStateLocal({ appPatch, packetId, workspacePatch }, action, detail);
+    return;
+  }
 
-  store.workspace = data.workspace;
-  applyShareModeFromUrl();
-  renderAll();
+  try {
+    const data = await requestJson("/api/state", {
+      method: "POST",
+      body: JSON.stringify({ appPatch, packetId, workspacePatch, action, detail })
+    });
+
+    store.workspace = data.workspace;
+    applyShareModeFromUrl();
+    chooseDefaultStage();
+    renderAll();
+  } catch (error) {
+    switchToLocalMode("API unavailable. Switched to local demo mode.");
+    persistStateLocal({ appPatch, packetId, workspacePatch }, action, detail);
+  }
 }
 
 async function queueQuestion(question) {
-  const data = await requestJson("/api/queue", {
-    method: "POST",
-    body: JSON.stringify({ question })
-  });
+  if (persistenceMode === "local") {
+    queueQuestionLocal(question);
+    return;
+  }
 
-  store.workspace = data.workspace;
-  applyShareModeFromUrl();
-  renderAll();
+  try {
+    const data = await requestJson("/api/queue", {
+      method: "POST",
+      body: JSON.stringify({ question })
+    });
+
+    store.workspace = data.workspace;
+    applyShareModeFromUrl();
+    chooseDefaultStage();
+    renderAll();
+  } catch (error) {
+    switchToLocalMode("API unavailable. Switched to local demo mode.");
+    queueQuestionLocal(question);
+  }
 }
 
 async function copyText(value) {
@@ -703,6 +1065,12 @@ function bindEvents() {
   document.addEventListener("click", async (event) => {
     const packet = getPacket();
     const workspace = getWorkspace();
+    const stageTrigger = event.target.closest("[data-stage-trigger]");
+
+    if (stageTrigger) {
+      setActiveStage(stageTrigger.dataset.stageTrigger);
+      return;
+    }
 
     const audienceButton = event.target.closest("[data-audience-id]");
     if (audienceButton) {
@@ -730,6 +1098,7 @@ function bindEvents() {
           `${packet.label} -> ${audience.label} mode`
         );
         setAppStatus("Audience updated.", "success", true);
+        setActiveStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -758,6 +1127,7 @@ function bindEvents() {
           nextPacket.label
         );
         setAppStatus("Packet loaded.", "success", true);
+        setActiveStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -788,6 +1158,7 @@ function bindEvents() {
           "Opened claim",
           claim.title
         );
+        setActiveStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -811,6 +1182,7 @@ function bindEvents() {
           "Switched output",
           formatButton.textContent.trim()
         );
+        setActiveStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -833,6 +1205,7 @@ function bindEvents() {
         await queueQuestion(question);
         elements.questionInput.value = "";
         setAppStatus("Question added to the queue.", "success", true);
+        setActiveStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -856,6 +1229,7 @@ function bindEvents() {
           "Opened packet",
           nextPacket.label
         );
+        setActiveStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -931,6 +1305,7 @@ function bindEvents() {
           packet.label
         );
         flashFeedback("Export package unlocked.");
+        setActiveStage("export");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -952,6 +1327,7 @@ function bindEvents() {
           packet.label
         );
         flashFeedback("Packet marked for revision.");
+        setActiveStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -1045,6 +1421,7 @@ function bindEvents() {
           `${packet.label} -> ${nextAudience.label}`
         );
         flashFeedback(`Remixed for ${nextAudience.label.toLowerCase()} mode.`);
+        setActiveStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -1091,6 +1468,8 @@ async function init() {
     await bootstrap();
     if (readonlyMode) {
       setAppStatus("Read-only creator handoff preview loaded.", "success", true);
+    } else if (persistenceMode === "local") {
+      setAppStatus("Running in local demo mode. Edits are saved in this browser.", "loading");
     } else {
       setAppStatus();
     }

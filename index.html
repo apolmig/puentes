@@ -8,6 +8,8 @@
     name="description"
     content="Puentes helps trusted creators turn civic information into source-linked captions, scripts, slide packs, and classroom-safe explainers that can travel without losing context."
   >
+  <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23ff6b3d"/%3E%3Cpath d="M20 44V20h13c8 0 13 4.5 13 11.5S41 43 33 43h-6v1z" fill="%23fff7f1"/%3E%3C/svg%3E'>
+  <link rel="shortcut icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23ff6b3d"/%3E%3Cpath d="M20 44V20h13c8 0 13 4.5 13 11.5S41 43 33 43h-6v1z" fill="%23fff7f1"/%3E%3C/svg%3E'>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -71,23 +73,55 @@
           <p class="preview-text">
             Pick a packet, verify the loudest claim, and turn it into a publishable handoff in one review pass.
           </p>
+          <div class="concept-rail">
+            <article class="concept-card">
+              <span class="detail-kicker">Packet</span>
+              <p id="visual-packet"></p>
+            </article>
+            <article class="concept-card">
+              <span class="detail-kicker">Claim pressure</span>
+              <p id="visual-claim"></p>
+            </article>
+            <article class="concept-card">
+              <span class="detail-kicker">Ready post</span>
+              <p id="visual-share-summary"></p>
+            </article>
+          </div>
           <article class="question-card">
             <span class="detail-kicker">Incoming question</span>
             <p id="hero-question"></p>
           </article>
-          <div class="before-after">
+          <div class="storyboard-stage">
             <article class="preview-card before-card">
               <span class="detail-kicker">Before</span>
               <p id="hero-before"></p>
             </article>
-            <article class="preview-card after-card">
-              <span class="detail-kicker">After</span>
-              <p id="hero-after"></p>
+            <div class="phone-shell">
+              <div class="phone-header">
+                <span class="phone-dot"></span>
+                <span class="phone-dot"></span>
+                <span class="phone-dot"></span>
+                <span class="phone-chip">creator preview</span>
+              </div>
+              <div class="phone-screen">
+                <span class="screen-badge">Source-linked cut</span>
+                <h3 id="visual-hook"></h3>
+                <p id="hero-after"></p>
+                <ul class="mini-slide-list" id="visual-slides"></ul>
+              </div>
+            </div>
+            <article class="preview-card after-card floating-proof">
+              <span class="detail-kicker">Why it can travel</span>
+              <p id="visual-comment"></p>
+              <div class="preview-proof-row">
+                <span class="receipt-badge">Built with receipts</span>
+                <p id="hero-output-label"></p>
+              </div>
             </article>
           </div>
           <div class="preview-footer">
             <span class="receipt-badge">Built with receipts</span>
-            <p id="hero-output-label"></p>
+            <p id="visual-source"></p>
           </div>
         </aside>
       </section>
@@ -105,45 +139,54 @@
           This is a read-only share preview. You can review the handoff, copy the output, and inspect the evidence trail.
         </div>
 
-        <div class="step-rail">
-          <article class="step-card" id="step-intake-card">
+        <div class="step-rail" role="tablist" aria-label="Workflow steps">
+          <button class="step-card" id="step-intake-card" data-stage-trigger="intake" type="button">
             <span class="step-number">01</span>
             <div>
               <h3>Intake</h3>
               <p>Pick the audience and frame the creator question.</p>
             </div>
             <span class="step-status" id="step-intake-status">Ready</span>
-          </article>
-          <article class="step-card" id="step-verify-card">
+          </button>
+          <button class="step-card" id="step-verify-card" data-stage-trigger="verify" type="button">
             <span class="step-number">02</span>
             <div>
               <h3>Verify</h3>
               <p>Check the strongest claim, evidence, and manipulation risk.</p>
             </div>
             <span class="step-status" id="step-verify-status">In review</span>
-          </article>
-          <article class="step-card" id="step-draft-card">
+          </button>
+          <button class="step-card" id="step-draft-card" data-stage-trigger="draft" type="button">
             <span class="step-number">03</span>
             <div>
               <h3>Draft</h3>
               <p>Turn verified facts into creator-native formats.</p>
             </div>
             <span class="step-status" id="step-draft-status">Bundle ready</span>
-          </article>
-          <article class="step-card" id="step-export-card">
+          </button>
+          <button class="step-card" id="step-export-card" data-stage-trigger="export" type="button">
             <span class="step-number">04</span>
             <div>
               <h3>Export</h3>
               <p>Approve, share, and remix the handoff once the checks are done.</p>
             </div>
             <span class="step-status" id="step-export-status">Blocked</span>
-          </article>
+          </button>
         </div>
 
         <div class="status-banner" id="app-status" hidden></div>
 
-        <div class="workspace-grid">
-          <section class="panel intake-panel" id="step1">
+        <article class="next-action-card panel">
+          <div>
+            <span class="detail-kicker" id="next-action-label">Now do this</span>
+            <h3 id="next-action-title">Start with intake</h3>
+            <p id="next-action-text">Pick the audience and paste the real question people are circulating.</p>
+          </div>
+          <button class="button button-primary" id="next-action-button" data-stage-trigger="intake" type="button">Go to intake</button>
+        </article>
+
+        <div class="stage-host" id="stage-host">
+          <section class="panel intake-panel stage-panel" id="step1" data-stage-panel="intake">
             <div class="panel-header">
               <div>
                 <span class="detail-kicker">Step 01</span>
@@ -193,9 +236,12 @@
                 <ul class="queue-list" id="queue-list"></ul>
               </article>
             </div>
+            <div class="panel-nav">
+              <button class="button button-primary" data-stage-trigger="verify" type="button">Continue to verify</button>
+            </div>
           </section>
 
-          <section class="panel verify-panel" id="step2">
+          <section class="panel verify-panel stage-panel" id="step2" data-stage-panel="verify">
             <div class="panel-header">
               <div>
                 <span class="detail-kicker">Step 02</span>
@@ -278,9 +324,13 @@
                 </div>
               </article>
             </div>
+            <div class="panel-nav">
+              <button class="button button-secondary" data-stage-trigger="intake" type="button">Back to intake</button>
+              <button class="button button-primary" data-stage-trigger="draft" type="button">Continue to draft</button>
+            </div>
           </section>
 
-          <section class="panel draft-panel" id="step3">
+          <section class="panel draft-panel stage-panel" id="step3" data-stage-panel="draft">
             <div class="panel-header">
               <div>
                 <span class="detail-kicker">Step 03</span>
@@ -340,9 +390,13 @@
                 <p id="draft-note"></p>
               </div>
             </div>
+            <div class="panel-nav">
+              <button class="button button-secondary" data-stage-trigger="verify" type="button">Back to verify</button>
+              <button class="button button-primary" data-stage-trigger="export" type="button">Continue to export</button>
+            </div>
           </section>
 
-          <aside class="panel export-panel" id="step4">
+          <aside class="panel export-panel stage-panel" id="step4" data-stage-panel="export">
             <div class="panel-header">
               <div>
                 <span class="detail-kicker">Step 04</span>
@@ -430,6 +484,9 @@
               <span class="detail-kicker">Activity history</span>
               <ul class="history-list" id="history-list"></ul>
             </article>
+            <div class="panel-nav">
+              <button class="button button-secondary" data-stage-trigger="draft" type="button">Back to draft</button>
+            </div>
           </aside>
         </div>
 
@@ -537,6 +594,7 @@
     </main>
   </div>
 
+  <script src="seed-data.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

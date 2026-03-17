@@ -9,7 +9,7 @@ const port = Number(process.env.PORT || 4173);
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dataFile = path.join(dataDir, "store.json");
-const staticFiles = new Set(["index.html", "styles.css", "script.js"]);
+const staticFiles = new Set(["index.html", "styles.css", "script.js", "seed-data.js"]);
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -340,6 +340,12 @@ async function handleApi(request, response, pathname) {
 }
 
 function serveStatic(response, pathname) {
+  if (pathname === "/favicon.ico") {
+    response.writeHead(204);
+    response.end();
+    return;
+  }
+
   const cleanPath = pathname === "/" ? "/index.html" : pathname;
   const relativePath = cleanPath.replace(/^\/+/, "");
 
