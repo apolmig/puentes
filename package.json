@@ -1,0 +1,9 @@
+{
+  "name": "puentes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Puentes youth civic media review app with a lightweight backend.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

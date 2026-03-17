@@ -23,7 +23,7 @@
       <nav class="site-nav" aria-label="Primary">
         <a href="#mission">Mission</a>
         <a href="#creator-lens">Creator Lens</a>
-        <a href="#prototype">Prototype</a>
+        <a href="#prototype">Workspace</a>
         <a href="#safeguards">Safeguards</a>
       </nav>
     </header>
@@ -40,13 +40,13 @@
             wall-of-text PDF energy. Every draft keeps receipts, flags manipulation, and waits for human review.
           </p>
           <div class="hero-badges" aria-label="Puentes use cases">
-            <span class="badge-pill">Carousel-ready</span>
+            <span class="badge-pill">Audience modes</span>
             <span class="badge-pill">Short-video scripts</span>
-            <span class="badge-pill">Classroom safe</span>
+            <span class="badge-pill">Saved review state</span>
             <span class="badge-pill">Creator handoff</span>
           </div>
           <div class="hero-actions">
-            <a class="button button-primary" href="#prototype">Open the prototype</a>
+            <a class="button button-primary" href="#prototype">Open the workspace</a>
             <a class="button button-secondary" href="#blueprint">See the architecture</a>
           </div>
         </div>
@@ -54,7 +54,7 @@
         <aside class="hero-panel" aria-label="Puentes system snapshot">
           <div class="signal-card">
             <span class="signal-label">What goes in</span>
-            <strong>Public documents, reliable reporting, community questions, creator prompts</strong>
+            <strong>Public docs, reliable reporting, community questions, creator prompts</strong>
           </div>
           <div class="signal-card">
             <span class="signal-label">What Puentes does</span>
@@ -77,7 +77,7 @@
         </article>
         <article>
           <span>Response</span>
-          <p>Puentes turns the same civic material into carousel posts, short scripts, and prompts that keep context attached.</p>
+          <p>Puentes turns the same civic material into creator-ready and classroom-safe formats that keep context attached.</p>
         </article>
         <article>
           <span>Principle</span>
@@ -91,7 +91,7 @@
           <h2>Built for student creators, youth orgs, classroom teams, and trusted messengers who need better civic media tools.</h2>
           <p>
             The system is designed to feel familiar to Gen Z and younger audiences without becoming cringe or careless.
-            It uses plain language, strong hooks, and format-native structure while keeping sources visible and uncertainty honest.
+            It uses plain language, strong hooks, format-native structure, and audience-specific handoff rules while keeping sources visible.
           </p>
         </div>
 
@@ -99,7 +99,7 @@
           <article class="creator-card">
             <span>Feels native</span>
             <h3>Short, scrollable, and clear</h3>
-            <p>Outputs are shaped for carousel swipes, 30-45 second explainers, and discussion prompts people can actually use.</p>
+            <p>Outputs are shaped for carousel swipes, 30-45 second explainers, and guided prompts people can actually use.</p>
           </article>
           <article class="creator-card">
             <span>Keeps receipts</span>
@@ -112,21 +112,41 @@
             <p>Puentes flags fear hooks, false binaries, dog whistles, and pressure to perform certainty just to win engagement.</p>
           </article>
           <article class="creator-card">
-            <span>Ready for youth spaces</span>
-            <h3>Works across feed, class, and community</h3>
-            <p>One reviewed packet can become a creator caption, a short script, a classroom prompt set, and a youth workshop starter.</p>
+            <span>Works like a tool</span>
+            <h3>Now backed by saved review state</h3>
+            <p>The workspace persists queue items, reviewer notes, approvals, and activity history instead of resetting every refresh.</p>
           </article>
         </div>
       </section>
 
       <section class="section prototype-section" id="prototype">
         <div class="section-heading prototype-heading">
-          <p class="eyebrow">Prototype workspace</p>
-          <h2>A review flow for source intake, claim checks, creator packs, and human approval.</h2>
+          <p class="eyebrow">Review workspace</p>
+          <h2>An audience-aware workflow for source intake, claim checks, creator packs, and human approval.</h2>
           <p>
-            This is the product core: a workspace where a reviewer can move from incoming civic material to a creator-ready,
-            classroom-safe draft while seeing evidence, rhetoric risks, and readiness state in one place.
+            This is the product core: a small real app where a reviewer can move from incoming civic material to a creator-ready,
+            classroom-safe draft while saving audience mode, reviewer notes, and approval state through a lightweight backend.
           </p>
+        </div>
+
+        <div class="audience-ribbon panel">
+          <div>
+            <span class="detail-kicker">Audience mode</span>
+            <h3>Switch the workspace between student, creator, and educator handoff.</h3>
+            <p>Each mode changes the framing guidance, default draft format, and the kind of language the final handoff should use.</p>
+            <div class="audience-tabs" id="audience-tabs" role="tablist" aria-label="Audience modes"></div>
+          </div>
+          <article class="audience-panel">
+            <div class="panel-header compact-header">
+              <div>
+                <span class="detail-kicker" id="audience-kicker"></span>
+                <h3 id="audience-title"></h3>
+              </div>
+              <div class="meta-pill" id="save-status">Saved locally</div>
+            </div>
+            <p id="audience-summary"></p>
+            <ul class="detail-list" id="audience-focus"></ul>
+          </article>
         </div>
 
         <div class="intake-ribbon panel">
@@ -137,7 +157,7 @@
           </div>
           <div class="intake-form">
             <label class="sr-only" for="question-input">Community question</label>
-            <textarea id="question-input" rows="3" placeholder="Example: People keep posting that the housing vote changed everything. What actually changed, and what is just engagement framing?"></textarea>
+            <textarea id="question-input" rows="3"></textarea>
             <div class="intake-actions">
               <button class="button button-primary" id="queue-question" type="button">Add to queue</button>
               <button class="button button-secondary" id="load-next-packet" type="button">Switch demo packet</button>
@@ -155,7 +175,7 @@
               <div>
                 <span class="detail-kicker">01 Source packet</span>
                 <h3>Pick the civic packet the team is working through.</h3>
-                <p class="panel-note">Each packet mixes records, reporting, and youth-facing questions so creators do not have to start from scratch.</p>
+                <p class="panel-note">Each packet mixes records, reporting, and youth-facing questions so creators and educators do not start from scratch.</p>
               </div>
               <div class="meta-pill" id="packet-count"></div>
             </div>
@@ -234,7 +254,7 @@
               <div class="meta-pill" id="draft-state">Review draft</div>
             </div>
             <div class="format-tabs" id="format-tabs" role="tablist" aria-label="Draft formats">
-              <button class="format-tab is-active" data-format="carousel" type="button" aria-selected="true">Carousel pack</button>
+              <button class="format-tab" data-format="carousel" type="button" aria-selected="false">Carousel pack</button>
               <button class="format-tab" data-format="video" type="button" aria-selected="false">Short video</button>
               <button class="format-tab" data-format="classroom" type="button" aria-selected="false">Class prompts</button>
               <button class="format-tab" data-format="creator" type="button" aria-selected="false">Creator caption</button>
@@ -276,6 +296,20 @@
               <div class="checklist" id="review-checklist"></div>
             </div>
 
+            <div class="notes-block">
+              <div class="panel-header compact-header">
+                <div>
+                  <span class="detail-kicker">Reviewer notes</span>
+                  <h4>Saved through the backend</h4>
+                </div>
+              </div>
+              <textarea id="reviewer-notes" rows="4" placeholder="Leave review notes for the next creator, editor, or educator handoff."></textarea>
+              <div class="note-actions">
+                <button class="button button-primary" id="save-note" type="button">Save note</button>
+                <button class="button button-secondary" id="clear-note" type="button">Clear note</button>
+              </div>
+            </div>
+
             <div class="review-actions">
               <button class="button button-primary" id="approve-review" type="button">Approve for handoff</button>
               <button class="button button-secondary" id="request-revision" type="button">Send back for revision</button>
@@ -285,6 +319,11 @@
               <span class="detail-kicker">Current gate status</span>
               <h4 id="gate-status-title">Waiting for reviewer checks</h4>
               <p id="gate-status-text">Complete the checklist before approving a draft for educator or creator handoff.</p>
+            </article>
+
+            <article class="history-card">
+              <span class="detail-kicker">Activity history</span>
+              <ul class="history-list" id="history-list"></ul>
             </article>
           </aside>
         </div>

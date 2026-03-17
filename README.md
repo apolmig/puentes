@@ -1,22 +1,25 @@
 # Puentes
 
-Puentes is an open, agentic AI concept for youth civic information integrity. This repository currently contains a zero-dependency landing page and an interactive workflow prototype shaped for youth creators, educators, and trusted community messengers.
+Puentes is an open, agentic AI concept for youth civic information integrity. This repository now contains a lightweight Node app with a persisted review workspace for youth creators, educators, and trusted community messengers.
 
 ## Run locally
 
-Open `index.html` directly in a browser, or serve the folder with any static file server.
+1. `npm start`
+2. Open `http://127.0.0.1:4173`
+
+No external dependencies are required.
 
 ## Current scope
 
 - Product narrative and visual identity
-- Creator-friendly review-workspace prototype
+- Audience modes for `Student`, `Creator`, and `Educator`
+- Backend-backed review workspace with saved queue, notes, approvals, and activity history
 - Source packet, claim check, and output studio demo flows
-- Human approval gate with manipulation and amplification notes
 - Carousel, short-video, classroom, and creator-caption handoff examples
 
 ## Next build steps
 
-- Persist source intake and review state in a lightweight backend
+- Persist review state per packet instead of one active workspace snapshot
 - Add retrieval-backed evidence cards instead of demo packet data
 - Define structured schemas for carousels, scripts, captions, and classroom prompts
-- Add reviewer roles, comments, and change history
+- Add reviewer roles, comments, and change history per packet
