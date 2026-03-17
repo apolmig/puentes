@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Puentes | Open Agentic AI for Youth Civic Information Integrity</title>
+  <title>Puentes | Creator-Ready Civic Media With Receipts</title>
   <meta
     name="description"
-    content="Puentes is an open, agentic AI system that helps young people, educators, and trusted creators turn civic information into source-linked, creator-ready civic media."
+    content="Puentes helps trusted creators turn civic information into source-linked captions, scripts, slide packs, and classroom-safe explainers that can travel without losing context."
   >
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -17,267 +17,339 @@
         <span class="wordmark-mark">P</span>
         <span class="wordmark-copy">
           <strong>Puentes</strong>
-          <span>Open Agentic AI for Youth Civic Information Integrity</span>
+          <span>Creator-ready civic clarity</span>
         </span>
       </a>
       <nav class="site-nav" aria-label="Primary">
-        <a href="#mission">Mission</a>
-        <a href="#creator-lens">Creator Lens</a>
-        <a href="#prototype">Workspace</a>
-        <a href="#safeguards">Safeguards</a>
+        <a href="#workspace">Start</a>
+        <a href="#step2">Verify</a>
+        <a href="#step3">Draft</a>
+        <a href="#step4">Export</a>
+        <a href="#safeguards">Trust</a>
+        <a href="#blueprint">Blueprint</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Civic clarity that fits the feed</p>
-          <h1>Turn dense public info into source-linked posts, scripts, and prompts young people will actually open.</h1>
+          <p class="eyebrow">Creator-first civic workflow</p>
+          <h1>Take a messy civic packet and leave with a caption, script, slide pack, and share-ready handoff.</h1>
           <p class="hero-text">
-            Puentes is an open agentic AI system for young people, educators, youth groups, and trusted
-            creators. It turns dense civic info into carousel packs, short-video scripts, classroom prompts,
-            and creator-ready explainers that feel familiar without dropping nuance. No panic bait. No
-            wall-of-text PDF energy. Every draft keeps receipts, flags manipulation, and waits for human review.
+            Puentes is built for trusted creators, youth media teams, and community messengers who need civic explainers that
+            feel native to the feed without borrowing the voice of outrage. The workflow starts with a real question, verifies
+            what is actually true, and exports a handoff that keeps the receipts attached.
           </p>
-          <div class="hero-badges" aria-label="Puentes use cases">
-            <span class="badge-pill">Audience modes</span>
-            <span class="badge-pill">Short-video scripts</span>
-            <span class="badge-pill">Saved review state</span>
-            <span class="badge-pill">Creator handoff</span>
-          </div>
           <div class="hero-actions">
-            <a class="button button-primary" href="#prototype">Open the workspace</a>
-            <a class="button button-secondary" href="#blueprint">See the architecture</a>
+            <a class="button button-primary" href="#workspace">Open creator flow</a>
+            <a class="button button-secondary" href="#safeguards">See trust rules</a>
+          </div>
+          <div class="hero-highlights">
+            <article class="hero-chip">
+              <span>Actionable</span>
+              <p>Copy-ready caption and script assets, not just notes.</p>
+            </article>
+            <article class="hero-chip">
+              <span>Safe to share</span>
+              <p>Every handoff keeps citations, uncertainty, and risk notes visible.</p>
+            </article>
+            <article class="hero-chip">
+              <span>Built to travel</span>
+              <p>Share preview links and remix paths help the work move without losing context.</p>
+            </article>
           </div>
         </div>
 
-        <aside class="hero-panel" aria-label="Puentes system snapshot">
-          <div class="signal-card">
-            <span class="signal-label">What goes in</span>
-            <strong>Public docs, reliable reporting, community questions, creator prompts</strong>
+        <aside class="hero-preview panel" aria-label="Live creator brief preview">
+          <div class="preview-header">
+            <div>
+              <span class="detail-kicker">Live creator brief</span>
+              <h2>Start from the question people are already asking.</h2>
+            </div>
+            <div class="meta-pill" id="save-status">Saved locally</div>
           </div>
-          <div class="signal-card">
-            <span class="signal-label">What Puentes does</span>
-            <strong>Checks claims, spots hype tactics, and reshapes facts into youth-native formats</strong>
+          <p class="preview-text">
+            Pick a packet, verify the loudest claim, and turn it into a publishable handoff in one review pass.
+          </p>
+          <article class="question-card">
+            <span class="detail-kicker">Incoming question</span>
+            <p id="hero-question"></p>
+          </article>
+          <div class="before-after">
+            <article class="preview-card before-card">
+              <span class="detail-kicker">Before</span>
+              <p id="hero-before"></p>
+            </article>
+            <article class="preview-card after-card">
+              <span class="detail-kicker">After</span>
+              <p id="hero-after"></p>
+            </article>
           </div>
-          <div class="signal-card">
-            <span class="signal-label">What never happens</span>
-            <strong>No autoposting. No partisan steering. No source-free hot takes.</strong>
-          </div>
-          <div class="hero-badge">
-            <span>Built for ages 13-24, student creators, school media clubs, youth organizers, educators, and trusted community voices.</span>
+          <div class="preview-footer">
+            <span class="receipt-badge">Built with receipts</span>
+            <p id="hero-output-label"></p>
           </div>
         </aside>
       </section>
 
-      <section class="impact-strip" id="mission">
-        <article>
-          <span>Problem</span>
-          <p>Public information shows up as dense docs while the feed rewards outrage, certainty, and identity conflict.</p>
-        </article>
-        <article>
-          <span>Response</span>
-          <p>Puentes turns the same civic material into creator-ready and classroom-safe formats that keep context attached.</p>
-        </article>
-        <article>
-          <span>Principle</span>
-          <p>It does not tell young people what to think. It helps them see what is true, what is missing, and what is being manipulated.</p>
-        </article>
-      </section>
-
-      <section class="section creator-section" id="creator-lens">
-        <div class="section-heading">
-          <p class="eyebrow">Creator lens</p>
-          <h2>Built for student creators, youth orgs, classroom teams, and trusted messengers who need better civic media tools.</h2>
+      <section class="workflow-shell" id="workspace">
+        <div class="section-heading workspace-heading">
+          <p class="eyebrow">Four-step creator flow</p>
+          <h2>Move from confusion to a creator-ready handoff without losing the source trail.</h2>
           <p>
-            The system is designed to feel familiar to Gen Z and younger audiences without becoming cringe or careless.
-            It uses plain language, strong hooks, format-native structure, and audience-specific handoff rules while keeping sources visible.
+            The workspace is intentionally direct: capture the question, verify the packet, shape the output, and export a source-linked asset.
           </p>
         </div>
 
-        <div class="creator-grid">
-          <article class="creator-card">
-            <span>Feels native</span>
-            <h3>Short, scrollable, and clear</h3>
-            <p>Outputs are shaped for carousel swipes, 30-45 second explainers, and guided prompts people can actually use.</p>
-          </article>
-          <article class="creator-card">
-            <span>Keeps receipts</span>
-            <h3>Source-linked by default</h3>
-            <p>Every claim stays tied to reporting, documents, or community questions so creators are not forced into vague summary mode.</p>
-          </article>
-          <article class="creator-card">
-            <span>Protects tone</span>
-            <h3>No rage-bait voice</h3>
-            <p>Puentes flags fear hooks, false binaries, dog whistles, and pressure to perform certainty just to win engagement.</p>
-          </article>
-          <article class="creator-card">
-            <span>Works like a tool</span>
-            <h3>Now backed by saved review state</h3>
-            <p>The workspace persists queue items, reviewer notes, approvals, and activity history instead of resetting every refresh.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section prototype-section" id="prototype">
-        <div class="section-heading prototype-heading">
-          <p class="eyebrow">Review workspace</p>
-          <h2>An audience-aware workflow for source intake, claim checks, creator packs, and human approval.</h2>
-          <p>
-            This is the product core: a small real app where a reviewer can move from incoming civic material to a creator-ready,
-            classroom-safe draft while saving audience mode, reviewer notes, and approval state through a lightweight backend.
-          </p>
+        <div class="readonly-banner" id="readonly-banner" hidden>
+          This is a read-only share preview. You can review the handoff, copy the output, and inspect the evidence trail.
         </div>
 
-        <div class="audience-ribbon panel">
-          <div>
-            <span class="detail-kicker">Audience mode</span>
-            <h3>Switch the workspace between student, creator, and educator handoff.</h3>
-            <p>Each mode changes the framing guidance, default draft format, and the kind of language the final handoff should use.</p>
-            <div class="audience-tabs" id="audience-tabs" role="tablist" aria-label="Audience modes"></div>
-          </div>
-          <article class="audience-panel">
-            <div class="panel-header compact-header">
-              <div>
-                <span class="detail-kicker" id="audience-kicker"></span>
-                <h3 id="audience-title"></h3>
-              </div>
-              <div class="meta-pill" id="save-status">Saved locally</div>
+        <div class="step-rail">
+          <article class="step-card" id="step-intake-card">
+            <span class="step-number">01</span>
+            <div>
+              <h3>Intake</h3>
+              <p>Pick the audience and frame the creator question.</p>
             </div>
-            <p id="audience-summary"></p>
-            <ul class="detail-list" id="audience-focus"></ul>
+            <span class="step-status" id="step-intake-status">Ready</span>
+          </article>
+          <article class="step-card" id="step-verify-card">
+            <span class="step-number">02</span>
+            <div>
+              <h3>Verify</h3>
+              <p>Check the strongest claim, evidence, and manipulation risk.</p>
+            </div>
+            <span class="step-status" id="step-verify-status">In review</span>
+          </article>
+          <article class="step-card" id="step-draft-card">
+            <span class="step-number">03</span>
+            <div>
+              <h3>Draft</h3>
+              <p>Turn verified facts into creator-native formats.</p>
+            </div>
+            <span class="step-status" id="step-draft-status">Bundle ready</span>
+          </article>
+          <article class="step-card" id="step-export-card">
+            <span class="step-number">04</span>
+            <div>
+              <h3>Export</h3>
+              <p>Approve, share, and remix the handoff once the checks are done.</p>
+            </div>
+            <span class="step-status" id="step-export-status">Blocked</span>
           </article>
         </div>
 
-        <div class="intake-ribbon panel">
-          <div>
-            <span class="detail-kicker">Question intake</span>
-            <h3>Drop in a student question, creator angle, or community confusion point.</h3>
-            <p>Use this to simulate how Puentes receives prompts from group chats, school clubs, classrooms, youth workshops, or trusted creators.</p>
-          </div>
-          <div class="intake-form">
-            <label class="sr-only" for="question-input">Community question</label>
-            <textarea id="question-input" rows="3"></textarea>
-            <div class="intake-actions">
-              <button class="button button-primary" id="queue-question" type="button">Add to queue</button>
-              <button class="button button-secondary" id="load-next-packet" type="button">Switch demo packet</button>
-            </div>
-          </div>
-          <div class="queue-card">
-            <span class="detail-kicker">Live queue</span>
-            <ul class="queue-list" id="queue-list"></ul>
-          </div>
-        </div>
+        <div class="status-banner" id="app-status" hidden></div>
 
         <div class="workspace-grid">
-          <section class="panel source-panel">
+          <section class="panel intake-panel" id="step1">
             <div class="panel-header">
               <div>
-                <span class="detail-kicker">01 Source packet</span>
-                <h3>Pick the civic packet the team is working through.</h3>
-                <p class="panel-note">Each packet mixes records, reporting, and youth-facing questions so creators and educators do not start from scratch.</p>
+                <span class="detail-kicker">Step 01</span>
+                <h3>Frame the creator job.</h3>
+                <p class="panel-note">Choose the handoff mode, drop in the question people are circulating, and build a review queue that starts from lived confusion.</p>
+              </div>
+              <div class="meta-pill">Intake</div>
+            </div>
+
+            <div class="audience-ribbon">
+              <div>
+                <span class="detail-kicker">Audience mode</span>
+                <h4>Switch the handoff between student, creator, and educator.</h4>
+                <p>Each mode changes framing, tone, and the default output format.</p>
+                <div class="audience-tabs" id="audience-tabs" role="tablist" aria-label="Audience modes"></div>
+              </div>
+              <article class="audience-panel">
+                <span class="detail-kicker" id="audience-kicker"></span>
+                <h4 id="audience-title"></h4>
+                <p id="audience-summary"></p>
+                <ul class="detail-list" id="audience-focus"></ul>
+              </article>
+            </div>
+
+            <div class="intake-ribbon">
+              <div class="intake-copy">
+                <span class="detail-kicker">Question intake</span>
+                <h4>Drop in a creator angle, student confusion point, or community question.</h4>
+                <p>The goal is to anchor the workflow in the real question, not the loudest clip.</p>
+              </div>
+              <div class="intake-form">
+                <label class="sr-only" for="question-input">Community question</label>
+                <textarea id="question-input" rows="3"></textarea>
+                <div class="intake-actions">
+                  <button class="button button-primary" id="queue-question" type="button">Add question</button>
+                  <button class="button button-secondary" id="load-next-packet" type="button">Try another packet</button>
+                </div>
+              </div>
+              <article class="queue-card">
+                <div class="panel-header compact-header">
+                  <div>
+                    <span class="detail-kicker">Queue</span>
+                    <h4>What creators want clarified next</h4>
+                  </div>
+                  <div class="meta-pill" id="queue-count">0</div>
+                </div>
+                <ul class="queue-list" id="queue-list"></ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel verify-panel" id="step2">
+            <div class="panel-header">
+              <div>
+                <span class="detail-kicker">Step 02</span>
+                <h3>Verify what is true, what is overstated, and what still needs context.</h3>
+                <p class="panel-note">This is where the workflow stays useful instead of becoming another machine for faster civic hype.</p>
               </div>
               <div class="meta-pill" id="packet-count"></div>
             </div>
-            <div class="packet-layout">
-              <div class="packet-list" id="packet-list" role="tablist" aria-label="Source packets"></div>
-              <article class="packet-detail">
-                <div class="packet-meta-row">
-                  <span class="status-chip" id="packet-type"></span>
-                  <span class="meta-pill" id="packet-date"></span>
-                  <span class="meta-pill" id="packet-trust"></span>
+
+            <div class="verify-layout">
+              <article class="verify-card">
+                <div class="panel-header compact-header">
+                  <div>
+                    <span class="detail-kicker">Source packet</span>
+                    <h4>Pick the packet driving the handoff.</h4>
+                  </div>
+                  <div class="meta-pill">Packet</div>
                 </div>
-                <h4 id="packet-title"></h4>
-                <p id="packet-summary"></p>
-                <div class="packet-context">
+                <div class="packet-layout">
+                  <div class="packet-list" id="packet-list" role="tablist" aria-label="Source packets"></div>
+                  <article class="packet-detail">
+                    <div class="packet-meta-row">
+                      <span class="status-chip" id="packet-type"></span>
+                      <span class="meta-pill" id="packet-date"></span>
+                      <span class="meta-pill" id="packet-trust"></span>
+                    </div>
+                    <h4 id="packet-title"></h4>
+                    <p id="packet-summary"></p>
+                    <div class="packet-context">
+                      <div>
+                        <span class="detail-kicker">Core question</span>
+                        <p id="packet-question"></p>
+                      </div>
+                      <div>
+                        <span class="detail-kicker">Source mix</span>
+                        <ul class="source-links" id="packet-sources"></ul>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </article>
+
+              <article class="verify-card">
+                <div class="panel-header compact-header">
                   <div>
-                    <span class="detail-kicker">Core question</span>
-                    <p id="packet-question"></p>
+                    <span class="detail-kicker">Claim check</span>
+                    <h4>Open the claim that needs the clearest correction.</h4>
                   </div>
-                  <div>
-                    <span class="detail-kicker">Source mix</span>
-                    <ul class="source-links" id="packet-sources"></ul>
-                  </div>
+                  <div class="meta-pill" id="claim-count"></div>
+                </div>
+                <div class="claim-layout">
+                  <div class="claim-list" id="claim-list" role="tablist" aria-label="Claims under review"></div>
+                  <article class="claim-detail">
+                    <div class="claim-header-row">
+                      <h4 id="claim-title"></h4>
+                      <span class="status-chip" id="claim-status"></span>
+                    </div>
+                    <p id="claim-summary"></p>
+                    <div class="detail-columns">
+                      <div>
+                        <span class="detail-kicker">What backs this up</span>
+                        <p id="claim-evidence"></p>
+                      </div>
+                      <div>
+                        <span class="detail-kicker">What still needs checking</span>
+                        <p id="claim-gap"></p>
+                      </div>
+                    </div>
+                    <div class="detail-columns">
+                      <div>
+                        <span class="detail-kicker">Receipts kept in the draft</span>
+                        <ul class="detail-list" id="claim-citations"></ul>
+                      </div>
+                      <div>
+                        <span class="detail-kicker">Language watchouts</span>
+                        <ul class="detail-list" id="claim-signals"></ul>
+                      </div>
+                    </div>
+                  </article>
                 </div>
               </article>
             </div>
           </section>
 
-          <section class="panel claim-panel">
+          <section class="panel draft-panel" id="step3">
             <div class="panel-header">
               <div>
-                <span class="detail-kicker">02 Claim check</span>
-                <h3>See what checks out, what gets overstated, and what still needs context.</h3>
-                <p class="panel-note">This keeps the team out of guess mode and helps creators avoid repeating the loudest version of the story.</p>
+                <span class="detail-kicker">Step 03</span>
+                <h3>Shape the verified facts into ready-to-use creator assets.</h3>
+                <p class="panel-note">Switch formats without rewriting the truth. The source trail stays attached no matter how you package the story.</p>
               </div>
-              <div class="meta-pill" id="claim-count"></div>
+              <div class="meta-pill" id="draft-state">Creator draft</div>
             </div>
-            <div class="claim-layout">
-              <div class="claim-list" id="claim-list" role="tablist" aria-label="Claims under review"></div>
-              <article class="claim-detail">
-                <div class="claim-header-row">
-                  <h4 id="claim-title"></h4>
-                  <span class="status-chip" id="claim-status"></span>
-                </div>
-                <p id="claim-summary"></p>
-                <div class="detail-columns">
-                  <div>
-                    <span class="detail-kicker">What backs this up</span>
-                    <p id="claim-evidence"></p>
-                  </div>
-                  <div>
-                    <span class="detail-kicker">What still needs checking</span>
-                    <p id="claim-gap"></p>
-                  </div>
-                </div>
-                <div class="detail-columns">
-                  <div>
-                    <span class="detail-kicker">Receipts kept in the draft</span>
-                    <ul class="detail-list" id="claim-citations"></ul>
-                  </div>
-                  <div>
-                    <span class="detail-kicker">Language watchouts</span>
-                    <ul class="detail-list" id="claim-signals"></ul>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </section>
 
-          <section class="panel draft-panel">
-            <div class="panel-header">
-              <div>
-                <span class="detail-kicker">03 Output studio</span>
-                <h3>Flip the same verified facts into creator-native and youth-ready formats.</h3>
-                <p class="panel-note">A single review packet can feed carousels, short videos, creator captions, and class prompts without rewriting the truth.</p>
-              </div>
-              <div class="meta-pill" id="draft-state">Review draft</div>
-            </div>
             <div class="format-tabs" id="format-tabs" role="tablist" aria-label="Draft formats">
               <button class="format-tab" data-format="carousel" type="button" aria-selected="false">Carousel pack</button>
               <button class="format-tab" data-format="video" type="button" aria-selected="false">Short video</button>
               <button class="format-tab" data-format="classroom" type="button" aria-selected="false">Class prompts</button>
               <button class="format-tab" data-format="creator" type="button" aria-selected="false">Creator caption</button>
             </div>
-            <article class="draft-view">
+
+            <article class="draft-summary-card">
               <span class="detail-kicker" id="draft-kicker"></span>
               <h4 id="draft-title"></h4>
               <p id="draft-summary"></p>
-              <ul class="detail-list" id="draft-points"></ul>
-              <div class="draft-footer">
+            </article>
+
+            <div class="draft-grid">
+              <article class="asset-card">
+                <span class="detail-kicker">Hook</span>
+                <p id="draft-hook"></p>
+              </article>
+              <article class="asset-card">
+                <span class="detail-kicker">Caption</span>
+                <p id="draft-caption"></p>
+              </article>
+              <article class="asset-card asset-card-wide">
+                <span class="detail-kicker">Script / talking path</span>
+                <p id="draft-script"></p>
+              </article>
+              <article class="asset-card">
+                <span class="detail-kicker">Comment prompt</span>
+                <p id="draft-comment-prompt"></p>
+              </article>
+              <article class="asset-card">
+                <span class="detail-kicker">Slides / beats</span>
+                <ol class="detail-list ordered-list" id="draft-slides"></ol>
+              </article>
+              <article class="asset-card">
+                <span class="detail-kicker">Citations in handoff</span>
+                <ul class="detail-list" id="draft-citations"></ul>
+              </article>
+            </div>
+
+            <div class="draft-foot">
+              <div>
+                <span class="detail-kicker">Share summary</span>
+                <p id="draft-share-summary"></p>
+              </div>
+              <div>
                 <span class="detail-kicker">Source-linked output rule</span>
                 <p id="draft-note"></p>
               </div>
-            </article>
+            </div>
           </section>
 
-          <aside class="panel gate-panel">
+          <aside class="panel export-panel" id="step4">
             <div class="panel-header">
               <div>
-                <span class="detail-kicker">04 Human gate</span>
-                <h3>Catch manipulation, pressure-tested framing, and creator risk before anything is shared.</h3>
-                <p class="panel-note">This is where Puentes stays useful instead of becoming another machine for faster civic hype.</p>
+                <span class="detail-kicker">Step 04</span>
+                <h3>Approve, export, and share the handoff once the risk checks are done.</h3>
+                <p class="panel-note">This is the handoff layer. Approval unlocks the export package, not autoposting.</p>
               </div>
+              <div class="meta-pill">Export</div>
             </div>
 
             <div class="risk-stack">
@@ -292,33 +364,66 @@
             </div>
 
             <div class="checklist-block">
-              <span class="detail-kicker">Reviewer checklist</span>
+              <div class="panel-header compact-header">
+                <div>
+                  <span class="detail-kicker">Reviewer checklist</span>
+                  <h4>What must be true before export</h4>
+                </div>
+                <div class="meta-pill" id="checklist-progress">0 / 0</div>
+              </div>
               <div class="checklist" id="review-checklist"></div>
             </div>
+
+            <article class="blocker-card">
+              <span class="detail-kicker">What is blocking export</span>
+              <ul class="detail-list" id="blocker-list"></ul>
+            </article>
 
             <div class="notes-block">
               <div class="panel-header compact-header">
                 <div>
                   <span class="detail-kicker">Reviewer notes</span>
-                  <h4>Saved through the backend</h4>
+                  <h4>Keep context for the next creator</h4>
                 </div>
               </div>
-              <textarea id="reviewer-notes" rows="4" placeholder="Leave review notes for the next creator, editor, or educator handoff."></textarea>
+              <textarea id="reviewer-notes" rows="4" placeholder="Leave context for the next creator, editor, or educator handoff."></textarea>
               <div class="note-actions">
+                <button class="button button-secondary" id="clear-note" type="button">Clear</button>
                 <button class="button button-primary" id="save-note" type="button">Save note</button>
-                <button class="button button-secondary" id="clear-note" type="button">Clear note</button>
               </div>
             </div>
 
             <div class="review-actions">
-              <button class="button button-primary" id="approve-review" type="button">Approve for handoff</button>
+              <button class="button button-primary" id="approve-review" type="button">Approve and unlock export</button>
               <button class="button button-secondary" id="request-revision" type="button">Send back for revision</button>
             </div>
 
             <article class="gate-status-card" id="gate-status-card" data-state="pending">
               <span class="detail-kicker">Current gate status</span>
               <h4 id="gate-status-title">Waiting for reviewer checks</h4>
-              <p id="gate-status-text">Complete the checklist before approving a draft for educator or creator handoff.</p>
+              <p id="gate-status-text">Complete the checklist before approving a draft for creator or educator handoff.</p>
+            </article>
+
+            <article class="export-card">
+              <div class="panel-header compact-header">
+                <div>
+                  <span class="detail-kicker">Creator handoff package</span>
+                  <h4 id="export-title">Export unlocks after approval</h4>
+                </div>
+                <span class="receipt-badge">Built with receipts</span>
+              </div>
+              <p id="export-summary">Approve the packet to unlock copy, download, and share actions.</p>
+              <div class="share-link-card">
+                <span class="detail-kicker">Read-only share link</span>
+                <p class="share-link" id="share-link">Share preview will appear here after approval.</p>
+              </div>
+              <div class="export-actions">
+                <button class="button button-primary" id="copy-output" type="button">Copy output</button>
+                <button class="button button-secondary" id="download-output" type="button">Download handoff</button>
+                <button class="button button-secondary" id="copy-share-link" type="button">Copy share link</button>
+                <button class="button button-secondary" id="open-share-preview" type="button">Open share preview</button>
+                <button class="button button-secondary" id="duplicate-audience" type="button">Remix for next audience</button>
+              </div>
             </article>
 
             <article class="history-card">
@@ -327,12 +432,47 @@
             </article>
           </aside>
         </div>
+
+        <div class="feedback-toast" id="feedback-toast" hidden></div>
+      </section>
+
+      <section class="section narrative-section" id="mission">
+        <div class="section-heading">
+          <p class="eyebrow">Why this product exists</p>
+          <h2>Make civic media easier to use, not easier to weaponize.</h2>
+          <p>
+            Puentes is not trying to tell young people what to think. It is trying to make it easier for trusted messengers to explain what is documented, what is overstated, and what is still unresolved.
+          </p>
+        </div>
+
+        <div class="creator-grid">
+          <article class="creator-card">
+            <span>Creator-native</span>
+            <h3>Made for the handoff</h3>
+            <p>Trusted creators should leave with something they can post, adapt, or remix, not a page of abstract guidance.</p>
+          </article>
+          <article class="creator-card">
+            <span>Source visible</span>
+            <h3>Receipts stay attached</h3>
+            <p>Citations, uncertainty, and missing context stay visible so the output can travel without faking certainty.</p>
+          </article>
+          <article class="creator-card">
+            <span>Youth aware</span>
+            <h3>Current, not cringe</h3>
+            <p>The voice aims for sharp, familiar, practical language rather than policy PDF tone or engagement bait.</p>
+          </article>
+          <article class="creator-card">
+            <span>Viral on purpose</span>
+            <h3>Easy to share responsibly</h3>
+            <p>Read-only preview links and remix paths help good civic explainers move faster than rumor loops.</p>
+          </article>
+        </div>
       </section>
 
       <section class="section section-alt" id="safeguards">
         <div class="section-heading">
-          <p class="eyebrow">Safeguards</p>
-          <h2>Built to reduce manipulation, not just make civic content faster.</h2>
+          <p class="eyebrow">Trust layer</p>
+          <h2>Built to reduce manipulation, not just produce content faster.</h2>
         </div>
 
         <div class="safeguard-grid">
@@ -342,69 +482,57 @@
           </article>
           <article>
             <h3>Amplification awareness</h3>
-            <p>Highlights when a claim or clip is spreading because it is algorithmically loud, not because it is well sourced.</p>
+            <p>Shows when a claim is spreading because it is algorithmically loud, not because it is well sourced.</p>
           </article>
           <article>
             <h3>Human review gate</h3>
-            <p>Every output is handoff-ready, not publish-ready. Teachers, editors, and trusted creators still make the final call.</p>
+            <p>Every export is handoff-ready, not publish-ready. Real people still decide what should go live.</p>
           </article>
           <article>
-            <h3>Nonpartisan framing</h3>
-            <p>Prompts and outputs are designed to widen understanding, not optimize for clout, ideological victory, or false balance.</p>
+            <h3>Read-only sharing</h3>
+            <p>Share links present the package without opening the editing flow, so context can travel without accidental changes.</p>
           </article>
         </div>
       </section>
 
       <section class="section section-grid" id="blueprint">
         <div class="section-heading">
-          <p class="eyebrow">System blueprint</p>
-          <h2>A practical architecture for open civic media production.</h2>
+          <p class="eyebrow">Blueprint</p>
+          <h2>The system underneath the creator flow.</h2>
         </div>
 
         <div class="blueprint">
           <article class="blueprint-card">
             <span>01</span>
-            <h3>Source graph</h3>
-            <p>Documents, reporting, creator prompts, and community questions are indexed with provenance, date, and trust metadata.</p>
+            <h3>Source packet</h3>
+            <p>Documents, reporting, and community questions stay grouped with provenance, date, and trust context.</p>
           </article>
           <article class="blueprint-card">
             <span>02</span>
-            <h3>Claim workflows</h3>
-            <p>Claims are decomposed, checked against evidence, and marked as supported, contested, or still unresolved.</p>
+            <h3>Claim check</h3>
+            <p>Claims are separated into supported, mixed, and unclear so the draft starts from what the packet can actually defend.</p>
           </article>
           <article class="blueprint-card">
             <span>03</span>
-            <h3>Rhetoric lens</h3>
-            <p>Language is scanned for manipulation patterns, polarization signals, and youth-safety concerns before reuse.</p>
+            <h3>Format engine</h3>
+            <p>The same packet can become a caption, a short script, a carousel pack, or a classroom prompt without losing the source trail.</p>
           </article>
           <article class="blueprint-card">
             <span>04</span>
-            <h3>Format engine</h3>
-            <p>Reviewed facts become carousels, short scripts, creator captions, and classroom tools while citations stay attached.</p>
+            <h3>Human gate</h3>
+            <p>Checklist state, notes, approvals, and revisions live per packet so the handoff does not reset every time someone switches topics.</p>
           </article>
           <article class="blueprint-card">
             <span>05</span>
-            <h3>Review workspace</h3>
-            <p>Humans inspect sources, tone, omissions, and risk notes before approving material for real audiences.</p>
+            <h3>Export loop</h3>
+            <p>Approved packets create copyable outputs, downloadable handoffs, and share previews designed for responsible distribution.</p>
           </article>
           <article class="blueprint-card">
             <span>06</span>
-            <h3>Open governance</h3>
-            <p>The system stays auditable through transparent prompts, source policies, and documented moderation constraints.</p>
+            <h3>Open trust model</h3>
+            <p>The experience remains auditable through visible sources, documented constraints, and explicit non-autoposting behavior.</p>
           </article>
         </div>
-      </section>
-
-      <section class="section callout">
-        <div>
-          <p class="eyebrow">Who benefits</p>
-          <h2>Students, youth organizations, educators, and trusted creators who need civic content that can travel without becoming manipulative.</h2>
-        </div>
-        <p>
-          Through Energia en Accion's mentoring networks, school partnerships, NGOs, and challenge-based learning
-          programs, Puentes can help smaller institutions and youth messengers make clear, source-linked civic media
-          that feels familiar in the spaces where younger audiences already get information.
-        </p>
       </section>
     </main>
   </div>

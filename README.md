@@ -1,6 +1,6 @@
 # Puentes
 
-Puentes is an open, agentic AI concept for youth civic information integrity. This repository now contains a lightweight Node app with a persisted review workspace for youth creators, educators, and trusted community messengers.
+Puentes is a creator-first civic media workspace for trusted youth creators, educators, and community messengers. The app turns civic packets into source-linked captions, scripts, slide packs, and read-only share previews without dropping the evidence trail.
 
 ## Run locally
 
@@ -11,15 +11,16 @@ No external dependencies are required.
 
 ## Current scope
 
-- Product narrative and visual identity
+- Creator-first intake -> verify -> draft -> export workflow
 - Audience modes for `Student`, `Creator`, and `Educator`
-- Backend-backed review workspace with saved queue, notes, approvals, and activity history
-- Source packet, claim check, and output studio demo flows
-- Carousel, short-video, classroom, and creator-caption handoff examples
+- Packet-scoped workspace state with saved checklist, notes, approvals, exports, and history
+- Structured output bundles for carousel, short-video, classroom, and creator-caption handoffs
+- Read-only share preview links and downloadable creator handoff packages
+- Lightweight backend validation for queue inputs and workspace mutations
 
 ## Next build steps
 
-- Persist review state per packet instead of one active workspace snapshot
 - Add retrieval-backed evidence cards instead of demo packet data
-- Define structured schemas for carousels, scripts, captions, and classroom prompts
-- Add reviewer roles, comments, and change history per packet
+- Add richer creator exports such as JSON bundles and image-ready slide layouts
+- Layer in reviewer roles, comments, and collaborative packet assignments
+- Add analytics around queue usage, export actions, and share-preview opens
