@@ -1,1 +1,9 @@
 data/store.json
+.netlify
+.tmp-edge*/
+server.err
+server.out
+desktop.png
+mobile.png
+smoke*.png
+smoke*.html

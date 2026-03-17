@@ -24,11 +24,9 @@
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="#workspace">Start</a>
-        <a href="#step2">Verify</a>
         <a href="#step3">Draft</a>
         <a href="#step4">Export</a>
         <a href="#safeguards">Trust</a>
-        <a href="#blueprint">Blueprint</a>
       </nav>
     </header>
 
@@ -36,11 +34,9 @@
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Creator-first civic workflow</p>
-          <h1>Take a messy civic packet and leave with a caption, script, slide pack, and share-ready handoff.</h1>
+          <h1>Turn a civic packet into a caption, script, and share-ready handoff.</h1>
           <p class="hero-text">
-            Puentes is built for trusted creators, youth media teams, and community messengers who need civic explainers that
-            feel native to the feed without borrowing the voice of outrage. The workflow starts with a real question, verifies
-            what is actually true, and exports a handoff that keeps the receipts attached.
+            Puentes helps trusted creators and youth media teams turn messy civic information into something clear, useful, and source-linked without drifting into outrage voice.
           </p>
           <div class="hero-actions">
             <a class="button button-primary" href="#workspace">Open creator flow</a>
@@ -49,15 +45,15 @@
           <div class="hero-highlights">
             <article class="hero-chip">
               <span>Actionable</span>
-              <p>Copy-ready caption and script assets, not just notes.</p>
+              <p>Caption and script, not notes.</p>
             </article>
             <article class="hero-chip">
-              <span>Safe to share</span>
-              <p>Every handoff keeps citations, uncertainty, and risk notes visible.</p>
+              <span>Source visible</span>
+              <p>Citations and uncertainty stay attached.</p>
             </article>
             <article class="hero-chip">
               <span>Built to travel</span>
-              <p>Share preview links and remix paths help the work move without losing context.</p>
+              <p>Share and remix without losing context.</p>
             </article>
           </div>
         </div>
@@ -66,7 +62,7 @@
           <div class="preview-header">
             <div>
               <span class="detail-kicker">Live creator brief</span>
-              <h2>Start from the question people are already asking.</h2>
+              <h2>Start from the question people already ask.</h2>
             </div>
             <div class="meta-pill" id="save-status">Saved locally</div>
           </div>
@@ -129,9 +125,9 @@
       <section class="workflow-shell" id="workspace">
         <div class="section-heading workspace-heading">
           <p class="eyebrow">Four-step creator flow</p>
-          <h2>Move from confusion to a creator-ready handoff without losing the source trail.</h2>
+          <h2>Go from question to creator-ready handoff in four moves.</h2>
           <p>
-            The workspace is intentionally direct: capture the question, verify the packet, shape the output, and export a source-linked asset.
+            Capture the question, verify the packet, shape one strong cut, and export it with the receipts attached.
           </p>
         </div>
 
@@ -144,7 +140,7 @@
             <span class="step-number">01</span>
             <div>
               <h3>Intake</h3>
-              <p>Pick the audience and frame the creator question.</p>
+              <p>Set audience and question.</p>
             </div>
             <span class="step-status" id="step-intake-status">Ready</span>
           </button>
@@ -152,7 +148,7 @@
             <span class="step-number">02</span>
             <div>
               <h3>Verify</h3>
-              <p>Check the strongest claim, evidence, and manipulation risk.</p>
+              <p>Check claim, evidence, risk.</p>
             </div>
             <span class="step-status" id="step-verify-status">In review</span>
           </button>
@@ -160,7 +156,7 @@
             <span class="step-number">03</span>
             <div>
               <h3>Draft</h3>
-              <p>Turn verified facts into creator-native formats.</p>
+              <p>Shape one postable cut.</p>
             </div>
             <span class="step-status" id="step-draft-status">Bundle ready</span>
           </button>
@@ -168,7 +164,7 @@
             <span class="step-number">04</span>
             <div>
               <h3>Export</h3>
-              <p>Approve, share, and remix the handoff once the checks are done.</p>
+              <p>Approve, share, remix.</p>
             </div>
             <span class="step-status" id="step-export-status">Blocked</span>
           </button>
@@ -337,7 +333,6 @@
                 <h3>Shape the verified facts into ready-to-use creator assets.</h3>
                 <p class="panel-note">Switch formats without rewriting the truth. The source trail stays attached no matter how you package the story.</p>
               </div>
-              <div class="meta-pill" id="draft-state">Creator draft</div>
             </div>
 
             <div class="format-tabs" id="format-tabs" role="tablist" aria-label="Draft formats">
@@ -347,48 +342,135 @@
               <button class="format-tab" data-format="creator" type="button" aria-selected="false">Creator caption</button>
             </div>
 
-            <article class="draft-summary-card">
-              <span class="detail-kicker" id="draft-kicker"></span>
-              <h4 id="draft-title"></h4>
-              <p id="draft-summary"></p>
-            </article>
+            <div class="creator-canvas">
+              <article class="creator-preview">
+                <div class="creator-preview-head">
+                  <div>
+                    <span class="detail-kicker" id="draft-kicker"></span>
+                    <h4 id="draft-title"></h4>
+                  </div>
+                  <div class="creator-preview-pills">
+                    <span class="meta-pill" id="draft-state">Creator draft</span>
+                    <span class="receipt-badge">Built with receipts</span>
+                  </div>
+                </div>
 
-            <div class="draft-grid">
-              <article class="asset-card">
-                <span class="detail-kicker">Hook</span>
-                <p id="draft-hook"></p>
-              </article>
-              <article class="asset-card">
-                <span class="detail-kicker">Caption</span>
-                <p id="draft-caption"></p>
-              </article>
-              <article class="asset-card asset-card-wide">
-                <span class="detail-kicker">Script / talking path</span>
-                <p id="draft-script"></p>
-              </article>
-              <article class="asset-card">
-                <span class="detail-kicker">Comment prompt</span>
-                <p id="draft-comment-prompt"></p>
-              </article>
-              <article class="asset-card">
-                <span class="detail-kicker">Slides / beats</span>
-                <ol class="detail-list ordered-list" id="draft-slides"></ol>
-              </article>
-              <article class="asset-card">
-                <span class="detail-kicker">Citations in handoff</span>
-                <ul class="detail-list" id="draft-citations"></ul>
-              </article>
-            </div>
+                <p class="creator-preview-summary" id="draft-summary"></p>
 
-            <div class="draft-foot">
-              <div>
-                <span class="detail-kicker">Share summary</span>
-                <p id="draft-share-summary"></p>
-              </div>
-              <div>
-                <span class="detail-kicker">Source-linked output rule</span>
-                <p id="draft-note"></p>
-              </div>
+                <div class="creator-stage">
+                  <article class="creator-side-card creator-side-card-hook">
+                    <span class="detail-kicker">Hook</span>
+                    <h5 id="draft-hook"></h5>
+                    <p id="draft-caption"></p>
+                  </article>
+
+                  <div class="phone-shell creator-phone-shell">
+                    <div class="phone-header">
+                      <span class="phone-dot"></span>
+                      <span class="phone-dot"></span>
+                      <span class="phone-dot"></span>
+                      <span class="phone-chip">creator canvas</span>
+                    </div>
+                    <div class="phone-screen creator-phone-screen">
+                      <span class="screen-badge">Ready-to-post core</span>
+                      <p class="creator-script" id="draft-script"></p>
+                      <div class="canvas-comment-block">
+                        <span class="detail-kicker">Comment prompt</span>
+                        <p id="draft-comment-prompt"></p>
+                      </div>
+                      <div class="canvas-slide-block">
+                        <span class="detail-kicker">Slide / beat plan</span>
+                        <ol class="detail-list ordered-list" id="draft-slides"></ol>
+                      </div>
+                    </div>
+                  </div>
+
+                  <article class="creator-side-card creator-side-card-share">
+                    <span class="detail-kicker">Share summary</span>
+                    <p id="draft-share-summary"></p>
+                    <div class="creator-rule">
+                      <span class="detail-kicker">Output rule</span>
+                      <p id="draft-note"></p>
+                    </div>
+                  </article>
+                </div>
+              </article>
+
+              <aside class="creator-sidebar">
+                <article class="creator-control-card">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Generate</span>
+                      <h4>Make one strong creator-ready handoff.</h4>
+                    </div>
+                    <div class="meta-pill" id="ai-status-pill">Ready to generate</div>
+                  </div>
+                  <p class="panel-note">Start with a fresh draft. Then add a visual if it sharpens the first impression. Video stays optional and slower.</p>
+                  <button class="button button-primary button-block" id="generate-text" type="button">Generate fresh draft</button>
+                  <div class="refinement-block">
+                    <span class="detail-kicker">Quick refinements</span>
+                    <div class="refinement-actions">
+                      <button class="button button-secondary" id="refine-hook" type="button">Stronger hook</button>
+                      <button class="button button-secondary" id="refine-caption" type="button">Tighter caption</button>
+                      <button class="button button-secondary" id="refine-receipts" type="button">More source visible</button>
+                      <button class="button button-secondary" id="refine-uncertainty" type="button">Clearer uncertainty</button>
+                    </div>
+                  </div>
+                  <div class="creator-secondary-actions">
+                    <button class="button button-secondary" id="generate-image" type="button">Generate cover visual</button>
+                    <button class="button button-secondary" id="reset-generated" type="button">Reset to packet default</button>
+                  </div>
+                </article>
+
+                <article class="creator-visual-card">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Visual concept</span>
+                      <h4>Feed-ready first impression</h4>
+                    </div>
+                    <span class="meta-pill" id="image-status">No visual yet</span>
+                  </div>
+                  <p id="visual-brief-text">Generate a visual concept to turn this packet into a stronger first impression.</p>
+                  <div class="generated-image-frame" id="generated-image-frame" data-state="empty">
+                    <img id="generated-image" alt="Generated Puentes visual concept" hidden>
+                  </div>
+                  <div class="asset-inline-actions">
+                    <button class="button button-secondary" id="download-image" type="button">Download visual</button>
+                  </div>
+                </article>
+
+                <article class="creator-video-card">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Experimental motion</span>
+                      <h4>Optional short video pass</h4>
+                    </div>
+                    <span class="meta-pill" id="video-status">No video yet</span>
+                  </div>
+                  <p class="panel-note">This is slower and optional. Use it after the draft feels right.</p>
+                  <p id="video-brief-text">Generate a short explainer cut from the verified packet once the draft feels strong.</p>
+                  <p class="video-job-status" id="video-job-status">No video job started.</p>
+                  <div class="asset-inline-actions">
+                    <button class="button button-secondary" id="generate-video" type="button">Generate short video</button>
+                    <button class="button button-secondary" id="refresh-video" type="button">Refresh status</button>
+                    <button class="button button-secondary" id="download-video" type="button">Download video</button>
+                  </div>
+                  <div class="generated-video-frame generated-video-frame-compact" id="generated-video-frame" data-state="empty">
+                    <video id="generated-video" controls playsinline preload="metadata" hidden></video>
+                    <div class="generated-video-demo" id="generated-video-demo" hidden></div>
+                  </div>
+                </article>
+
+                <details class="creator-drawer" open>
+                  <summary>Receipts and citations</summary>
+                  <ul class="detail-list" id="draft-citations"></ul>
+                </details>
+
+                <details class="creator-drawer">
+                  <summary>Safety and moderation notes</summary>
+                  <ul class="detail-list" id="safety-notes"></ul>
+                </details>
+              </aside>
             </div>
             <div class="panel-nav">
               <button class="button button-secondary" data-stage-trigger="verify" type="button">Back to verify</button>
@@ -467,17 +549,22 @@
                 <span class="receipt-badge">Built with receipts</span>
               </div>
               <p id="export-summary">Approve the packet to unlock copy, download, and share actions.</p>
+              <div class="export-status-strip">
+                <span class="status-chip" id="export-handoff-status" data-status="draft">Review locked</span>
+                <span class="status-chip" id="export-preview-status" data-status="packet">Preview locked</span>
+              </div>
               <div class="share-link-card">
                 <span class="detail-kicker">Read-only share link</span>
                 <p class="share-link" id="share-link">Share preview will appear here after approval.</p>
               </div>
               <div class="export-actions">
-                <button class="button button-primary" id="copy-output" type="button">Copy output</button>
-                <button class="button button-secondary" id="download-output" type="button">Download handoff</button>
-                <button class="button button-secondary" id="copy-share-link" type="button">Copy share link</button>
-                <button class="button button-secondary" id="open-share-preview" type="button">Open share preview</button>
-                <button class="button button-secondary" id="duplicate-audience" type="button">Remix for next audience</button>
+                <button class="button button-primary" id="copy-output" type="button">Copy handoff</button>
+                <button class="button button-secondary" id="open-share-preview" type="button">Open preview</button>
+                <button class="button button-secondary" id="copy-share-link" type="button">Copy preview link</button>
+                <button class="button button-secondary" id="download-output" type="button">Download text</button>
+                <button class="button button-secondary" id="duplicate-audience" type="button">Remix audience</button>
               </div>
+              <p class="export-guidance" id="export-guidance">Finish review to unlock the handoff actions.</p>
             </article>
 
             <article class="history-card">

@@ -6,11 +6,54 @@ const store = {
 
 const STAGES = ["intake", "verify", "draft", "export"];
 const LOCAL_STORAGE_KEY = "puentes-visual-demo-v3";
+const MEDIA_STORAGE_KEY = "puentes-media-demo-v1";
+const DEMO_VIDEO_DELAY_MS = 1800;
 const elements = {};
 let readonlyMode = false;
 let feedbackTimer = null;
 let persistenceMode = "api";
 let activeStage = "intake";
+const mediaState = { byPacket: {} };
+const pendingState = { text: false, image: false, video: false };
+const videoPollTimers = new Map();
+const REFINE_PRESETS = {
+  hook: {
+    label: "Stronger hook",
+    status: "Tightening the hook...",
+    action: "Refined hook",
+    instructions: [
+      "Keep the factual spine, but make the opening hook sharper and more attention-worthy.",
+      "Do not increase outrage or certainty just to be catchy."
+    ]
+  },
+  caption: {
+    label: "Tighter caption",
+    status: "Shortening the caption...",
+    action: "Refined caption",
+    instructions: [
+      "Shorten the caption and make it cleaner for social posting.",
+      "Keep the strongest information density without sounding clipped."
+    ]
+  },
+  receipts: {
+    label: "More source visible",
+    status: "Bringing the receipts forward...",
+    action: "Refined source visibility",
+    instructions: [
+      "Make the sourcing and citation trail more visible inside the output.",
+      "Keep the language natural while making the receipts easier to notice."
+    ]
+  },
+  uncertainty: {
+    label: "Clearer uncertainty",
+    status: "Clarifying uncertainty...",
+    action: "Refined uncertainty",
+    instructions: [
+      "Make what is still unknown or unresolved more explicit.",
+      "Preserve clarity without sounding vague or evasive."
+    ]
+  }
+};
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -77,6 +120,29 @@ function cacheElements() {
     draftCitations: document.getElementById("draft-citations"),
     draftShareSummary: document.getElementById("draft-share-summary"),
     draftNote: document.getElementById("draft-note"),
+    aiStatusPill: document.getElementById("ai-status-pill"),
+    generateText: document.getElementById("generate-text"),
+    refineHook: document.getElementById("refine-hook"),
+    refineCaption: document.getElementById("refine-caption"),
+    refineReceipts: document.getElementById("refine-receipts"),
+    refineUncertainty: document.getElementById("refine-uncertainty"),
+    generateImage: document.getElementById("generate-image"),
+    generateVideo: document.getElementById("generate-video"),
+    resetGenerated: document.getElementById("reset-generated"),
+    visualBriefText: document.getElementById("visual-brief-text"),
+    imageStatus: document.getElementById("image-status"),
+    generatedImageFrame: document.getElementById("generated-image-frame"),
+    generatedImage: document.getElementById("generated-image"),
+    downloadImage: document.getElementById("download-image"),
+    videoBriefText: document.getElementById("video-brief-text"),
+    videoStatus: document.getElementById("video-status"),
+    videoJobStatus: document.getElementById("video-job-status"),
+    generatedVideoFrame: document.getElementById("generated-video-frame"),
+    generatedVideo: document.getElementById("generated-video"),
+    generatedVideoDemo: document.getElementById("generated-video-demo"),
+    refreshVideo: document.getElementById("refresh-video"),
+    downloadVideo: document.getElementById("download-video"),
+    safetyNotes: document.getElementById("safety-notes"),
     manipulationList: document.getElementById("manipulation-list"),
     amplificationNote: document.getElementById("amplification-note"),
     reviewChecklist: document.getElementById("review-checklist"),
@@ -89,6 +155,9 @@ function cacheElements() {
     historyList: document.getElementById("history-list"),
     exportTitle: document.getElementById("export-title"),
     exportSummary: document.getElementById("export-summary"),
+    exportHandoffStatus: document.getElementById("export-handoff-status"),
+    exportPreviewStatus: document.getElementById("export-preview-status"),
+    exportGuidance: document.getElementById("export-guidance"),
     shareLink: document.getElementById("share-link"),
     approveReview: document.getElementById("approve-review"),
     requestRevision: document.getElementById("request-revision"),
@@ -138,10 +207,41 @@ function getDraft(packetId = getPacket()?.id) {
   return packet?.drafts?.[workspace?.selectedFormat] || packet?.drafts?.carousel || null;
 }
 
+function getGeneratedBundle(packetId = getPacket()?.id, format = getWorkspace(packetId)?.selectedFormat) {
+  const workspace = getWorkspace(packetId);
+  return workspace?.generatedBundlesByFormat?.[format] || null;
+}
+
 function getBundle(packetId = getPacket()?.id) {
   const packet = getPacket(packetId);
   const workspace = getWorkspace(packetId);
-  return packet?.outputBundles?.[workspace?.selectedFormat] || packet?.outputBundles?.carousel || null;
+  return getGeneratedBundle(packetId, workspace?.selectedFormat)
+    || packet?.outputBundles?.[workspace?.selectedFormat]
+    || packet?.outputBundles?.carousel
+    || null;
+}
+
+function ensurePacketMediaState(packetId = getPacket()?.id) {
+  if (!packetId) {
+    return { imagesByFormat: {}, videosByFormat: {} };
+  }
+
+  if (!mediaState.byPacket[packetId]) {
+    mediaState.byPacket[packetId] = {
+      imagesByFormat: {},
+      videosByFormat: {}
+    };
+  }
+
+  return mediaState.byPacket[packetId];
+}
+
+function getImageAsset(packetId = getPacket()?.id, format = getWorkspace(packetId)?.selectedFormat) {
+  return ensurePacketMediaState(packetId).imagesByFormat?.[format] || null;
+}
+
+function getVideoAsset(packetId = getPacket()?.id, format = getWorkspace(packetId)?.selectedFormat) {
+  return ensurePacketMediaState(packetId).videosByFormat?.[format] || null;
 }
 
 function getFallbackFactory() {
@@ -187,6 +287,43 @@ function saveLocalSnapshot() {
   globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(getSnapshotFromStore()));
 }
 
+function loadMediaSnapshot() {
+  if (!globalThis.localStorage) {
+    return { byPacket: {} };
+  }
+
+  try {
+    const raw = globalThis.localStorage.getItem(MEDIA_STORAGE_KEY);
+    if (!raw) {
+      return { byPacket: {} };
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : { byPacket: {} };
+  } catch (error) {
+    console.warn("Failed to read local media snapshot", error);
+    return { byPacket: {} };
+  }
+}
+
+function hydrateMediaSnapshot(snapshot) {
+  mediaState.byPacket = snapshot?.byPacket && typeof snapshot.byPacket === "object"
+    ? snapshot.byPacket
+    : {};
+}
+
+function saveMediaSnapshot() {
+  if (!globalThis.localStorage) {
+    return;
+  }
+
+  try {
+    globalThis.localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(mediaState));
+  } catch (error) {
+    console.warn("Failed to persist media snapshot", error);
+  }
+}
+
 function sanitizeLocalText(value, maxLength = 240) {
   return String(value || "")
     .replace(/[\u0000-\u001f\u007f]/g, " ")
@@ -201,6 +338,271 @@ function sanitizeLocalNote(value, maxLength = 1200) {
     .replace(/\r\n/g, "\n")
     .trim()
     .slice(0, maxLength);
+}
+
+function sanitizeList(items, maxItems = 6, maxLength = 240) {
+  return Array.isArray(items)
+    ? items.map((item) => sanitizeLocalText(item, maxLength)).filter(Boolean).slice(0, maxItems)
+    : [];
+}
+
+function validIsoTimestamp(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
+function normalizeGeneratedBundlePayload(payload, context) {
+  const output = payload?.output || {};
+
+  return {
+    label: `AI ${context.baseBundle.label}`,
+    title: sanitizeLocalText(output.title, 180),
+    hook: sanitizeLocalNote(output.hook, 320),
+    caption: sanitizeLocalNote(output.caption, 1200),
+    script: sanitizeLocalNote(output.script, 1600),
+    slides: sanitizeList(output.slides, 6, 220),
+    commentPrompt: sanitizeLocalNote(output.commentPrompt, 320),
+    citations: sanitizeList(output.citations, 6, 180),
+    shareSummary: sanitizeLocalText(
+      `${context.packet.shortLabel}: ${output.hook || output.caption || context.baseBundle.shareSummary}`,
+      240
+    ),
+    note: sanitizeLocalNote((output.safetyNotes || []).join(" "), 600),
+    visualBrief: sanitizeLocalNote(output.visualBrief, 700),
+    videoBrief: sanitizeLocalNote(output.videoBrief, 700),
+    safetyNotes: sanitizeList(output.safetyNotes, 5, 220),
+    model: sanitizeLocalText(payload?.model, 80),
+    responseId: sanitizeLocalText(payload?.id, 120),
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function buildFallbackSafetyNotes(packet = getPacket(), claim = getClaim(), audience = getAudience()) {
+  return [
+    ...sanitizeList(claim?.signals, 2, 220),
+    sanitizeLocalText(claim?.gap || "", 220),
+    sanitizeLocalText(packet?.amplification || "", 220),
+    sanitizeLocalText(audience?.draftRule || "", 220)
+  ].filter(Boolean).slice(0, 5);
+}
+
+function buildVisualPrompt(bundle = getBundle(), packet = getPacket(), audience = getAudience(), claim = getClaim()) {
+  if (bundle?.visualBrief) {
+    return bundle.visualBrief;
+  }
+
+  return [
+    `Create a bold civic explainer cover image for ${packet.label}.`,
+    `Audience: ${audience.label}.`,
+    `Hook: ${bundle.hook}.`,
+    `Claim focus: ${claim.title}.`,
+    "Use editorial composition, confident typography space, and a trustworthy, youth-native tone.",
+    "No fearmongering, no partisan logos, no sensational disaster imagery."
+  ].join(" ");
+}
+
+function buildVideoPrompt(bundle = getBundle(), packet = getPacket(), audience = getAudience(), claim = getClaim()) {
+  if (bundle?.videoBrief) {
+    return bundle.videoBrief;
+  }
+
+  return [
+    `Create an 8-second vertical-adjacent civic explainer clip for ${packet.label}.`,
+    `Audience: ${audience.label}.`,
+    `Open with this hook: ${bundle.hook}.`,
+    `Keep the focus on: ${claim.title}.`,
+    "Style it like a polished social explainer with motion graphics energy, clear pacing, and no panic framing."
+  ].join(" ");
+}
+
+function shortSentence(value, maxLength = 150) {
+  return sanitizeLocalNote(value, maxLength).replace(/\s+/g, " ").trim();
+}
+
+function trimCaption(value, maxLength = 220) {
+  return sanitizeLocalNote(value, maxLength).replace(/\s{2,}/g, " ").trim();
+}
+
+function buildDemoGeneratedBundle(context, presetKey = "fresh") {
+  const { packet, audience, claim } = context;
+  const currentBundle = getBundle();
+  const baseBundle = context.seedBundle;
+  const baseSafetyNotes = buildFallbackSafetyNotes(packet, claim, audience);
+  const baseTitle = shortSentence(currentBundle?.title || baseBundle.title, 180);
+  const baseHook = shortSentence(currentBundle?.hook || baseBundle.hook, 220);
+  const baseCaption = trimCaption(currentBundle?.caption || baseBundle.caption, 420);
+  const unresolvedLine = shortSentence(claim.gap || "Some implementation details still need to be checked.", 180);
+  const citations = (currentBundle?.citations?.length ? currentBundle.citations : baseBundle.citations).slice(0, 4);
+
+  const bundle = {
+    label: `AI ${baseBundle.label}`,
+    title: baseTitle,
+    hook: baseHook,
+    caption: baseCaption,
+    script: sanitizeLocalNote(currentBundle?.script || baseBundle.script, 1600),
+    slides: sanitizeList(currentBundle?.slides || baseBundle.slides, 6, 220),
+    commentPrompt: shortSentence(currentBundle?.commentPrompt || baseBundle.commentPrompt, 220),
+    citations,
+    shareSummary: shortSentence(currentBundle?.shareSummary || baseBundle.shareSummary, 220),
+    note: sanitizeLocalNote(currentBundle?.note || baseBundle.note, 600),
+    visualBrief: buildVisualPrompt(currentBundle || baseBundle, packet, audience, claim),
+    videoBrief: buildVideoPrompt(currentBundle || baseBundle, packet, audience, claim),
+    safetyNotes: baseSafetyNotes,
+    model: "puentes-demo",
+    responseId: `demo-${Date.now()}`,
+    generatedAt: new Date().toISOString()
+  };
+
+  if (presetKey === "hook") {
+    bundle.hook = shortSentence(`Quick reset: ${claim.title.replace(/\.$/, "")}, but the record is narrower than the feed makes it sound.`, 220);
+    bundle.caption = trimCaption(`${bundle.hook} ${baseCaption}`, 320);
+  } else if (presetKey === "caption") {
+    bundle.caption = trimCaption(`${bundle.hook} ${shortSentence(claim.summary, 120)} Sources stay attached in the handoff.`, 220);
+  } else if (presetKey === "receipts") {
+    bundle.caption = trimCaption(`${baseCaption} Receipts: ${citations.slice(0, 2).join(" + ")}.`, 320);
+    bundle.note = sanitizeLocalNote(`${bundle.note} Lead with what is documented and keep the receipts visible in the post body.`, 600);
+  } else if (presetKey === "uncertainty") {
+    bundle.caption = trimCaption(`${baseCaption} What is still open: ${unresolvedLine}`, 340);
+    bundle.shareSummary = shortSentence(`${packet.shortLabel}: what changed, what stayed, and what still needs watching.`, 200);
+    bundle.safetyNotes = sanitizeList([...baseSafetyNotes, unresolvedLine], 5, 220);
+  } else {
+    bundle.title = shortSentence(`${packet.label}: what changed, what stayed, and what still needs context`, 180);
+    bundle.hook = shortSentence(`Quick reset: ${claim.title.replace(/\.$/, "")} is not the whole story. Here is the cleaner version.`, 220);
+    bundle.caption = trimCaption(`${bundle.hook} ${shortSentence(claim.summary, 150)} What changed, what stayed, and what still needs watching are all in the handoff.`, 340);
+    bundle.script = sanitizeLocalNote(`${bundle.hook}\n\n${shortSentence(claim.evidence, 260)}\n\nWhat is still open: ${unresolvedLine}\n\nSources stay attached so people can check the record themselves.`, 1600);
+    bundle.slides = sanitizeList([
+      `What people are saying: ${claim.title}`,
+      `What the packet supports: ${shortSentence(claim.evidence, 120)}`,
+      `What is still open: ${unresolvedLine}`,
+      "Why this can travel: the receipts stay attached."
+    ], 6, 220);
+    bundle.commentPrompt = shortSentence(`What part of this issue gets distorted fastest once it hits the feed?`, 180);
+    bundle.shareSummary = shortSentence(`${packet.shortLabel}: a source-linked explainer for ${audience.label.toLowerCase()} mode.`, 180);
+  }
+
+  return bundle;
+}
+
+function buildDemoImageAsset(context) {
+  const bundle = getBundle();
+  const title = escapeHtml(shortSentence(bundle.title, 90));
+  const hook = escapeHtml(shortSentence(bundle.hook, 120));
+  const label = escapeHtml(`${context.packet.shortLabel} / ${context.audience.label}`);
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#102337"/>
+      <stop offset="55%" stop-color="#20445f"/>
+      <stop offset="100%" stop-color="#ff6b3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1536" height="1024" rx="54" fill="url(#bg)"/>
+  <circle cx="1280" cy="180" r="220" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="260" cy="840" r="260" fill="rgba(255,255,255,0.06)"/>
+  <rect x="104" y="96" width="220" height="52" rx="26" fill="#fff4ea" opacity="0.95"/>
+  <text x="140" y="130" fill="#cb4920" font-family="Arial, sans-serif" font-size="24" font-weight="700">Puentes visual</text>
+  <text x="108" y="290" fill="#fff8f2" font-family="Georgia, serif" font-size="90" font-weight="700">${title}</text>
+  <text x="108" y="410" fill="#ffe7db" font-family="Arial, sans-serif" font-size="34">${hook}</text>
+  <rect x="108" y="760" width="340" height="96" rx="28" fill="#fff4ea"/>
+  <text x="148" y="815" fill="#102337" font-family="Arial, sans-serif" font-size="26" font-weight="700">${label}</text>
+  <text x="148" y="848" fill="#475869" font-family="Arial, sans-serif" font-size="22">Source-linked social cover</text>
+</svg>`;
+
+  return {
+    prompt: buildVisualPrompt(),
+    status: "ready",
+    generatedAt: new Date().toISOString(),
+    model: "puentes-demo",
+    dataUrl: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+    revisedPrompt: "Demo visual generated locally from the current packet and draft."
+  };
+}
+
+function buildDemoVideoAsset(context) {
+  const bundle = getBundle();
+  return {
+    prompt: buildVideoPrompt(),
+    status: "processing",
+    id: `demo-video-${Date.now()}`,
+    model: "puentes-demo",
+    createdAt: new Date().toISOString(),
+    demo: true,
+    demoTitle: shortSentence(bundle.hook, 120),
+    demoSummary: shortSentence(`8-second explainer concept for ${context.packet.shortLabel}. Text first, motion second.`, 180)
+  };
+}
+
+function useDemoTextFallback(error) {
+  return /request failed|failed to fetch|not configured|not found|api unavailable/i.test(String(error?.message || ""));
+}
+
+function useDemoMediaFallback(error) {
+  return /request failed|failed to fetch|not configured|not found|api unavailable/i.test(String(error?.message || ""));
+}
+
+function getSmokeMode() {
+  return new URLSearchParams(window.location.search).get("smoke");
+}
+
+function demoSmokeEnabled() {
+  return getSmokeMode() === "demo";
+}
+
+function prepareSmokeModeState() {
+  if (!demoSmokeEnabled() || !globalThis.localStorage) {
+    return;
+  }
+
+  try {
+    globalThis.localStorage.removeItem(LOCAL_STORAGE_KEY);
+    globalThis.localStorage.removeItem(MEDIA_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Failed to reset smoke mode state", error);
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function waitForCondition(check, timeout = 5000, interval = 120) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeout) {
+    if (check()) {
+      return true;
+    }
+    await sleep(interval);
+  }
+
+  return false;
+}
+
+function readableVideoStatus(status) {
+  const value = String(status || "").toLowerCase();
+
+  if (["completed", "succeeded", "ready"].includes(value)) {
+    return "ready";
+  }
+
+  if (["failed", "cancelled", "error"].includes(value)) {
+    return "error";
+  }
+
+  if (["queued", "submitted"].includes(value)) {
+    return "queued";
+  }
+
+  if (value) {
+    return "processing";
+  }
+
+  return "empty";
+}
+
+function videoIsReady(videoAsset = getVideoAsset()) {
+  return readableVideoStatus(videoAsset?.status) === "ready";
 }
 
 function appendLocalHistory(packetId, action, detail) {
@@ -416,6 +818,8 @@ function buildExportText() {
   const bundle = getBundle();
   const workspace = getWorkspace();
   const claim = getClaim();
+  const imageAsset = getImageAsset();
+  const videoAsset = getVideoAsset();
 
   return [
     "Puentes creator handoff",
@@ -443,6 +847,12 @@ function buildExportText() {
     "Comment prompt",
     bundle.commentPrompt,
     "",
+    "Visual brief",
+    bundle.visualBrief || buildVisualPrompt(bundle, packet, audience, claim),
+    "",
+    "Video brief",
+    bundle.videoBrief || buildVideoPrompt(bundle, packet, audience, claim),
+    "",
     "Current claim check",
     claim.title,
     claim.summary,
@@ -453,8 +863,15 @@ function buildExportText() {
     "Reviewer notes",
     workspace.reviewerNotes || "No reviewer note added.",
     "",
+    "Safety notes",
+    ...(bundle.safetyNotes?.length ? bundle.safetyNotes : buildFallbackSafetyNotes(packet, claim, audience)),
+    "",
     "Share summary",
-    bundle.shareSummary
+    bundle.shareSummary,
+    "",
+    "Generated media",
+    imageAsset?.dataUrl ? "Cover visual ready" : "No generated visual saved",
+    videoAsset?.id ? `Video status: ${readableVideoStatus(videoAsset.status)}` : "No generated video job"
   ].join("\n");
 }
 
@@ -490,6 +907,52 @@ function flashFeedback(message, state = "success") {
   }, 2600);
 }
 
+function setButtonBusy(button, busyLabel) {
+  if (!button) {
+    return;
+  }
+
+  if (!button.dataset.defaultLabel) {
+    button.dataset.defaultLabel = button.textContent.trim();
+  }
+
+  button.classList.remove("is-done");
+  button.classList.add("is-busy");
+  button.textContent = busyLabel;
+}
+
+function clearButtonBusy(button) {
+  if (!button) {
+    return;
+  }
+
+  button.classList.remove("is-busy");
+  if (button.dataset.defaultLabel) {
+    button.textContent = button.dataset.defaultLabel;
+  }
+}
+
+function pulseButtonDone(button, doneLabel = "Done") {
+  if (!button) {
+    return;
+  }
+
+  if (!button.dataset.defaultLabel) {
+    button.dataset.defaultLabel = button.textContent.trim();
+  }
+
+  button.classList.remove("is-busy");
+  button.classList.add("is-done");
+  button.textContent = doneLabel;
+
+  window.setTimeout(() => {
+    button.classList.remove("is-done");
+    if (button.dataset.defaultLabel) {
+      button.textContent = button.dataset.defaultLabel;
+    }
+  }, 1100);
+}
+
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {
     headers: { "Content-Type": "application/json" },
@@ -501,6 +964,141 @@ async function requestJson(url, options = {}) {
     throw new Error(payload.error || "Request failed");
   }
   return payload;
+}
+
+function setPillState(element, text, stateClass = "") {
+  element.textContent = text;
+  element.classList.remove("is-busy", "is-ready", "is-error");
+  if (stateClass) {
+    element.classList.add(stateClass);
+  }
+}
+
+function renderAiStudio() {
+  const packet = getPacket();
+  const audience = getAudience();
+  const claim = getClaim();
+  const bundle = getBundle();
+  const generatedBundle = getGeneratedBundle();
+  const imageAsset = getImageAsset();
+  const videoAsset = getVideoAsset();
+  const safetyNotes = bundle?.safetyNotes?.length ? bundle.safetyNotes : buildFallbackSafetyNotes(packet, claim, audience);
+  const visualPrompt = buildVisualPrompt(bundle, packet, audience, claim);
+  const videoPrompt = buildVideoPrompt(bundle, packet, audience, claim);
+  const videoState = readableVideoStatus(videoAsset?.status);
+  const videoUnlocked = Boolean(generatedBundle || videoAsset?.id);
+
+  elements.visualBriefText.textContent = visualPrompt;
+  elements.videoBriefText.textContent = videoUnlocked
+    ? videoPrompt
+    : "Generate a fresh draft first. The motion pass is slower and works best once the text handoff already feels right.";
+  elements.safetyNotes.innerHTML = createListMarkup(
+    safetyNotes,
+    "Generate a fresh AI draft to get packet-specific safety notes."
+  );
+
+  if (imageAsset?.dataUrl) {
+    elements.generatedImage.hidden = false;
+    if (elements.generatedImage.getAttribute("src") !== imageAsset.dataUrl) {
+      elements.generatedImage.src = imageAsset.dataUrl;
+    }
+    elements.generatedImageFrame.dataset.state = imageAsset.status === "error" ? "error" : "ready";
+  } else {
+    elements.generatedImage.hidden = true;
+    elements.generatedImage.removeAttribute("src");
+    elements.generatedImageFrame.dataset.state = pendingState.image ? "loading" : imageAsset?.status || "empty";
+  }
+
+  if (videoIsReady(videoAsset) && videoAsset?.download?.video) {
+    elements.generatedVideo.hidden = false;
+    elements.generatedVideoDemo.hidden = true;
+    if (elements.generatedVideo.getAttribute("src") !== videoAsset.download.video) {
+      elements.generatedVideo.src = videoAsset.download.video;
+    }
+    elements.generatedVideoFrame.dataset.state = "ready";
+  } else if (videoIsReady(videoAsset) && videoAsset?.demo) {
+    elements.generatedVideo.hidden = true;
+    elements.generatedVideo.removeAttribute("src");
+    elements.generatedVideoDemo.hidden = false;
+    elements.generatedVideoDemo.innerHTML = `
+      <strong>${escapeHtml(videoAsset.demoTitle || "Demo video concept")}</strong>
+      <p>${escapeHtml(videoAsset.demoSummary || "Motion concept ready in demo mode.")}</p>
+    `;
+    elements.generatedVideoFrame.dataset.state = "ready";
+  } else {
+    elements.generatedVideo.hidden = true;
+    elements.generatedVideo.removeAttribute("src");
+    elements.generatedVideoDemo.hidden = true;
+    elements.generatedVideoDemo.textContent = "";
+    elements.generatedVideoFrame.dataset.state = pendingState.video
+      ? "loading"
+      : videoState === "error"
+        ? "error"
+        : videoAsset?.id
+          ? "loading"
+          : "empty";
+  }
+
+  if (pendingState.text || pendingState.image || pendingState.video) {
+    setPillState(elements.aiStatusPill, "Generating...", "is-busy");
+  } else if (generatedBundle) {
+    setPillState(elements.aiStatusPill, "Draft ready to tune", "is-ready");
+  } else if (imageAsset?.dataUrl || videoAsset?.id) {
+    setPillState(elements.aiStatusPill, "Extras attached", "is-ready");
+  } else {
+    setPillState(elements.aiStatusPill, "Ready to generate");
+  }
+
+  if (pendingState.image) {
+    setPillState(elements.imageStatus, "Generating visual", "is-busy");
+  } else if (imageAsset?.dataUrl) {
+    setPillState(elements.imageStatus, "Visual ready", "is-ready");
+  } else if (imageAsset?.status === "error") {
+    setPillState(elements.imageStatus, "Visual failed", "is-error");
+  } else {
+    setPillState(elements.imageStatus, "No visual yet");
+  }
+
+  if (pendingState.video) {
+    setPillState(elements.videoStatus, "Starting video", "is-busy");
+  } else if (videoState === "ready") {
+    setPillState(elements.videoStatus, "Video ready", "is-ready");
+  } else if (videoState === "error") {
+    setPillState(elements.videoStatus, "Video failed", "is-error");
+  } else if (videoAsset?.id) {
+    setPillState(elements.videoStatus, "Video processing", "is-busy");
+  } else {
+    setPillState(elements.videoStatus, "No video yet");
+  }
+
+  elements.videoJobStatus.textContent = videoAsset?.id
+    ? videoAsset.demo
+      ? videoState === "ready"
+        ? "Demo video concept is ready for review."
+        : "Demo video concept is rendering locally."
+      : `Job ${videoAsset.id} is ${videoState === "processing" ? "still rendering" : videoState}.`
+    : videoUnlocked
+      ? "No video job started."
+      : "Generate a fresh draft first. Video stays optional and slower.";
+
+  if (videoAsset?.id && !videoAsset.demo && (videoState === "processing" || videoState === "queued")) {
+    const videoKey = `${packet.id}:${getWorkspace(packet.id)?.selectedFormat}`;
+    if (!videoPollTimers.has(videoKey)) {
+      scheduleVideoPoll(packet.id, getWorkspace(packet.id)?.selectedFormat, 5000);
+    }
+  }
+
+  elements.generateText.disabled = readonlyMode || pendingState.text;
+  elements.refineHook.disabled = readonlyMode || pendingState.text;
+  elements.refineCaption.disabled = readonlyMode || pendingState.text;
+  elements.refineReceipts.disabled = readonlyMode || pendingState.text;
+  elements.refineUncertainty.disabled = readonlyMode || pendingState.text;
+  elements.generateImage.disabled = readonlyMode || pendingState.text || pendingState.image;
+  elements.generateVideo.disabled = readonlyMode || pendingState.text || pendingState.video || !videoUnlocked;
+  elements.resetGenerated.disabled = readonlyMode || pendingState.text || !(generatedBundle || imageAsset?.dataUrl || videoAsset?.id);
+  elements.downloadImage.disabled = !imageAsset?.dataUrl;
+  elements.refreshVideo.disabled = !videoAsset?.id || pendingState.video || videoAsset?.demo;
+  elements.downloadVideo.disabled = !videoIsReady(videoAsset) || videoAsset?.demo;
 }
 
 function renderHero() {
@@ -601,10 +1199,15 @@ function renderDraft() {
   const audience = getAudience();
   const draft = getDraft();
   const bundle = getBundle();
+  const generatedBundle = getGeneratedBundle();
 
-  elements.draftKicker.textContent = `${bundle.label} / ${audience.label} mode`;
+  elements.draftKicker.textContent = generatedBundle
+    ? `${bundle.label} / AI-assisted ${audience.label.toLowerCase()} mode`
+    : `${bundle.label} / ${audience.label} mode`;
   elements.draftTitle.textContent = bundle.title;
-  elements.draftSummary.textContent = `${draft.summary} ${audience.draftRule}`;
+  elements.draftSummary.textContent = generatedBundle
+    ? `Fresh AI pass built from the current packet, claim, and audience framing. ${audience.draftRule}`
+    : `${draft.summary} ${audience.draftRule}`;
   elements.draftHook.textContent = bundle.hook;
   elements.draftCaption.textContent = bundle.caption;
   elements.draftScript.textContent = bundle.script;
@@ -672,17 +1275,36 @@ function renderExportCard() {
   const audience = getAudience();
   const bundle = getBundle();
   const workspace = getWorkspace();
+  const generatedBundle = getGeneratedBundle();
+  const imageAsset = getImageAsset();
+  const videoAsset = getVideoAsset();
   const approved = workspace.reviewStatus === "approved";
+  const blockers = getBlockers(workspace);
   const exportedFormats = workspace.exportedFormats || [];
   const shareUrl = approved ? (workspace.shareUrl || getShareUrl(packet.id)) : "";
+  const assetSummary = [
+    generatedBundle ? "AI-assisted draft attached." : "",
+    imageAsset?.dataUrl ? "Cover visual ready." : "",
+    videoIsReady(videoAsset) ? "Short video ready." : videoAsset?.id ? "Short video is still rendering." : ""
+  ].filter(Boolean).join(" ");
 
   elements.exportTitle.textContent = approved
-    ? `${bundle.title} is ready to hand off`
-    : "Export unlocks after approval";
+    ? "Handoff ready to ship"
+    : "Finish review to unlock export";
   elements.exportSummary.textContent = approved
-    ? `${bundle.label} is ready for ${audience.label.toLowerCase()} mode. Copy the asset, download the handoff, or share a read-only preview. ${exportedFormats.length ? `Formats already exported: ${exportedFormats.join(", ")}.` : ""}`
-    : "Approve the packet to unlock copy, download, and read-only sharing.";
+    ? `${bundle.label} is ready for ${audience.label.toLowerCase()} mode. ${assetSummary || "Receipts stay attached."} ${exportedFormats.length ? `Already exported: ${exportedFormats.join(", ")}.` : ""}`
+    : "Approve the packet to unlock copy, preview, and sharing.";
   elements.shareLink.textContent = shareUrl || "Share preview will appear here after approval.";
+
+  elements.exportHandoffStatus.dataset.status = approved ? "supported" : "draft";
+  elements.exportHandoffStatus.textContent = approved ? "Handoff ready" : "Review locked";
+  elements.exportPreviewStatus.dataset.status = approved ? "packet" : "draft";
+  elements.exportPreviewStatus.textContent = approved ? "Preview available" : "Preview locked";
+  elements.exportGuidance.textContent = approved
+    ? "Best next move: copy the handoff or open the preview before sharing it wider."
+    : blockers.length
+      ? `Best next move: clear ${blockers.length} blocker${blockers.length === 1 ? "" : "s"} in the review gate.`
+      : "Best next move: approve the handoff to unlock export actions.";
 
   elements.copyOutput.disabled = !approved;
   elements.downloadOutput.disabled = !approved;
@@ -716,7 +1338,7 @@ function renderStepRail() {
 
   elements.stepIntakeStatus.textContent = store.workspace.queue.length ? `${store.workspace.queue.length} queued` : "Ready";
   elements.stepVerifyStatus.textContent = claimStatusText(claim.status);
-  elements.stepDraftStatus.textContent = bundle.label;
+  elements.stepDraftStatus.textContent = getGeneratedBundle() ? "AI draft ready" : bundle.label;
   elements.stepExportStatus.textContent = workspace.reviewStatus === "approved"
     ? "Approved"
     : blockers.length
@@ -743,6 +1365,21 @@ function renderStepRail() {
   document.title = `Puentes | ${packet.shortLabel} -> ${bundle.label}`;
 }
 
+function revealActiveStepCard() {
+  if (!window.matchMedia("(max-width: 640px)").matches) {
+    return;
+  }
+
+  const activeCard = document.querySelector(".step-card.is-active");
+  if (activeCard) {
+    activeCard.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center"
+    });
+  }
+}
+
 function renderReadonlyState() {
   document.body.classList.toggle("is-share-mode", readonlyMode);
   elements.readonlyBanner.hidden = !readonlyMode;
@@ -758,7 +1395,7 @@ function renderNextAction() {
     stage: "intake",
     label: "Now do this",
     title: "Start with intake",
-    text: "Pick the audience and paste the real question people are circulating.",
+    text: "Pick the audience and add the real question.",
     button: "Go to intake"
   };
 
@@ -767,7 +1404,7 @@ function renderNextAction() {
       stage: "export",
       label: "Read-only mode",
       title: "Review the creator handoff",
-      text: "This preview is built for inspecting the packaged output, citations, and final share summary.",
+      text: "Inspect the final output, citations, and share summary.",
       button: "Open export"
     };
   } else if (!store.workspace.queue.length) {
@@ -775,7 +1412,7 @@ function renderNextAction() {
       stage: "intake",
       label: "First move",
       title: "Add the question people are actually asking",
-      text: "That one prompt makes the whole workflow feel anchored and much easier to understand.",
+      text: "That one prompt makes the workflow click.",
       button: "Add a question"
     };
   } else if (!allChecklistDone(workspace) && activeStage !== "verify" && activeStage !== "draft") {
@@ -783,8 +1420,16 @@ function renderNextAction() {
       stage: "verify",
       label: "Recommended next step",
       title: `Pressure-test ${packet.shortLabel.toLowerCase()} before you package it`,
-      text: "Open the loudest claim, scan the evidence, and clear the review blockers before approval.",
+      text: "Open the loudest claim and clear the blockers before approval.",
       button: "Go to verify"
+    };
+  } else if (activeStage === "draft" && !getGeneratedBundle()) {
+    config = {
+      stage: "draft",
+      label: "Make it sharper",
+      title: `Generate a stronger ${audience.label.toLowerCase()} cut from the verified packet`,
+      text: "Start with a fresh draft, then add visual polish if needed.",
+      button: "Open draft studio"
     };
   } else if (workspace.reviewStatus !== "approved") {
     config = {
@@ -824,6 +1469,7 @@ function renderAll() {
   renderClaimDetail();
   renderFormats();
   renderDraft();
+  renderAiStudio();
   renderRisks();
   renderChecklist();
   renderReviewerNotes();
@@ -842,6 +1488,7 @@ function setActiveStage(stage) {
   activeStage = stage;
   if (store.workspace) {
     renderStepRail();
+    revealActiveStepCard();
   }
 }
 
@@ -946,6 +1593,21 @@ function applyShareModeFromUrl() {
   }
 }
 
+function applyStageFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedStage = params.get("stage");
+
+  if (!requestedStage || !STAGES.includes(requestedStage)) {
+    return;
+  }
+
+  if (readonlyMode && requestedStage !== "export") {
+    return;
+  }
+
+  activeStage = requestedStage;
+}
+
 async function bootstrap() {
   try {
     const data = await requestJson("/api/bootstrap");
@@ -963,6 +1625,7 @@ async function bootstrap() {
   }
 
   applyShareModeFromUrl();
+  applyStageFromUrl();
   renderAll();
 }
 
@@ -1035,6 +1698,487 @@ function downloadText(filename, content) {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+function triggerDownload(url, filename) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function clearVideoPoll(packetId = getPacket()?.id, format = getWorkspace(packetId)?.selectedFormat) {
+  const key = `${packetId}:${format}`;
+  const timer = videoPollTimers.get(key);
+  if (timer) {
+    window.clearTimeout(timer);
+    videoPollTimers.delete(key);
+  }
+}
+
+function scheduleDemoVideoReady(packetId, format, delay = DEMO_VIDEO_DELAY_MS) {
+  clearVideoPoll(packetId, format);
+  const key = `${packetId}:${format}`;
+  const timer = window.setTimeout(() => {
+    const packetMedia = ensurePacketMediaState(packetId);
+    const currentAsset = packetMedia.videosByFormat?.[format];
+
+    if (!currentAsset?.demo) {
+      videoPollTimers.delete(key);
+      return;
+    }
+
+    packetMedia.videosByFormat[format] = {
+      ...currentAsset,
+      status: "ready",
+      readyAt: new Date().toISOString()
+    };
+
+    videoPollTimers.delete(key);
+    saveMediaSnapshot();
+    renderAll();
+    flashFeedback("Demo video concept is ready.");
+    setAppStatus("Demo video concept is ready.", "success", true);
+  }, delay);
+
+  videoPollTimers.set(key, timer);
+}
+
+function scheduleVideoPoll(packetId, format, delay = 6000) {
+  clearVideoPoll(packetId, format);
+  const key = `${packetId}:${format}`;
+  const timer = window.setTimeout(() => {
+    refreshVideoStatus(packetId, format, true);
+  }, delay);
+  videoPollTimers.set(key, timer);
+}
+
+async function refreshVideoStatus(packetId = getPacket()?.id, format = getWorkspace(packetId)?.selectedFormat, silent = false) {
+  const videoAsset = getVideoAsset(packetId, format);
+  if (!videoAsset?.id) {
+    return null;
+  }
+
+  if (videoAsset.demo) {
+    if (!silent) {
+      setAppStatus(
+        videoIsReady(videoAsset) ? "Demo video concept is ready." : "Demo video concept is still rendering locally.",
+        videoIsReady(videoAsset) ? "success" : "loading",
+        videoIsReady(videoAsset)
+      );
+    }
+    return videoAsset;
+  }
+
+  try {
+    if (!silent) {
+      setAppStatus("Refreshing video status...", "loading");
+    }
+
+    const payload = await requestJson(`/api/video-status?id=${encodeURIComponent(videoAsset.id)}`);
+    const status = payload.video?.status || payload.video?.state || "processing";
+    const packetMedia = ensurePacketMediaState(packetId);
+
+    packetMedia.videosByFormat[format] = {
+      ...videoAsset,
+      ...payload.video,
+      status,
+      download: payload.download,
+      checkedAt: new Date().toISOString()
+    };
+
+    saveMediaSnapshot();
+
+    if (readableVideoStatus(status) === "processing" || readableVideoStatus(status) === "queued") {
+      scheduleVideoPoll(packetId, format);
+    } else {
+      clearVideoPoll(packetId, format);
+    }
+
+    renderAll();
+
+    if (!silent) {
+      setAppStatus(
+        readableVideoStatus(status) === "ready" ? "Video is ready." : "Video status updated.",
+        readableVideoStatus(status) === "error" ? "error" : "success",
+        true
+      );
+    }
+
+    return packetMedia.videosByFormat[format];
+  } catch (error) {
+    const packetMedia = ensurePacketMediaState(packetId);
+    packetMedia.videosByFormat[format] = {
+      ...videoAsset,
+      status: "error",
+      error: error.message,
+      checkedAt: new Date().toISOString()
+    };
+    saveMediaSnapshot();
+    renderAll();
+
+    if (!silent) {
+      setAppStatus(error.message, "error");
+    }
+
+    return null;
+  }
+}
+
+async function runSmokeDemoFlow() {
+  setActiveStage("draft");
+  setAppStatus("Running demo smoke flow...", "loading");
+
+  await generateTextDraft(elements.generateText);
+  if (!(await waitForCondition(() => Boolean(getGeneratedBundle()), 5000))) {
+    throw new Error("Smoke flow failed before the draft rendered.");
+  }
+
+  await generateImageConcept(elements.generateImage);
+  if (!(await waitForCondition(() => Boolean(getImageAsset()?.dataUrl), 5000))) {
+    throw new Error("Smoke flow failed before the visual rendered.");
+  }
+
+  if (!elements.generateVideo.disabled) {
+    await generateVideoConcept(elements.generateVideo);
+    if (!(await waitForCondition(() => videoIsReady(getVideoAsset()), 7000))) {
+      throw new Error("Smoke flow failed before the video concept reached ready state.");
+    }
+  }
+
+  setAppStatus("Demo smoke flow completed.", "success", true);
+}
+
+function buildTextGenerationRequest(extraInstructions = []) {
+  const packet = getPacket();
+  const audience = getAudience();
+  const claim = getClaim();
+  const workspace = getWorkspace();
+  const seedBundle = packet.outputBundles[workspace.selectedFormat] || getBundle();
+  const currentBundle = getBundle();
+  const currentQueue = store.workspace?.queue?.[0] || packet.question;
+
+  return {
+    packet,
+    audience,
+    claim,
+    workspace,
+    seedBundle,
+    body: {
+      audience: audience.id,
+      goal: `Create a ${seedBundle.label.toLowerCase()} for ${audience.label.toLowerCase()} mode.`,
+      format: workspace.selectedFormat,
+      packetTitle: packet.label,
+      packetSummary: packet.summary,
+      coreQuestion: currentQueue,
+      claim: `${claim.title} ${claim.summary}`,
+      evidence: claim.evidence,
+      gaps: claim.gap,
+      citations: currentBundle?.citations?.length ? currentBundle.citations : claim.citations,
+      manipulationSignals: [...packet.manipulation, ...claim.signals].slice(0, 5),
+      additionalContext: `${audience.draftRule} ${packet.amplification}`,
+      currentDraft: currentBundle ? {
+        title: currentBundle.title,
+        hook: currentBundle.hook,
+        caption: currentBundle.caption,
+        script: currentBundle.script,
+        slides: currentBundle.slides,
+        commentPrompt: currentBundle.commentPrompt,
+        citations: currentBundle.citations,
+        shareSummary: currentBundle.shareSummary,
+        note: currentBundle.note
+      } : {},
+      instructions: extraInstructions
+    }
+  };
+}
+
+async function runTextGeneration({
+  extraInstructions = [],
+  statusMessage,
+  successMessage,
+  feedbackMessage,
+  historyAction,
+  historyDetail,
+  demoPresetKey = "fresh",
+  button,
+  busyLabel,
+  doneLabel
+}) {
+  const request = buildTextGenerationRequest(extraInstructions);
+
+  pendingState.text = true;
+  setButtonBusy(button, busyLabel || "Working...");
+  renderAiStudio();
+  setAppStatus(statusMessage, "loading");
+
+  try {
+    const payload = await requestJson("/api/generate-text", {
+      method: "POST",
+      body: JSON.stringify(request.body)
+    });
+
+    const generatedBundlesByFormat = {
+      ...(request.workspace.generatedBundlesByFormat || {}),
+      [request.workspace.selectedFormat]: normalizeGeneratedBundlePayload(payload, {
+        packet: request.packet,
+        baseBundle: request.seedBundle
+      })
+    };
+
+    await persistState(
+      {
+        packetId: request.packet.id,
+        workspacePatch: {
+          generatedBundlesByFormat,
+          reviewStatus: "pending",
+          shareReady: false,
+          shareUrl: ""
+        }
+      },
+      historyAction,
+      historyDetail || `${request.packet.label} -> ${request.workspace.selectedFormat}`
+    );
+
+    flashFeedback(feedbackMessage);
+    pulseButtonDone(button, doneLabel || "Updated");
+    setAppStatus(successMessage, "success", true);
+  } catch (error) {
+    if (useDemoTextFallback(error)) {
+      const generatedBundlesByFormat = {
+        ...(request.workspace.generatedBundlesByFormat || {}),
+        [request.workspace.selectedFormat]: buildDemoGeneratedBundle(request, demoPresetKey)
+      };
+
+      await persistState(
+        {
+          packetId: request.packet.id,
+          workspacePatch: {
+            generatedBundlesByFormat,
+            reviewStatus: "pending",
+            shareReady: false,
+            shareUrl: ""
+          }
+        },
+        historyAction,
+        historyDetail || `${request.packet.label} -> ${request.workspace.selectedFormat}`
+      );
+
+      flashFeedback("Demo draft generated locally.");
+      pulseButtonDone(button, doneLabel || "Updated");
+      setAppStatus("Demo draft generated locally.", "success", true);
+    } else {
+      clearButtonBusy(button);
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.text = false;
+    renderAll();
+  }
+}
+
+async function generateTextDraft(button = elements.generateText) {
+  await runTextGeneration({
+    statusMessage: "Generating a fresh creator draft...",
+    successMessage: "AI draft generated.",
+    feedbackMessage: "Fresh AI draft is ready to review.",
+    historyAction: "Generated AI draft",
+    demoPresetKey: "fresh",
+    button,
+    busyLabel: "Generating draft...",
+    doneLabel: "Draft ready"
+  });
+}
+
+async function refineTextDraft(presetKey, button) {
+  const preset = REFINE_PRESETS[presetKey];
+  if (!preset) {
+    return;
+  }
+
+  await runTextGeneration({
+    extraInstructions: preset.instructions,
+    statusMessage: preset.status,
+    successMessage: `${preset.label} is ready.`,
+    feedbackMessage: `${preset.label} applied.`,
+    historyAction: preset.action,
+    historyDetail: `${getPacket().label} -> ${preset.label}`,
+    demoPresetKey: presetKey,
+    button,
+    busyLabel: "Updating...",
+    doneLabel: "Updated"
+  });
+}
+
+async function generateImageConcept(button = elements.generateImage) {
+  const packet = getPacket();
+  const workspace = getWorkspace();
+  const packetMedia = ensurePacketMediaState(packet.id);
+  const prompt = buildVisualPrompt();
+
+  pendingState.image = true;
+  setButtonBusy(button, "Generating...");
+  packetMedia.imagesByFormat[workspace.selectedFormat] = {
+    ...(packetMedia.imagesByFormat[workspace.selectedFormat] || {}),
+    prompt,
+    status: "loading"
+  };
+  saveMediaSnapshot();
+  renderAll();
+  setAppStatus("Generating cover visual...", "loading");
+
+  try {
+    const payload = await requestJson("/api/generate-image", {
+      method: "POST",
+      body: JSON.stringify({ prompt, size: "1536x1024", quality: "medium", outputFormat: "png" })
+    });
+
+    packetMedia.imagesByFormat[workspace.selectedFormat] = {
+      prompt,
+      status: "ready",
+      generatedAt: new Date().toISOString(),
+      model: sanitizeLocalText(payload.model, 80),
+      dataUrl: payload.image?.dataUrl || "",
+      revisedPrompt: sanitizeLocalNote(payload.image?.revisedPrompt || "", 1200)
+    };
+    saveMediaSnapshot();
+    renderAll();
+    pulseButtonDone(button, "Visual ready");
+    setAppStatus("Visual concept generated.", "success", true);
+    flashFeedback("Cover visual is ready.");
+  } catch (error) {
+    if (useDemoMediaFallback(error)) {
+      packetMedia.imagesByFormat[workspace.selectedFormat] = buildDemoImageAsset({
+        packet,
+        audience: getAudience(),
+        claim: getClaim(),
+        workspace
+      });
+      saveMediaSnapshot();
+      renderAll();
+      pulseButtonDone(button, "Visual ready");
+      setAppStatus("Demo visual generated locally.", "success", true);
+      flashFeedback("Demo visual is ready.");
+    } else {
+      clearButtonBusy(button);
+      packetMedia.imagesByFormat[workspace.selectedFormat] = {
+        prompt,
+        status: "error",
+        error: error.message,
+        generatedAt: new Date().toISOString()
+      };
+      saveMediaSnapshot();
+      renderAll();
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.image = false;
+    renderAll();
+  }
+}
+
+async function generateVideoConcept(button = elements.generateVideo) {
+  const packet = getPacket();
+  const workspace = getWorkspace();
+  const packetMedia = ensurePacketMediaState(packet.id);
+  const prompt = buildVideoPrompt();
+
+  pendingState.video = true;
+  setButtonBusy(button, "Starting...");
+  packetMedia.videosByFormat[workspace.selectedFormat] = {
+    ...(packetMedia.videosByFormat[workspace.selectedFormat] || {}),
+    prompt,
+    status: "queued"
+  };
+  saveMediaSnapshot();
+  renderAll();
+  setAppStatus("Starting short video generation...", "loading");
+
+  try {
+    const payload = await requestJson("/api/generate-video", {
+      method: "POST",
+      body: JSON.stringify({ prompt, size: "1280x720", seconds: 8 })
+    });
+
+    packetMedia.videosByFormat[workspace.selectedFormat] = {
+      prompt,
+      status: payload.video?.status || "processing",
+      id: sanitizeLocalText(payload.video?.id, 120),
+      model: sanitizeLocalText(payload.model, 80),
+      createdAt: new Date().toISOString(),
+      download: {
+        video: payload.downloadUrl || "",
+        thumbnail: payload.thumbnailUrl || ""
+      }
+    };
+    saveMediaSnapshot();
+    renderAll();
+    pulseButtonDone(button, "Job started");
+    setAppStatus("Video job started. Puentes will keep checking status.", "success", true);
+    scheduleVideoPoll(packet.id, workspace.selectedFormat, 4000);
+  } catch (error) {
+    if (useDemoMediaFallback(error)) {
+      packetMedia.videosByFormat[workspace.selectedFormat] = buildDemoVideoAsset({
+        packet,
+        audience: getAudience(),
+        claim: getClaim(),
+        workspace
+      });
+      saveMediaSnapshot();
+      renderAll();
+      pulseButtonDone(button, "Queued");
+      setAppStatus("Demo video concept started locally.", "success", true);
+      flashFeedback("Demo video concept is rendering.");
+      scheduleDemoVideoReady(packet.id, workspace.selectedFormat);
+    } else {
+      clearButtonBusy(button);
+      packetMedia.videosByFormat[workspace.selectedFormat] = {
+        prompt,
+        status: "error",
+        error: error.message,
+        createdAt: new Date().toISOString()
+      };
+      saveMediaSnapshot();
+      renderAll();
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.video = false;
+    renderAll();
+  }
+}
+
+async function resetGeneratedDraft() {
+  const packet = getPacket();
+  const workspace = getWorkspace();
+  const format = workspace.selectedFormat;
+  const generatedBundlesByFormat = { ...(workspace.generatedBundlesByFormat || {}) };
+  const packetMedia = ensurePacketMediaState(packet.id);
+
+  delete generatedBundlesByFormat[format];
+  delete packetMedia.imagesByFormat[format];
+  delete packetMedia.videosByFormat[format];
+  clearVideoPoll(packet.id, format);
+  saveMediaSnapshot();
+
+  await persistState(
+    {
+      packetId: packet.id,
+      workspacePatch: {
+        generatedBundlesByFormat,
+        reviewStatus: "pending",
+        shareReady: false,
+        shareUrl: ""
+      }
+    },
+    "Reset AI draft",
+    `${packet.label} -> ${format}`
+  );
+
+  flashFeedback("Returned to the packet default.");
 }
 
 function nextAudienceId(currentAudienceId) {
@@ -1183,6 +2327,111 @@ function bindEvents() {
           formatButton.textContent.trim()
         );
         setActiveStage("draft");
+      } catch (error) {
+        setAppStatus(error.message, "error");
+      }
+      return;
+    }
+
+    if (event.target.id === "generate-text") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await generateTextDraft(elements.generateText);
+      return;
+    }
+
+    if (event.target.id === "refine-hook") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await refineTextDraft("hook", elements.refineHook);
+      return;
+    }
+
+    if (event.target.id === "refine-caption") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await refineTextDraft("caption", elements.refineCaption);
+      return;
+    }
+
+    if (event.target.id === "refine-receipts") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await refineTextDraft("receipts", elements.refineReceipts);
+      return;
+    }
+
+    if (event.target.id === "refine-uncertainty") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await refineTextDraft("uncertainty", elements.refineUncertainty);
+      return;
+    }
+
+    if (event.target.id === "generate-image") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await generateImageConcept(elements.generateImage);
+      return;
+    }
+
+    if (event.target.id === "generate-video") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await generateVideoConcept(elements.generateVideo);
+      return;
+    }
+
+    if (event.target.id === "refresh-video") {
+      await refreshVideoStatus();
+      return;
+    }
+
+    if (event.target.id === "download-image") {
+      const packetImage = getImageAsset();
+      if (!packetImage?.dataUrl) {
+        flashFeedback("Generate a visual first.", "error");
+        return;
+      }
+
+      triggerDownload(packetImage.dataUrl, `puentes-${packet.id}-${workspace.selectedFormat}-visual.png`);
+      flashFeedback("Visual download started.");
+      return;
+    }
+
+    if (event.target.id === "download-video") {
+      const packetVideo = getVideoAsset();
+      if (!videoIsReady(packetVideo) || !packetVideo?.download?.video) {
+        flashFeedback("Video is not ready yet.", "error");
+        return;
+      }
+
+      triggerDownload(packetVideo.download.video, `puentes-${packet.id}-${workspace.selectedFormat}-video.mp4`);
+      flashFeedback("Video download started.");
+      return;
+    }
+
+    if (event.target.id === "reset-generated") {
+      if (readonlyMode) {
+        return;
+      }
+
+      try {
+        await resetGeneratedDraft();
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -1343,6 +2592,7 @@ function bindEvents() {
       try {
         await copyText(buildExportText());
         await markExportAction("Copied output", `${packet.label} -> ${workspace.selectedFormat}`);
+        pulseButtonDone(elements.copyOutput, "Copied");
         flashFeedback("Handoff copied to clipboard.");
       } catch (error) {
         setAppStatus(error.message, "error");
@@ -1359,6 +2609,7 @@ function bindEvents() {
       try {
         downloadText(`puentes-${packet.id}-${workspace.selectedFormat}.txt`, buildExportText());
         await markExportAction("Downloaded handoff", `${packet.label} -> ${workspace.selectedFormat}`);
+        pulseButtonDone(elements.downloadOutput, "Downloaded");
         flashFeedback("Handoff downloaded.");
       } catch (error) {
         setAppStatus(error.message, "error");
@@ -1376,6 +2627,7 @@ function bindEvents() {
         const shareUrl = getShareUrl(packet.id);
         await copyText(shareUrl);
         await markExportAction("Copied share link", packet.label, { shareReady: true, shareUrl });
+        pulseButtonDone(elements.copyShareLink, "Copied");
         flashFeedback("Share link copied.");
       } catch (error) {
         setAppStatus(error.message, "error");
@@ -1393,6 +2645,7 @@ function bindEvents() {
         const shareUrl = getShareUrl(packet.id);
         window.open(shareUrl, "_blank", "noopener");
         await markExportAction("Opened share preview", packet.label, { shareReady: true, shareUrl });
+        pulseButtonDone(elements.openSharePreview, "Opened");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -1420,6 +2673,7 @@ function bindEvents() {
           "Remixed audience",
           `${packet.label} -> ${nextAudience.label}`
         );
+        pulseButtonDone(elements.duplicateAudience, "Remixed");
         flashFeedback(`Remixed for ${nextAudience.label.toLowerCase()} mode.`);
         setActiveStage("draft");
       } catch (error) {
@@ -1460,7 +2714,9 @@ function bindEvents() {
 }
 
 async function init() {
+  prepareSmokeModeState();
   cacheElements();
+  hydrateMediaSnapshot(loadMediaSnapshot());
   bindEvents();
   setAppStatus("Loading creator workflow...", "loading");
 
@@ -1472,6 +2728,10 @@ async function init() {
       setAppStatus("Running in local demo mode. Edits are saved in this browser.", "loading");
     } else {
       setAppStatus();
+    }
+
+    if (!readonlyMode && demoSmokeEnabled()) {
+      await runSmokeDemoFlow();
     }
   } catch (error) {
     setAppStatus("The workspace failed to load. Refresh and try again.", "error");

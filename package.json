@@ -1,9 +1,10 @@
-{
+﻿{
   "name": "puentes",
   "version": "0.1.0",
   "private": true,
-  "description": "Puentes youth civic media review app with a lightweight backend.",
+  "description": "Puentes creator-first civic media app with a Netlify-ready AI backend scaffold.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev:netlify": "netlify dev"
   }
 }

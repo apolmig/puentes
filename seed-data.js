@@ -540,7 +540,16 @@ function createWorkspaceState(packetId, overrides = {}) {
       ? unique(overrides.exportedFormats).filter((candidate) => packet && packet.outputBundles[candidate])
       : [],
     shareReady: Boolean(overrides.shareReady),
-    shareUrl: typeof overrides.shareUrl === "string" ? overrides.shareUrl : ""
+    shareUrl: typeof overrides.shareUrl === "string" ? overrides.shareUrl : "",
+    generatedBundlesByFormat: overrides.generatedBundlesByFormat && typeof overrides.generatedBundlesByFormat === "object"
+      ? clone(overrides.generatedBundlesByFormat)
+      : {},
+    generatedImagesByFormat: overrides.generatedImagesByFormat && typeof overrides.generatedImagesByFormat === "object"
+      ? clone(overrides.generatedImagesByFormat)
+      : {},
+    generatedVideosByFormat: overrides.generatedVideosByFormat && typeof overrides.generatedVideosByFormat === "object"
+      ? clone(overrides.generatedVideosByFormat)
+      : {}
   };
 }
 
@@ -560,7 +569,7 @@ workspaceStateByPacket.housing = createWorkspaceState("housing", {
 });
 
 return {
-  meta: { version: 2 },
+  meta: { version: 3 },
   audiences,
   packets,
   workspace: {
