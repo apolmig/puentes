@@ -27,7 +27,9 @@ These routes are compatible with the existing frontend. In local development you
 
 ### AI routes
 
+- `GET /api/ai-config`
 - `POST /api/generate-text`
+- `POST /api/review-draft`
 - `POST /api/generate-image`
 - `POST /api/generate-video`
 - `GET /api/video-status?id=...`
@@ -36,9 +38,10 @@ These routes are compatible with the existing frontend. In local development you
 ### Required environment variables
 
 - `OPENAI_API_KEY`
-- `OPENAI_TEXT_MODEL` default: `gpt-5`
-- `OPENAI_IMAGE_MODEL` default: `gpt-image-1.5`
-- `OPENAI_VIDEO_MODEL` default: `sora-2`
+- `PUENTES_TEXT_MODEL` default: `gpt-5`
+- `PUENTES_REVIEW_MODEL` default: `gpt-5-mini`
+- `PUENTES_IMAGE_MODEL` default: `gpt-image-1.5`
+- `PUENTES_VIDEO_MODEL` default: `sora-2`
 
 See [docs/ai-backend.md](/C:/Code/puentes/docs/ai-backend.md) for the route contracts and backend architecture notes.
 
