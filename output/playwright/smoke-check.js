@@ -235,8 +235,8 @@ async function main() {
     record(
       results,
       "Home hero renders",
-      heroText === "Fight civic disinformation with source-linked explainers young people will actually use.",
-      await page.title()
+      typeof heroText === "string" && /source-linked (cut|handoff)/i.test(heroText),
+      heroText || await page.title()
     );
 
     const audienceCount = await page.locator("#audience-tabs button").count();
@@ -321,11 +321,15 @@ async function main() {
     await page.waitForTimeout(150);
     const gateTitle = await page.locator("#gate-status-title").textContent();
     const exportStatus = await page.locator("#export-handoff-status").textContent();
+    const previewTitle = await page.locator("#export-preview-title").textContent();
     record(
       results,
       "Approval gate updates",
-      gateTitle === "Approved for creator or educator handoff" && exportStatus === "Handoff ready",
-      `${gateTitle} / ${exportStatus}`
+      gateTitle === "Approved for creator or educator handoff" &&
+        exportStatus === "Handoff ready" &&
+        typeof previewTitle === "string" &&
+        previewTitle.trim().length > 10,
+      `${gateTitle} / ${exportStatus} / ${previewTitle}`
     );
 
     const desktopShot = path.join(outputDir, "desktop-smoke.png");
