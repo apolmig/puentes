@@ -108,6 +108,17 @@ function cacheElements() {
     claimGap: document.getElementById("claim-gap"),
     claimCitations: document.getElementById("claim-citations"),
     claimSignals: document.getElementById("claim-signals"),
+    detectorVerdict: document.getElementById("detector-verdict"),
+    detectorConfidence: document.getElementById("detector-confidence"),
+    detectorRisk: document.getElementById("detector-risk"),
+    detectorContext: document.getElementById("detector-context"),
+    detectorPatterns: document.getElementById("detector-patterns"),
+    detectorViewerThinks: document.getElementById("detector-viewer-thinks"),
+    detectorRecordSays: document.getElementById("detector-record-says"),
+    detectorSpreadBar: document.getElementById("detector-spread-bar"),
+    detectorEvidenceBar: document.getElementById("detector-evidence-bar"),
+    detectorSpreadScore: document.getElementById("detector-spread-score"),
+    detectorEvidenceScore: document.getElementById("detector-evidence-score"),
     draftState: document.getElementById("draft-state"),
     draftKicker: document.getElementById("draft-kicker"),
     draftTitle: document.getElementById("draft-title"),
@@ -120,6 +131,11 @@ function cacheElements() {
     draftCitations: document.getElementById("draft-citations"),
     draftShareSummary: document.getElementById("draft-share-summary"),
     draftNote: document.getElementById("draft-note"),
+    responseColdOpen: document.getElementById("response-cold-open"),
+    responseOnscreen: document.getElementById("response-onscreen"),
+    responsePinned: document.getElementById("response-pinned"),
+    responseStitch: document.getElementById("response-stitch"),
+    responseCta: document.getElementById("response-cta"),
     aiStatusPill: document.getElementById("ai-status-pill"),
     generateText: document.getElementById("generate-text"),
     refineHook: document.getElementById("refine-hook"),
@@ -158,6 +174,18 @@ function cacheElements() {
     exportHandoffStatus: document.getElementById("export-handoff-status"),
     exportPreviewStatus: document.getElementById("export-preview-status"),
     exportGuidance: document.getElementById("export-guidance"),
+    exportPackaging: document.getElementById("export-packaging"),
+    exportConfidence: document.getElementById("export-confidence"),
+    exportAngle: document.getElementById("export-angle"),
+    exportModels: document.getElementById("export-models"),
+    exportAssets: document.getElementById("export-assets"),
+    exportAvoidLine: document.getElementById("export-avoid-line"),
+    exportModerationNote: document.getElementById("export-moderation-note"),
+    exportReceiptsLine: document.getElementById("export-receipts-line"),
+    exportPreviewTitle: document.getElementById("export-preview-title"),
+    exportPreviewSummary: document.getElementById("export-preview-summary"),
+    exportPreviewPrompt: document.getElementById("export-preview-prompt"),
+    exportPreviewGuardrail: document.getElementById("export-preview-guardrail"),
     shareLink: document.getElementById("share-link"),
     approveReview: document.getElementById("approve-review"),
     requestRevision: document.getElementById("request-revision"),
@@ -242,6 +270,55 @@ function getImageAsset(packetId = getPacket()?.id, format = getWorkspace(packetI
 
 function getVideoAsset(packetId = getPacket()?.id, format = getWorkspace(packetId)?.selectedFormat) {
   return ensurePacketMediaState(packetId).videosByFormat?.[format] || null;
+}
+
+function getFeedSignals(packetId = getPacket()?.id) {
+  const packet = getPacket(packetId);
+  const feed = packet?.feed || {};
+
+  return {
+    platform: sanitizeLocalText(feed.platform || "TikTok / Reels / Shorts", 80),
+    spreadPattern: sanitizeLocalText(feed.spreadPattern || "Short-form feed clip", 160),
+    detectorLabel: sanitizeLocalText(feed.detectorLabel || "High misinformation risk", 120),
+    spreadHeat: sanitizeLocalText(feed.spreadHeat || "medium", 40),
+    correctionMode: sanitizeLocalText(feed.correctionMode || "Myth-check video", 120),
+    trendTags: Array.isArray(feed.trendTags) ? sanitizeList(feed.trendTags, 5, 60) : [],
+    hookSeed: sanitizeLocalText(feed.hookSeed || packet?.question || "", 180)
+  };
+}
+
+function getClaimDetector(packetId = getPacket()?.id) {
+  const claim = getClaim(packetId);
+  const detector = claim?.detector || {};
+  const status = claim?.status || "unclear";
+  const defaultConfidence = status === "supported" ? "High confidence" : status === "mixed" ? "Medium confidence" : "Low confidence";
+  const defaultRisk = status === "supported" ? "Moderate risk of simplification" : "High risk of false certainty";
+  const defaultContext = claim?.gap || "Context is incomplete and should stay visible.";
+  const defaultPatterns = sanitizeList(claim?.signals || [], 4, 120);
+
+  return {
+    confidenceBand: sanitizeLocalText(detector.confidenceBand || defaultConfidence, 80),
+    riskToAudience: sanitizeLocalText(detector.riskToAudience || defaultRisk, 120),
+    missingContextType: sanitizeLocalText(detector.missingContextType || defaultContext, 180),
+    deceptionPatterns: Array.isArray(detector.deceptionPatterns)
+      ? sanitizeList(detector.deceptionPatterns, 5, 120)
+      : defaultPatterns,
+    viewerBelief: sanitizeLocalText(detector.viewerBelief || claim?.title || "", 180),
+    recordSays: sanitizeLocalText(detector.recordSays || claim?.summary || "", 220),
+    spreadScore: Math.max(0, Math.min(Number(detector.spreadScore) || 72, 100)),
+    evidenceScore: Math.max(0, Math.min(Number(detector.evidenceScore) || (status === "supported" ? 88 : status === "mixed" ? 63 : 46), 100)),
+    responseMode: sanitizeLocalText(detector.responseMode || getFeedSignals(packetId).correctionMode, 120)
+  };
+}
+
+function formatFeedReadout(feed = getFeedSignals()) {
+  const parts = [
+    feed.platform,
+    feed.spreadPattern,
+    feed.detectorLabel
+  ].filter(Boolean);
+
+  return parts.join(" | ");
 }
 
 function getFallbackFactory() {
@@ -378,39 +455,49 @@ function normalizeGeneratedBundlePayload(payload, context) {
 }
 
 function buildFallbackSafetyNotes(packet = getPacket(), claim = getClaim(), audience = getAudience()) {
+  const feed = getFeedSignals(packet.id);
   return [
     ...sanitizeList(claim?.signals, 2, 220),
     sanitizeLocalText(claim?.gap || "", 220),
     sanitizeLocalText(packet?.amplification || "", 220),
-    sanitizeLocalText(audience?.draftRule || "", 220)
+    sanitizeLocalText(audience?.draftRule || "", 220),
+    sanitizeLocalText(feed.detectorLabel || "", 220)
   ].filter(Boolean).slice(0, 5);
 }
 
 function buildVisualPrompt(bundle = getBundle(), packet = getPacket(), audience = getAudience(), claim = getClaim()) {
+  const feed = getFeedSignals(packet.id);
   if (bundle?.visualBrief) {
     return bundle.visualBrief;
   }
 
   return [
-    `Create a bold civic explainer cover image for ${packet.label}.`,
+    `Create a bold civic explainer cover image for ${packet.label} that works as a TikTok-first thumbnail.`,
     `Audience: ${audience.label}.`,
     `Hook: ${bundle.hook}.`,
     `Claim focus: ${claim.title}.`,
+    `Feed hook seed: ${feed.hookSeed}.`,
+    `Feed pattern: ${feed.spreadPattern}.`,
     "Use editorial composition, confident typography space, and a trustworthy, youth-native tone.",
+    "The image should interrupt a feed scroll, feel stitch-worthy, and avoid panic bait.",
     "No fearmongering, no partisan logos, no sensational disaster imagery."
   ].join(" ");
 }
 
 function buildVideoPrompt(bundle = getBundle(), packet = getPacket(), audience = getAudience(), claim = getClaim()) {
+  const feed = getFeedSignals(packet.id);
   if (bundle?.videoBrief) {
     return bundle.videoBrief;
   }
 
   return [
-    `Create an 8-second vertical-adjacent civic explainer clip for ${packet.label}.`,
+    `Create an 8-second vertical-first civic explainer clip for ${packet.label}.`,
     `Audience: ${audience.label}.`,
+    `Feed hook seed: ${feed.hookSeed}.`,
     `Open with this hook: ${bundle.hook}.`,
     `Keep the focus on: ${claim.title}.`,
+    `Feed pattern to interrupt: ${feed.spreadPattern}.`,
+    `Correction mode: ${feed.correctionMode}.`,
     "Style it like a polished social explainer with motion graphics energy, clear pacing, and no panic framing."
   ].join(" ");
 }
@@ -425,6 +512,7 @@ function trimCaption(value, maxLength = 220) {
 
 function buildDemoGeneratedBundle(context, presetKey = "fresh") {
   const { packet, audience, claim } = context;
+  const feed = getFeedSignals(packet.id);
   const currentBundle = getBundle();
   const baseBundle = context.seedBundle;
   const baseSafetyNotes = buildFallbackSafetyNotes(packet, claim, audience);
@@ -463,13 +551,13 @@ function buildDemoGeneratedBundle(context, presetKey = "fresh") {
     bundle.note = sanitizeLocalNote(`${bundle.note} Lead with what is documented and keep the receipts visible in the post body.`, 600);
   } else if (presetKey === "uncertainty") {
     bundle.caption = trimCaption(`${baseCaption} What is still open: ${unresolvedLine}`, 340);
-    bundle.shareSummary = shortSentence(`${packet.shortLabel}: what changed, what stayed, and what still needs watching.`, 200);
+    bundle.shareSummary = shortSentence(`${packet.shortLabel}: what changed, what stayed, and what still needs watching. ${feed.correctionMode}.`, 200);
     bundle.safetyNotes = sanitizeList([...baseSafetyNotes, unresolvedLine], 5, 220);
   } else {
     bundle.title = shortSentence(`${packet.label}: what changed, what stayed, and what still needs context`, 180);
     bundle.hook = shortSentence(`Quick reset: ${claim.title.replace(/\.$/, "")} is not the whole story. Here is the cleaner version.`, 220);
-    bundle.caption = trimCaption(`${bundle.hook} ${shortSentence(claim.summary, 150)} What changed, what stayed, and what still needs watching are all in the handoff.`, 340);
-    bundle.script = sanitizeLocalNote(`${bundle.hook}\n\n${shortSentence(claim.evidence, 260)}\n\nWhat is still open: ${unresolvedLine}\n\nSources stay attached so people can check the record themselves.`, 1600);
+    bundle.caption = trimCaption(`${bundle.hook} ${shortSentence(claim.summary, 150)} What changed, what stayed, and what still needs watching are all in the handoff. ${feed.correctionMode}.`, 340);
+    bundle.script = sanitizeLocalNote(`${bundle.hook}\n\n${shortSentence(claim.evidence, 260)}\n\nWhat is still open: ${unresolvedLine}\n\nThis is packaged for ${feed.correctionMode.toLowerCase()} against ${feed.spreadPattern}.\n\nSources stay attached so people can check the record themselves.`, 1600);
     bundle.slides = sanitizeList([
       `What people are saying: ${claim.title}`,
       `What the packet supports: ${shortSentence(claim.evidence, 120)}`,
@@ -477,7 +565,7 @@ function buildDemoGeneratedBundle(context, presetKey = "fresh") {
       "Why this can travel: the receipts stay attached."
     ], 6, 220);
     bundle.commentPrompt = shortSentence(`What part of this issue gets distorted fastest once it hits the feed?`, 180);
-    bundle.shareSummary = shortSentence(`${packet.shortLabel}: a source-linked explainer for ${audience.label.toLowerCase()} mode.`, 180);
+    bundle.shareSummary = shortSentence(`${packet.shortLabel}: a source-linked explainer for ${audience.label.toLowerCase()} mode. ${feed.detectorLabel}.`, 180);
   }
 
   return bundle;
@@ -485,6 +573,7 @@ function buildDemoGeneratedBundle(context, presetKey = "fresh") {
 
 function buildDemoImageAsset(context) {
   const bundle = getBundle();
+  const feed = getFeedSignals(context.packet.id);
   const title = escapeHtml(shortSentence(bundle.title, 90));
   const hook = escapeHtml(shortSentence(bundle.hook, 120));
   const label = escapeHtml(`${context.packet.shortLabel} / ${context.audience.label}`);
@@ -504,6 +593,8 @@ function buildDemoImageAsset(context) {
   <text x="140" y="130" fill="#cb4920" font-family="Arial, sans-serif" font-size="24" font-weight="700">Puentes visual</text>
   <text x="108" y="290" fill="#fff8f2" font-family="Georgia, serif" font-size="90" font-weight="700">${title}</text>
   <text x="108" y="410" fill="#ffe7db" font-family="Arial, sans-serif" font-size="34">${hook}</text>
+  <text x="108" y="470" fill="#ffcfb8" font-family="Arial, sans-serif" font-size="24">Detector read: ${escapeHtml(feed.detectorLabel)}</text>
+  <text x="108" y="508" fill="#ffcfb8" font-family="Arial, sans-serif" font-size="24">Feed pattern: ${escapeHtml(feed.spreadPattern)}</text>
   <rect x="108" y="760" width="340" height="96" rx="28" fill="#fff4ea"/>
   <text x="148" y="815" fill="#102337" font-family="Arial, sans-serif" font-size="26" font-weight="700">${label}</text>
   <text x="148" y="848" fill="#475869" font-family="Arial, sans-serif" font-size="22">Source-linked social cover</text>
@@ -521,6 +612,7 @@ function buildDemoImageAsset(context) {
 
 function buildDemoVideoAsset(context) {
   const bundle = getBundle();
+  const feed = getFeedSignals(context.packet.id);
   return {
     prompt: buildVideoPrompt(),
     status: "processing",
@@ -529,7 +621,7 @@ function buildDemoVideoAsset(context) {
     createdAt: new Date().toISOString(),
     demo: true,
     demoTitle: shortSentence(bundle.hook, 120),
-    demoSummary: shortSentence(`8-second explainer concept for ${context.packet.shortLabel}. Text first, motion second.`, 180)
+    demoSummary: shortSentence(`8-second explainer concept for ${context.packet.shortLabel}. ${feed.correctionMode}. Text first, motion second.`, 180)
   };
 }
 
@@ -689,6 +781,18 @@ function createListMarkup(items, emptyText = "Nothing here yet.") {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
+function watchlistMarkup(question, index) {
+  const packet = store.packets[index % store.packets.length] || getPacket();
+  const feed = getFeedSignals(packet?.id);
+  return `
+    <li class="watchlist-card">
+      <strong>${escapeHtml(question)}</strong>
+      <span>${escapeHtml(`${packet?.shortLabel || "Packet"} | ${feed.platform}`)}</span>
+      <span class="history-meta">${escapeHtml(`${feed.detectorLabel} | ${feed.spreadHeat} heat | ${feed.correctionMode}`)}</span>
+    </li>
+  `;
+}
+
 function historyMarkup(entry) {
   return `
     <li>
@@ -818,8 +922,10 @@ function buildExportText() {
   const bundle = getBundle();
   const workspace = getWorkspace();
   const claim = getClaim();
+  const detector = getClaimDetector(packet.id);
   const imageAsset = getImageAsset();
   const videoAsset = getVideoAsset();
+  const feed = getFeedSignals(packet.id);
 
   return [
     "Puentes creator handoff",
@@ -828,6 +934,11 @@ function buildExportText() {
     `Audience: ${audience.label}`,
     `Format: ${bundle.label}`,
     `Review status: ${workspace.reviewStatus}`,
+    `Feed platform: ${feed.platform}`,
+    `Spread heat: ${feed.spreadHeat}`,
+    `Detector read: ${feed.detectorLabel}`,
+    `Confidence band: ${detector.confidenceBand}`,
+    `Response lane: ${detector.responseMode}`,
     "",
     "Title",
     bundle.title,
@@ -847,6 +958,13 @@ function buildExportText() {
     "Comment prompt",
     bundle.commentPrompt,
     "",
+    "Detector read",
+    `Risk pattern: ${feed.detectorLabel}`,
+    `Spread shape: ${feed.spreadPattern}`,
+    `Correction mode: ${feed.correctionMode}`,
+    `Open with: ${feed.hookSeed}`,
+    ...(feed.trendTags.length ? [`Trend tags: ${feed.trendTags.join(", ")}`] : []),
+    "",
     "Visual brief",
     bundle.visualBrief || buildVisualPrompt(bundle, packet, audience, claim),
     "",
@@ -856,6 +974,21 @@ function buildExportText() {
     "Current claim check",
     claim.title,
     claim.summary,
+    "",
+    "Detector board",
+    `Audience risk: ${detector.riskToAudience}`,
+    `Missing context: ${detector.missingContextType}`,
+    `Spread score: ${detector.spreadScore}/100`,
+    `Evidence score: ${detector.evidenceScore}/100`,
+    `Viewer belief: ${detector.viewerBelief}`,
+    `Record says: ${detector.recordSays}`,
+    ...detector.deceptionPatterns.map((item) => `Pattern: ${item}`),
+    "",
+    "Creator response kit",
+    `Cold open: ${feed.hookSeed || bundle.hook}`,
+    `On-screen receipt: ${claim.citations[0] || bundle.citations[0] || "Keep a source line visible."}`,
+    `Pinned comment: ${bundle.commentPrompt} Sources in caption.`,
+    `Stitch-safe line: ${detector.responseMode} with the missing context first.`,
     "",
     "Citations",
     ...bundle.citations.map((citation) => `- ${citation}`),
@@ -1107,18 +1240,19 @@ function renderHero() {
   const bundle = getBundle();
   const queue = store.workspace?.queue || [];
   const claim = getClaim();
+  const feed = getFeedSignals(packet.id);
 
   elements.heroQuestion.textContent = queue[0] || packet.question;
   elements.heroBefore.textContent = packet.summary;
   elements.heroAfter.textContent = bundle.caption;
-  elements.heroOutputLabel.textContent = `${bundle.label} ready for ${audience.label.toLowerCase()} mode`;
-  elements.visualPacket.textContent = packet.shortLabel;
-  elements.visualClaim.textContent = claim.title;
-  elements.visualShareSummary.textContent = bundle.shareSummary;
+  elements.heroOutputLabel.textContent = `${bundle.label} ready for ${audience.label.toLowerCase()} mode | ${feed.spreadHeat} spread heat`;
+  elements.visualPacket.textContent = `${packet.shortLabel} / ${feed.platform}`;
+  elements.visualClaim.textContent = `${claim.title} / ${feed.detectorLabel}`;
+  elements.visualShareSummary.textContent = `${bundle.shareSummary} / ${feed.correctionMode}`;
   elements.visualHook.textContent = bundle.hook;
   elements.visualSlides.innerHTML = createListMarkup(bundle.slides.slice(0, 3));
   elements.visualComment.textContent = bundle.commentPrompt;
-  elements.visualSource.textContent = bundle.citations.slice(0, 2).join(" + ");
+  elements.visualSource.textContent = `${formatFeedReadout(feed)} | ${feed.trendTags.slice(0, 2).join(" / ") || packet.sources.slice(0, 2).join(" / ")}`;
 }
 
 function renderAudience() {
@@ -1137,7 +1271,9 @@ function renderAudience() {
 function renderQueue() {
   const queue = store.workspace?.queue || [];
   elements.queueCount.textContent = `${queue.length}`;
-  elements.queueList.innerHTML = createListMarkup(queue, "Add a real creator question and it will appear here.");
+  elements.queueList.innerHTML = queue.length
+    ? queue.map(watchlistMarkup).join("")
+    : `<li class="empty-state">Add a real creator question and it will appear here.</li>`;
 }
 
 function renderPackets() {
@@ -1147,15 +1283,19 @@ function renderPackets() {
 
 function renderPacketDetail() {
   const packet = getPacket();
+  const feed = getFeedSignals(packet.id);
 
-  elements.packetType.textContent = packet.type;
+  elements.packetType.textContent = `${packet.type} / ${feed.platform}`;
   elements.packetType.dataset.status = "packet";
-  elements.packetDate.textContent = packet.date;
-  elements.packetTrust.textContent = packet.trust;
+  elements.packetDate.textContent = `${packet.date} / ${feed.spreadHeat.toUpperCase()} heat`;
+  elements.packetTrust.textContent = `${packet.trust} / ${feed.detectorLabel}`;
   elements.packetTitle.textContent = packet.label;
-  elements.packetSummary.textContent = packet.summary;
-  elements.packetQuestion.textContent = packet.question;
-  elements.packetSources.innerHTML = createListMarkup(packet.sources);
+  elements.packetSummary.textContent = `${packet.summary} Detector read: ${feed.detectorLabel}.`;
+  elements.packetQuestion.textContent = `${packet.question} Best correction: ${feed.correctionMode}.`;
+  elements.packetSources.innerHTML = createListMarkup([
+    ...packet.sources,
+    ...feed.trendTags.map((tag) => `Trend tag: ${tag}`)
+  ]);
 }
 
 function renderClaims() {
@@ -1166,15 +1306,37 @@ function renderClaims() {
 
 function renderClaimDetail() {
   const claim = getClaim();
+  const feed = getFeedSignals();
 
   elements.claimTitle.textContent = claim.title;
   elements.claimStatus.textContent = claimStatusText(claim.status);
   elements.claimStatus.dataset.status = claim.status;
-  elements.claimSummary.textContent = claim.summary;
-  elements.claimEvidence.textContent = claim.evidence;
-  elements.claimGap.textContent = claim.gap;
+  elements.claimSummary.textContent = `${claim.summary} TikTok read: ${feed.detectorLabel}.`;
+  elements.claimEvidence.textContent = `${claim.evidence} Correction mode: ${feed.correctionMode}.`;
+  elements.claimGap.textContent = `${claim.gap} Spread pattern: ${feed.spreadPattern}.`;
   elements.claimCitations.innerHTML = createListMarkup(claim.citations);
-  elements.claimSignals.innerHTML = createListMarkup(claim.signals);
+  elements.claimSignals.innerHTML = createListMarkup([
+    ...claim.signals,
+    `Feed risk: ${feed.detectorLabel}`,
+    `Correction format: ${feed.correctionMode}`
+  ]);
+}
+
+function renderClaimDetector() {
+  const detector = getClaimDetector();
+  const feed = getFeedSignals();
+
+  setPillState(elements.detectorVerdict, feed.detectorLabel, "is-busy");
+  elements.detectorConfidence.textContent = detector.confidenceBand;
+  elements.detectorRisk.textContent = detector.riskToAudience;
+  elements.detectorContext.textContent = detector.missingContextType;
+  elements.detectorPatterns.innerHTML = createListMarkup(detector.deceptionPatterns, "No deception patterns logged.");
+  elements.detectorViewerThinks.textContent = detector.viewerBelief;
+  elements.detectorRecordSays.textContent = detector.recordSays;
+  elements.detectorSpreadBar.style.width = `${detector.spreadScore}%`;
+  elements.detectorEvidenceBar.style.width = `${detector.evidenceScore}%`;
+  elements.detectorSpreadScore.textContent = `${detector.spreadScore}/100`;
+  elements.detectorEvidenceScore.textContent = `${detector.evidenceScore}/100`;
 }
 
 function renderFormats() {
@@ -1200,22 +1362,40 @@ function renderDraft() {
   const draft = getDraft();
   const bundle = getBundle();
   const generatedBundle = getGeneratedBundle();
+  const feed = getFeedSignals();
 
   elements.draftKicker.textContent = generatedBundle
     ? `${bundle.label} / AI-assisted ${audience.label.toLowerCase()} mode`
     : `${bundle.label} / ${audience.label} mode`;
   elements.draftTitle.textContent = bundle.title;
   elements.draftSummary.textContent = generatedBundle
-    ? `Fresh AI pass built from the current packet, claim, and audience framing. ${audience.draftRule}`
-    : `${draft.summary} ${audience.draftRule}`;
+    ? `Fresh AI pass built from the current packet, claim, and audience framing. Feed lens: ${feed.detectorLabel}. Best correction: ${feed.correctionMode}. ${audience.draftRule}`
+    : `${draft.summary} Feed lens: ${feed.detectorLabel}. ${audience.draftRule}`;
   elements.draftHook.textContent = bundle.hook;
   elements.draftCaption.textContent = bundle.caption;
   elements.draftScript.textContent = bundle.script;
   elements.draftCommentPrompt.textContent = bundle.commentPrompt;
   elements.draftSlides.innerHTML = createListMarkup(bundle.slides);
   elements.draftCitations.innerHTML = createListMarkup(bundle.citations);
-  elements.draftShareSummary.textContent = bundle.shareSummary;
-  elements.draftNote.textContent = bundle.note;
+  elements.draftShareSummary.textContent = `${bundle.shareSummary} / ${feed.spreadPattern}`;
+  elements.draftNote.textContent = `${bundle.note} Feed response: ${feed.correctionMode}.`;
+}
+
+function renderResponseKit() {
+  const packet = getPacket();
+  const claim = getClaim();
+  const audience = getAudience();
+  const bundle = getBundle();
+  const feed = getFeedSignals(packet.id);
+  const detector = getClaimDetector(packet.id);
+
+  elements.responseColdOpen.textContent = feed.hookSeed || bundle.hook;
+  elements.responseOnscreen.textContent = claim.citations[0] || bundle.citations[0] || "Keep one visible receipt on screen.";
+  elements.responsePinned.textContent = `${bundle.commentPrompt} Sources are in the caption and first comment.`;
+  elements.responseStitch.textContent = `If you stitch this, open with the missing context: ${detector.missingContextType}`;
+  elements.responseCta.textContent = audience.id === "educator"
+    ? "Invite viewers to compare the record, the rumor, and what is still unresolved."
+    : "Ask viewers which part of the claim changed once they saw the full record.";
 }
 
 function renderRisks() {
@@ -1278,6 +1458,9 @@ function renderExportCard() {
   const generatedBundle = getGeneratedBundle();
   const imageAsset = getImageAsset();
   const videoAsset = getVideoAsset();
+  const feed = getFeedSignals(packet.id);
+  const detector = getClaimDetector(packet.id);
+  const claim = getClaim(packet.id);
   const approved = workspace.reviewStatus === "approved";
   const blockers = getBlockers(workspace);
   const exportedFormats = workspace.exportedFormats || [];
@@ -1292,16 +1475,28 @@ function renderExportCard() {
     ? "Handoff ready to ship"
     : "Finish review to unlock export";
   elements.exportSummary.textContent = approved
-    ? `${bundle.label} is ready for ${audience.label.toLowerCase()} mode. ${assetSummary || "Receipts stay attached."} ${exportedFormats.length ? `Already exported: ${exportedFormats.join(", ")}.` : ""}`
-    : "Approve the packet to unlock copy, preview, and sharing.";
+    ? `${bundle.label} is ready for ${audience.label.toLowerCase()} mode. ${assetSummary || "Receipts stay attached."} Feed read: ${feed.detectorLabel}. ${feed.correctionMode}. ${exportedFormats.length ? `Already exported: ${exportedFormats.join(", ")}.` : ""}`
+    : `Approve the packet to unlock copy, preview, and sharing. Current detector read: ${feed.detectorLabel}.`;
   elements.shareLink.textContent = shareUrl || "Share preview will appear here after approval.";
+  elements.exportPackaging.textContent = feed.correctionMode;
+  elements.exportConfidence.textContent = `${claimStatusText(claim.status)} / ${detector.confidenceBand}`;
+  elements.exportAngle.textContent = feed.hookSeed || bundle.hook;
+  elements.exportModels.textContent = detector.responseMode;
+  elements.exportAssets.textContent = assetSummary || "No generated media attached yet.";
+  elements.exportAvoidLine.textContent = detector.deceptionPatterns[0] || "Avoid mirroring the hottest misleading framing.";
+  elements.exportModerationNote.textContent = `${detector.riskToAudience}. Keep replies tied to the record.`;
+  elements.exportReceiptsLine.textContent = [claim.citations[0], claim.citations[1]].filter(Boolean).join(" | ") || bundle.citations.slice(0, 2).join(" | ");
+  elements.exportPreviewTitle.textContent = bundle.hook;
+  elements.exportPreviewSummary.textContent = bundle.shareSummary;
+  elements.exportPreviewPrompt.textContent = bundle.commentPrompt;
+  elements.exportPreviewGuardrail.textContent = detector.missingContextType;
 
   elements.exportHandoffStatus.dataset.status = approved ? "supported" : "draft";
   elements.exportHandoffStatus.textContent = approved ? "Handoff ready" : "Review locked";
   elements.exportPreviewStatus.dataset.status = approved ? "packet" : "draft";
   elements.exportPreviewStatus.textContent = approved ? "Preview available" : "Preview locked";
   elements.exportGuidance.textContent = approved
-    ? "Best next move: copy the handoff or open the preview before sharing it wider."
+    ? `Best next move: copy the handoff or open the preview before sharing it wider. Lead with the feed correction mode: ${feed.correctionMode}.`
     : blockers.length
       ? `Best next move: clear ${blockers.length} blocker${blockers.length === 1 ? "" : "s"} in the review gate.`
       : "Best next move: approve the handoff to unlock export actions.";
@@ -1324,6 +1519,7 @@ function renderStepRail() {
   const packet = getPacket();
   const workspace = getWorkspace();
   const claim = getClaim();
+  const feed = getFeedSignals(packet.id);
   const blockers = getBlockers(workspace);
   const bundle = getBundle();
   const completedChecks = workspace.checklist.filter((item) => item.done).length;
@@ -1337,13 +1533,13 @@ function renderStepRail() {
   };
 
   elements.stepIntakeStatus.textContent = store.workspace.queue.length ? `${store.workspace.queue.length} queued` : "Ready";
-  elements.stepVerifyStatus.textContent = claimStatusText(claim.status);
-  elements.stepDraftStatus.textContent = getGeneratedBundle() ? "AI draft ready" : bundle.label;
+  elements.stepVerifyStatus.textContent = `${claimStatusText(claim.status)} / ${feed.spreadHeat} heat`;
+  elements.stepDraftStatus.textContent = getGeneratedBundle() ? `AI draft ready / ${feed.correctionMode}` : `${bundle.label} / ${feed.correctionMode}`;
   elements.stepExportStatus.textContent = workspace.reviewStatus === "approved"
     ? "Approved"
-    : blockers.length
-      ? `${blockers.length} blockers`
-      : "Ready";
+      : blockers.length
+        ? `${blockers.length} blockers`
+        : "Ready";
 
   elements.questionInput.disabled = readonlyMode;
   elements.saveStatus.textContent = saveStatusText(store.workspace.lastSavedAt);
@@ -1390,6 +1586,7 @@ function renderNextAction() {
   const blockers = getBlockers(workspace);
   const packet = getPacket();
   const audience = getAudience();
+  const feed = getFeedSignals(packet.id);
 
   let config = {
     stage: "intake",
@@ -1411,8 +1608,8 @@ function renderNextAction() {
     config = {
       stage: "intake",
       label: "First move",
-      title: "Add the question people are actually asking",
-      text: "That one prompt makes the workflow click.",
+      title: "Add the clip or claim people are actually passing around",
+      text: `That one prompt makes the workflow click. Current spread pattern: ${feed.spreadPattern}.`,
       button: "Add a question"
     };
   } else if (!allChecklistDone(workspace) && activeStage !== "verify" && activeStage !== "draft") {
@@ -1420,7 +1617,7 @@ function renderNextAction() {
       stage: "verify",
       label: "Recommended next step",
       title: `Pressure-test ${packet.shortLabel.toLowerCase()} before you package it`,
-      text: "Open the loudest claim and clear the blockers before approval.",
+      text: `Open the loudest claim and clear the blockers before approval. Detector read: ${feed.detectorLabel}.`,
       button: "Go to verify"
     };
   } else if (activeStage === "draft" && !getGeneratedBundle()) {
@@ -1428,7 +1625,7 @@ function renderNextAction() {
       stage: "draft",
       label: "Make it sharper",
       title: `Generate a stronger ${audience.label.toLowerCase()} cut from the verified packet`,
-      text: "Start with a fresh draft, then add visual polish if needed.",
+      text: `Start with a fresh draft, then add visual polish if needed. Best correction mode: ${feed.correctionMode}.`,
       button: "Open draft studio"
     };
   } else if (workspace.reviewStatus !== "approved") {
@@ -1438,7 +1635,7 @@ function renderNextAction() {
       title: `Approve the ${audience.label.toLowerCase()} handoff to unlock export`,
       text: blockers.length
         ? `${blockers.length} review item${blockers.length === 1 ? "" : "s"} still block export.`
-        : "The packet is ready for approval and share preview generation.",
+        : `The packet is ready for approval and share preview generation. Feed read: ${feed.detectorLabel}.`,
       button: "Go to export"
     };
   } else {
@@ -1446,7 +1643,7 @@ function renderNextAction() {
       stage: "export",
       label: "Ready to move",
       title: "Copy, download, or share the creator handoff",
-      text: "The export package is unlocked. Hand it off, remix it for another audience, or open the read-only preview.",
+      text: `The export package is unlocked. Hand it off, remix it for another audience, or open the read-only preview. Lead with ${feed.correctionMode}.`,
       button: "Open export"
     };
   }
@@ -1467,8 +1664,10 @@ function renderAll() {
   renderPacketDetail();
   renderClaims();
   renderClaimDetail();
+  renderClaimDetector();
   renderFormats();
   renderDraft();
+  renderResponseKit();
   renderAiStudio();
   renderRisks();
   renderChecklist();
@@ -1860,6 +2059,7 @@ function buildTextGenerationRequest(extraInstructions = []) {
   const seedBundle = packet.outputBundles[workspace.selectedFormat] || getBundle();
   const currentBundle = getBundle();
   const currentQueue = store.workspace?.queue?.[0] || packet.question;
+  const feed = getFeedSignals(packet.id);
 
   return {
     packet,
@@ -1869,7 +2069,7 @@ function buildTextGenerationRequest(extraInstructions = []) {
     seedBundle,
     body: {
       audience: audience.id,
-      goal: `Create a ${seedBundle.label.toLowerCase()} for ${audience.label.toLowerCase()} mode.`,
+      goal: `Create a ${seedBundle.label.toLowerCase()} for ${audience.label.toLowerCase()} mode that can interrupt a TikTok-style misinformation loop.`,
       format: workspace.selectedFormat,
       packetTitle: packet.label,
       packetSummary: packet.summary,
@@ -1879,7 +2079,8 @@ function buildTextGenerationRequest(extraInstructions = []) {
       gaps: claim.gap,
       citations: currentBundle?.citations?.length ? currentBundle.citations : claim.citations,
       manipulationSignals: [...packet.manipulation, ...claim.signals].slice(0, 5),
-      additionalContext: `${audience.draftRule} ${packet.amplification}`,
+      additionalContext: `${audience.draftRule} ${packet.amplification} Feed pattern: ${feed.spreadPattern}. Detector read: ${feed.detectorLabel}. Correction mode: ${feed.correctionMode}.`,
+      feedSignals: feed,
       currentDraft: currentBundle ? {
         title: currentBundle.title,
         hook: currentBundle.hook,

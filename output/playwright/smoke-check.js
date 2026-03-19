@@ -235,8 +235,16 @@ async function main() {
     record(
       results,
       "Home hero renders",
-      heroText === "Fight civic disinformation with source-linked explainers young people will actually use.",
-      await page.title()
+      heroText === "Turn a political fake-news spike into a clean, source-linked response.",
+      heroText || await page.title()
+    );
+
+    const heroClaim = await page.locator("#visual-claim").textContent();
+    record(
+      results,
+      "Detector layer renders",
+      typeof heroClaim === "string" && heroClaim.includes("Out-of-context policy clip"),
+      heroClaim
     );
 
     const audienceCount = await page.locator("#audience-tabs button").count();
@@ -275,7 +283,12 @@ async function main() {
     await page.locator("#queue-question").click();
     await page.waitForTimeout(150);
     const firstQueueItem = await page.locator("#queue-list li").first().textContent();
-    record(results, "Queue submission works", firstQueueItem === queuedQuestion, firstQueueItem);
+    record(
+      results,
+      "Queue submission works",
+      typeof firstQueueItem === "string" && firstQueueItem.includes(queuedQuestion),
+      firstQueueItem
+    );
 
     await page.locator("#step-intake-card").click();
     await page.locator("#load-next-packet").waitFor({ state: "visible" });
@@ -321,11 +334,18 @@ async function main() {
     await page.waitForTimeout(150);
     const gateTitle = await page.locator("#gate-status-title").textContent();
     const exportStatus = await page.locator("#export-handoff-status").textContent();
+    const exportSummary = await page.locator("#export-summary").textContent();
+    const correctionMode = await page.locator("#export-packaging").textContent();
     record(
       results,
       "Approval gate updates",
-      gateTitle === "Approved for creator or educator handoff" && exportStatus === "Handoff ready",
-      `${gateTitle} / ${exportStatus}`
+      gateTitle === "Approved for creator or educator handoff" &&
+        exportStatus === "Handoff ready" &&
+        typeof correctionMode === "string" &&
+        correctionMode.trim().length > 5 &&
+        typeof exportSummary === "string" &&
+        exportSummary.includes("Feed read:"),
+      `${gateTitle} / ${exportStatus} / ${correctionMode} / ${exportSummary}`
     );
 
     const desktopShot = path.join(outputDir, "desktop-smoke.png");
