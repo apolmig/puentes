@@ -205,6 +205,22 @@ function cacheElements() {
     nextActionButton: document.getElementById("next-action-button"),
     appStatus: document.getElementById("app-status"),
     readonlyBanner: document.getElementById("readonly-banner"),
+    shareArtifact: document.getElementById("share-artifact"),
+    shareTitle: document.getElementById("share-title"),
+    shareDek: document.getElementById("share-dek"),
+    shareDetectorBadge: document.getElementById("share-detector-badge"),
+    shareMetaBadge: document.getElementById("share-meta-badge"),
+    shareResponseMode: document.getElementById("share-response-mode"),
+    shareHook: document.getElementById("share-hook"),
+    shareSummary: document.getElementById("share-summary"),
+    sharePinnedComment: document.getElementById("share-pinned-comment"),
+    sharePacket: document.getElementById("share-packet"),
+    shareAudience: document.getElementById("share-audience"),
+    shareFormat: document.getElementById("share-format"),
+    shareConfidence: document.getElementById("share-confidence"),
+    shareDetectorSummary: document.getElementById("share-detector-summary"),
+    shareReceipts: document.getElementById("share-receipts"),
+    shareGuidance: document.getElementById("share-guidance"),
     feedbackToast: document.getElementById("feedback-toast")
   });
 }
@@ -1579,6 +1595,34 @@ function revealActiveStepCard() {
 function renderReadonlyState() {
   document.body.classList.toggle("is-share-mode", readonlyMode);
   elements.readonlyBanner.hidden = !readonlyMode;
+  elements.shareArtifact.hidden = !readonlyMode;
+
+  if (readonlyMode) {
+    const packet = getPacket();
+    const workspace = getWorkspace(packet?.id);
+    const audience = getAudience(packet?.id);
+    const bundle = getBundle(packet?.id);
+    const claim = getClaim(packet?.id);
+    const feed = getFeedSignals(packet?.id);
+    const detector = getClaimDetector(packet?.id);
+
+    elements.readonlyBanner.textContent = `Readonly public preview for ${packet.label}. This link is for review and sharing, not editing.`;
+    elements.shareTitle.textContent = bundle.title;
+    elements.shareDek.textContent = `${bundle.shareSummary} Built for ${audience.label.toLowerCase()} mode with visible receipts.`;
+    elements.shareDetectorBadge.textContent = feed.detectorLabel;
+    elements.shareMetaBadge.textContent = `${audience.label} | ${workspace.selectedFormat}`;
+    elements.shareResponseMode.textContent = feed.correctionMode;
+    elements.shareHook.textContent = bundle.hook;
+    elements.shareSummary.textContent = bundle.caption;
+    elements.sharePinnedComment.textContent = `${bundle.commentPrompt} Sources are attached in the caption and the first comment.`;
+    elements.sharePacket.textContent = packet.label;
+    elements.shareAudience.textContent = audience.label;
+    elements.shareFormat.textContent = bundle.label;
+    elements.shareConfidence.textContent = `${claimStatusText(claim.status)} / ${detector.confidenceBand}`;
+    elements.shareDetectorSummary.textContent = `${feed.spreadPattern}. ${detector.riskToAudience}`;
+    elements.shareReceipts.innerHTML = createListMarkup(bundle.citations.slice(0, 3), "No receipts attached.");
+    elements.shareGuidance.textContent = `${detector.missingContextType} Repost only with the detector line and receipts still visible.`;
+  }
 }
 
 function renderNextAction() {
@@ -1774,12 +1818,17 @@ function applyShareModeFromUrl() {
     return;
   }
 
-  activeStage = "export";
-
   store.workspace.activePacketId = sharedPacketId;
 
   const workspace = getWorkspace(sharedPacketId);
   const packet = getPacket(sharedPacketId);
+  readonlyMode = Boolean(workspace?.shareReady || workspace?.reviewStatus === "approved");
+  if (!readonlyMode) {
+    return;
+  }
+
+  activeStage = "export";
+
   const requestedAudience = params.get("audience");
   const requestedFormat = params.get("format");
 

@@ -372,6 +372,96 @@ h5 {
   margin-top: 1.5rem;
 }
 
+.share-only {
+  display: none;
+}
+
+.share-exhibit {
+  margin-top: 1rem;
+}
+
+.share-exhibit-shell {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1rem, 2vw, 1.45rem);
+  border: 1px solid color-mix(in oklab, var(--moss) 22%, var(--line));
+  border-radius: 1.8rem;
+  background:
+    radial-gradient(circle at 12% 14%, color-mix(in oklab, var(--accent) 11%, transparent), transparent 20%),
+    radial-gradient(circle at 86% 16%, color-mix(in oklab, var(--moss) 12%, transparent), transparent 18%),
+    linear-gradient(145deg, color-mix(in oklab, white 94%, var(--paper)) 0%, color-mix(in oklab, white 82%, var(--paper-deep)) 100%);
+  box-shadow: var(--shadow-strong);
+}
+
+.share-exhibit-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.35rem;
+  background: linear-gradient(90deg, var(--signal-ember), var(--signal-cyan), var(--signal-lime));
+}
+
+.share-exhibit-header,
+.share-exhibit-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.share-exhibit-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.share-exhibit-copy h2 {
+  margin-top: 0.45rem;
+  max-width: 13ch;
+  font-size: clamp(2.5rem, 5vw, 4.15rem);
+  line-height: 0.92;
+}
+
+.share-exhibit-text {
+  max-width: 48rem;
+  margin: 0.85rem 0 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.share-exhibit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.share-exhibit-card {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.05rem;
+  background: color-mix(in oklab, white 90%, var(--paper));
+  box-shadow: var(--shadow-soft);
+}
+
+.share-exhibit-card strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--ink);
+  font-family: "Instrument Serif", "Iowan Old Style", serif;
+  font-size: 1.18rem;
+  line-height: 1.05;
+}
+
+.share-exhibit-card p {
+  margin: 0.45rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
 .trend-strip,
 .feed-meter,
 .signal-board,
@@ -855,6 +945,65 @@ h5 {
 
 .readonly-banner {
   background: color-mix(in oklab, var(--gold) 16%, white);
+}
+
+.share-artifact {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.2rem;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 86% 16%, color-mix(in oklab, var(--signal-cyan) 10%, transparent), transparent 18%),
+    linear-gradient(145deg, color-mix(in oklab, white 92%, var(--paper)) 0%, color-mix(in oklab, white 82%, var(--paper-deep)) 100%);
+}
+
+.share-artifact-grid,
+.share-proof-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.share-artifact-grid {
+  grid-template-columns: minmax(300px, 0.7fr) minmax(0, 1.1fr);
+  align-items: start;
+}
+
+.share-badge-stack {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: end;
+}
+
+.share-phone-card,
+.share-proof-card {
+  padding: 0;
+}
+
+.share-phone-shell {
+  max-width: 26rem;
+  margin: 0 auto;
+}
+
+.share-proof-card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.share-proof-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.share-proof-grid > div,
+.share-proof-block {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, white 94%, var(--paper));
+}
+
+.share-proof-block p {
+  margin: 0.35rem 0 0;
 }
 
 .status-banner[data-state="error"] {
@@ -1755,8 +1904,149 @@ textarea:focus {
   border: 0;
 }
 
-.is-share-mode .site-header {
+body.is-share-mode {
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 11%, transparent), transparent 26%),
+    radial-gradient(circle at 84% 14%, color-mix(in oklab, var(--moss) 12%, transparent), transparent 22%),
+    linear-gradient(180deg, color-mix(in oklab, white 94%, var(--paper)) 0%, color-mix(in oklab, white 90%, var(--paper-deep)) 44%, var(--paper-deep) 100%);
+}
+
+body.is-share-mode::before {
+  opacity: 0.16;
+}
+
+body.is-share-mode .site-header {
+  top: 0.75rem;
   border-color: color-mix(in oklab, var(--moss) 22%, var(--line));
+  background: color-mix(in oklab, white 88%, var(--paper));
+}
+
+body.is-share-mode .site-nav {
+  display: none;
+}
+
+body.is-share-mode .share-only {
+  display: grid;
+}
+
+body.is-share-mode .hero {
+  grid-template-columns: 1fr;
+  padding-top: 1rem;
+}
+
+body.is-share-mode .hero-copy {
+  max-width: 54rem;
+}
+
+body.is-share-mode .hero-actions {
+  display: none;
+}
+
+body.is-share-mode .hero-preview {
+  max-width: none;
+  margin-left: 0;
+}
+
+body.is-share-mode .workflow-shell {
+  padding-top: 0.9rem;
+}
+
+body.is-share-mode .step-rail,
+body.is-share-mode .status-banner,
+body.is-share-mode .next-action-card,
+body.is-share-mode .panel-nav,
+body.is-share-mode .intake-actions,
+body.is-share-mode .review-actions,
+body.is-share-mode .note-actions,
+body.is-share-mode .export-actions,
+body.is-share-mode .refinement-actions,
+body.is-share-mode .creator-secondary-actions,
+body.is-share-mode .asset-inline-actions,
+body.is-share-mode .creator-drawer,
+body.is-share-mode .history-card,
+body.is-share-mode .risk-stack,
+body.is-share-mode .checklist-block,
+body.is-share-mode .blocker-card,
+body.is-share-mode .notes-block,
+body.is-share-mode .intake-panel,
+body.is-share-mode .verify-panel,
+body.is-share-mode .draft-panel,
+body.is-share-mode #mission,
+body.is-share-mode #safeguards,
+body.is-share-mode #blueprint {
+  display: none;
+}
+
+body.is-share-mode .signal-board {
+  margin-top: 0.85rem;
+}
+
+body.is-share-mode .share-exhibit-shell,
+body.is-share-mode .hero-preview,
+body.is-share-mode .signal-card,
+body.is-share-mode .trend-card,
+body.is-share-mode .export-card,
+body.is-share-mode .share-link-card,
+body.is-share-mode .export-preview-card {
+  border-color: color-mix(in oklab, var(--moss) 18%, var(--line));
+}
+
+body.is-share-mode .share-exhibit-shell,
+body.is-share-mode .hero-preview,
+body.is-share-mode .export-card {
+  box-shadow: var(--shadow-strong);
+}
+
+body.is-share-mode .export-card {
+  margin-top: 0;
+  padding: clamp(1rem, 2vw, 1.35rem);
+  border-radius: 1.6rem;
+}
+
+body.is-share-mode .export-card,
+body.is-share-mode .export-preview-card,
+body.is-share-mode .share-link-card {
+  background:
+    radial-gradient(circle at 88% 14%, color-mix(in oklab, var(--signal-cyan) 10%, transparent), transparent 18%),
+    linear-gradient(180deg, color-mix(in oklab, white 94%, var(--paper)) 0%, color-mix(in oklab, white 84%, var(--paper-deep)) 100%);
+}
+
+body.is-share-mode .export-preview-card h5 {
+  font-size: clamp(1.45rem, 2.5vw, 2.15rem);
+}
+
+body.is-share-mode .export-proof-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.is-share-mode .export-proof-card p,
+body.is-share-mode .share-link,
+body.is-share-mode .export-guidance {
+  font-size: 0.96rem;
+}
+
+body.is-share-mode .readonly-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid color-mix(in oklab, var(--moss) 24%, var(--line));
+  background: color-mix(in oklab, var(--moss) 14%, white);
+  box-shadow: var(--shadow-soft);
+}
+
+body.is-share-mode .readonly-banner::before {
+  content: "Public artifact";
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, white 82%, var(--paper));
+  color: var(--accent-deep);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 @keyframes floatCard {
@@ -1816,8 +2106,12 @@ textarea:focus {
   .creator-canvas,
   .verify-layout,
   .intake-ribbon,
+  .share-exhibit-body,
+  .share-exhibit-grid,
   .detector-grid,
   .response-kit-grid,
+  .share-artifact-grid,
+  .share-proof-grid,
   .trend-strip,
   .signal-board,
   .export-proof-grid,
@@ -1860,8 +2154,12 @@ textarea:focus {
   .claim-layout,
   .packet-context,
   .detail-columns,
+  .share-exhibit-body,
+  .share-exhibit-grid,
   .detector-grid,
   .response-kit-grid,
+  .share-artifact-grid,
+  .share-proof-grid,
   .hero-highlights,
   .trend-strip,
   .signal-board,
@@ -1922,6 +2220,12 @@ textarea:focus {
   .creator-card:nth-child(3),
   .creator-card:nth-child(4) {
     grid-column: auto;
+  }
+
+  body.is-share-mode .share-exhibit-header,
+  body.is-share-mode .share-exhibit-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

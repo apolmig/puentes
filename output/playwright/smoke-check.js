@@ -348,6 +348,26 @@ async function main() {
       `${gateTitle} / ${exportStatus} / ${correctionMode} / ${exportSummary}`
     );
 
+    const shareUrl = await page.locator("#share-link").textContent();
+    const sharePage = await context.newPage();
+    await sharePage.goto((shareUrl || "").trim(), { waitUntil: "networkidle" });
+    const shareView = await sharePage.evaluate(() => ({
+      readonlyBannerHidden: document.querySelector("#readonly-banner")?.hidden,
+      shareArtifactHidden: document.querySelector("#share-artifact")?.hidden,
+      shareModeClass: document.body.classList.contains("is-share-mode"),
+      stepRailDisplay: window.getComputedStyle(document.querySelector(".step-rail")).display
+    }));
+    record(
+      results,
+      "Public share mode renders",
+      shareView.readonlyBannerHidden === false &&
+        shareView.shareArtifactHidden === false &&
+        shareView.shareModeClass === true &&
+        shareView.stepRailDisplay === "none",
+      JSON.stringify(shareView)
+    );
+    await sharePage.close();
+
     const desktopShot = path.join(outputDir, "desktop-smoke.png");
     await page.screenshot({ path: desktopShot, fullPage: true });
     results.screenshots.push(desktopShot);
