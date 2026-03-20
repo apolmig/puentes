@@ -1,5 +1,6 @@
 const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
 const { generateImageAsset } = require("./_lib/openai");
+const { sanitizeModel } = require("../../lib/model-config");
 
 exports.handler = async function handler(event) {
   try {
@@ -11,7 +12,7 @@ exports.handler = async function handler(event) {
     }
 
     const payload = await generateImageAsset({
-      model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5",
+      model: sanitizeModel("image", body.model),
       prompt: body.prompt,
       size: body.size || "1536x1024",
       quality: body.quality || "medium",
@@ -22,7 +23,7 @@ exports.handler = async function handler(event) {
     const image = payload.data?.[0];
     return json(200, {
       created: payload.created,
-      model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5",
+      model: sanitizeModel("image", body.model),
       image: image ? {
         b64Json: image.b64_json,
         revisedPrompt: image.revised_prompt || "",

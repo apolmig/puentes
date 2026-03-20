@@ -13,6 +13,7 @@ let readonlyMode = false;
 let feedbackTimer = null;
 let persistenceMode = "api";
 let activeStage = "intake";
+let runtimeConfig = null;
 const mediaState = { byPacket: {} };
 const pendingState = { text: false, image: false, video: false };
 const videoPollTimers = new Map();
@@ -55,6 +56,37 @@ const REFINE_PRESETS = {
   }
 };
 
+const PACKAGING_PRESETS = {
+  fast_myth_check: {
+    label: "Fast myth check",
+    instructions: [
+      "Package this as a quick myth reset for short-form audiences.",
+      "Lead with what people are getting wrong, then snap to the documented record."
+    ]
+  },
+  context_carousel: {
+    label: "Context carousel",
+    instructions: [
+      "Package this for a swipeable context carousel.",
+      "Prioritize sequence, comparison, and what changed versus what stayed."
+    ]
+  },
+  comment_deescalator: {
+    label: "Comment-war de-escalator",
+    instructions: [
+      "Package this to cool down polarized comment sections.",
+      "Avoid taking the bait of false binaries and give viewers a calmer way to talk about the issue."
+    ]
+  },
+  teacher_safe: {
+    label: "Teacher-safe explainer",
+    instructions: [
+      "Package this for educators or youth facilitators who need a room-safe explainer.",
+      "Keep the tone grounded and the discussion prompt constructive."
+    ]
+  }
+};
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -68,9 +100,24 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function getDefaultRuntimeConfig() {
+  return {
+    text: { provider: "openai", selectedModel: "gpt-5", availableModels: ["gpt-5", "gpt-5-mini"] },
+    review: { provider: "openai", selectedModel: "gpt-5-mini", availableModels: ["gpt-5-mini", "gpt-5"] },
+    image: { provider: "openai", selectedModel: "gpt-image-1.5", availableModels: ["gpt-image-1.5"] },
+    video: { provider: "openai", selectedModel: "sora-2", availableModels: ["sora-2"] },
+    apiKeysConfigured: { openai: false }
+  };
+}
+
 function cacheElements() {
   Object.assign(elements, {
     saveStatus: document.getElementById("save-status"),
+    sessionPacket: document.getElementById("session-packet"),
+    sessionAudience: document.getElementById("session-audience"),
+    sessionFormat: document.getElementById("session-format"),
+    sessionModel: document.getElementById("session-model"),
+    sessionNext: document.getElementById("session-next"),
     heroQuestion: document.getElementById("hero-question"),
     heroBefore: document.getElementById("hero-before"),
     heroAfter: document.getElementById("hero-after"),
@@ -90,6 +137,7 @@ function cacheElements() {
     questionInput: document.getElementById("question-input"),
     queueList: document.getElementById("queue-list"),
     queueCount: document.getElementById("queue-count"),
+    runHistoryList: document.getElementById("run-history-list"),
     packetList: document.getElementById("packet-list"),
     packetCount: document.getElementById("packet-count"),
     packetType: document.getElementById("packet-type"),
@@ -137,7 +185,30 @@ function cacheElements() {
     responseStitch: document.getElementById("response-stitch"),
     responseCta: document.getElementById("response-cta"),
     aiStatusPill: document.getElementById("ai-status-pill"),
+    aiProviderBadge: document.getElementById("ai-provider-badge"),
+    aiConfigNote: document.getElementById("ai-config-note"),
+    packagingPresets: document.getElementById("packaging-presets"),
+    angleStatus: document.getElementById("angle-status"),
+    generateAngleOptions: document.getElementById("generate-angle-options"),
+    angleOptionsList: document.getElementById("angle-options-list"),
+    textModelSelect: document.getElementById("text-model-select"),
+    reviewModelSelect: document.getElementById("review-model-select"),
+    imageModelSelect: document.getElementById("image-model-select"),
+    videoModelSelect: document.getElementById("video-model-select"),
+    generateIntakeBrief: document.getElementById("generate-intake-brief"),
+    intakeBriefStatus: document.getElementById("intake-brief-status"),
+    intakeBriefSummary: document.getElementById("intake-brief-summary"),
+    intakeBriefThink: document.getElementById("intake-brief-think"),
+    intakeBriefRecord: document.getElementById("intake-brief-record"),
+    intakeBriefMissing: document.getElementById("intake-brief-missing"),
+    generateClaimMap: document.getElementById("generate-claim-map"),
+    claimMapStatus: document.getElementById("claim-map-status"),
+    claimMapFraming: document.getElementById("claim-map-framing"),
+    claimMapSupported: document.getElementById("claim-map-supported"),
+    claimMapOpen: document.getElementById("claim-map-open"),
+    claimMapRisks: document.getElementById("claim-map-risks"),
     generateText: document.getElementById("generate-text"),
+    reviewDraft: document.getElementById("review-draft"),
     refineHook: document.getElementById("refine-hook"),
     refineCaption: document.getElementById("refine-caption"),
     refineReceipts: document.getElementById("refine-receipts"),
@@ -168,6 +239,12 @@ function cacheElements() {
     gateStatusCard: document.getElementById("gate-status-card"),
     gateStatusTitle: document.getElementById("gate-status-title"),
     gateStatusText: document.getElementById("gate-status-text"),
+    reviewFindingsStatus: document.getElementById("review-findings-status"),
+    reviewVerdict: document.getElementById("review-verdict"),
+    reviewSummary: document.getElementById("review-summary"),
+    reviewStrengths: document.getElementById("review-strengths"),
+    reviewRisks: document.getElementById("review-risks"),
+    reviewFixes: document.getElementById("review-fixes"),
     historyList: document.getElementById("history-list"),
     exportTitle: document.getElementById("export-title"),
     exportSummary: document.getElementById("export-summary"),
@@ -335,6 +412,48 @@ function formatFeedReadout(feed = getFeedSignals()) {
   ].filter(Boolean);
 
   return parts.join(" | ");
+function getAiSettings(packetId = getPacket()?.id) {
+  const workspace = getWorkspace(packetId);
+  const config = runtimeConfig || {};
+  return {
+    textModel: workspace?.aiSettings?.textModel || config.text?.selectedModel || "gpt-5",
+    reviewModel: workspace?.aiSettings?.reviewModel || config.review?.selectedModel || "gpt-5-mini",
+    imageModel: workspace?.aiSettings?.imageModel || config.image?.selectedModel || "gpt-image-1.5",
+    videoModel: workspace?.aiSettings?.videoModel || config.video?.selectedModel || "sora-2"
+  };
+}
+
+function getIntakeBrief(packetId = getPacket()?.id) {
+  return getWorkspace(packetId)?.intakeBrief || null;
+}
+
+function getClaimMap(packetId = getPacket()?.id) {
+  return getWorkspace(packetId)?.claimMap || null;
+}
+
+function getReviewFindings(packetId = getPacket()?.id) {
+  return getWorkspace(packetId)?.reviewFindings || null;
+}
+
+function getGenerationRuns(packetId = getPacket()?.id) {
+  return getWorkspace(packetId)?.generationRuns || [];
+}
+
+function getPackagingPreset(packetId = getPacket()?.id) {
+  return getPackagingPresetKey(getWorkspace(packetId)?.packagingPreset, "fast_myth_check");
+}
+
+function getAngleOptions(packetId = getPacket()?.id) {
+  return getWorkspace(packetId)?.angleOptions || [];
+}
+
+function getSelectedAngle(packetId = getPacket()?.id) {
+  const workspace = getWorkspace(packetId);
+  const options = getAngleOptions(packetId);
+  const selectedIndex = Number.isInteger(workspace?.selectedAngleIndex)
+    ? Math.max(0, Math.min(workspace.selectedAngleIndex, Math.max(options.length - 1, 0)))
+    : 0;
+  return options[selectedIndex] || null;
 }
 
 function getFallbackFactory() {
@@ -433,9 +552,56 @@ function sanitizeLocalNote(value, maxLength = 1200) {
     .slice(0, maxLength);
 }
 
+function getPackagingPresetKey(value, fallback = "fast_myth_check") {
+  const candidate = sanitizeLocalText(value || fallback, 80);
+  return Object.prototype.hasOwnProperty.call(PACKAGING_PRESETS, candidate) ? candidate : fallback;
+}
+
 function sanitizeList(items, maxItems = 6, maxLength = 240) {
   return Array.isArray(items)
     ? items.map((item) => sanitizeLocalText(item, maxLength)).filter(Boolean).slice(0, maxItems)
+    : [];
+}
+
+function normalizeLocalAiSettings(aiSettings = {}) {
+  const config = runtimeConfig || {};
+  return {
+    textModel: sanitizeLocalText(aiSettings.textModel || config.text?.selectedModel || "gpt-5", 80),
+    reviewModel: sanitizeLocalText(aiSettings.reviewModel || config.review?.selectedModel || "gpt-5-mini", 80),
+    imageModel: sanitizeLocalText(aiSettings.imageModel || config.image?.selectedModel || "gpt-image-1.5", 80),
+    videoModel: sanitizeLocalText(aiSettings.videoModel || config.video?.selectedModel || "sora-2", 80)
+  };
+}
+
+function normalizeLocalRun(run = {}, index = 0) {
+  return {
+    id: sanitizeLocalText(run.id || `run-${index}`, 80),
+    type: sanitizeLocalText(run.type, 60),
+    status: sanitizeLocalText(run.status || "ready", 40),
+    model: sanitizeLocalText(run.model, 80),
+    target: sanitizeLocalText(run.target, 120),
+    generatedAt: validIsoTimestamp(run.generatedAt || new Date().toISOString())
+  };
+}
+
+function normalizeLocalRuns(runs = []) {
+  return Array.isArray(runs)
+    ? runs.map(normalizeLocalRun).filter((run) => run.type).slice(0, 24)
+    : [];
+}
+
+function normalizeLocalAngleOptions(angleOptions = []) {
+  return Array.isArray(angleOptions)
+    ? angleOptions
+      .map((angle) => ({
+        label: sanitizeLocalText(angle?.label, 60),
+        hook: sanitizeLocalNote(angle?.hook, 220),
+        audienceFit: sanitizeLocalNote(angle?.audienceFit, 220),
+        riskNote: sanitizeLocalNote(angle?.riskNote, 220),
+        avoidWhen: sanitizeLocalNote(angle?.avoidWhen, 220)
+      }))
+      .filter((angle) => angle.label)
+      .slice(0, 3)
     : [];
 }
 
@@ -750,6 +916,9 @@ function normalizeLocalWorkspace(packetId, candidate = {}) {
     ? requestedFormat
     : getAudienceDefaultFormat(audienceId);
   const nextClaimIndex = Number(candidate.selectedClaimIndex);
+  const angleOptions = normalizeLocalAngleOptions(candidate.angleOptions ?? defaults.angleOptions ?? []);
+  const nextSelectedAngleIndex = Number(candidate.selectedAngleIndex);
+  const maxAngleIndex = Math.max(angleOptions.length - 1, 0);
 
   return {
     ...defaults,
@@ -769,7 +938,105 @@ function normalizeLocalWorkspace(packetId, candidate = {}) {
       ? [...new Set(candidate.exportedFormats.filter((format) => packet?.outputBundles?.[format]))]
       : clone(defaults.exportedFormats || []),
     shareReady: Boolean(candidate.shareReady),
-    shareUrl: sanitizeLocalText(candidate.shareUrl ?? defaults.shareUrl ?? "", 320)
+    shareUrl: sanitizeLocalText(candidate.shareUrl ?? defaults.shareUrl ?? "", 320),
+    packagingPreset: getPackagingPresetKey(candidate.packagingPreset ?? defaults.packagingPreset ?? "fast_myth_check"),
+    aiSettings: normalizeLocalAiSettings(candidate.aiSettings || defaults.aiSettings || {}),
+    intakeBrief: candidate.intakeBrief && typeof candidate.intakeBrief === "object"
+      ? clone(candidate.intakeBrief)
+      : clone(defaults.intakeBrief || null),
+    claimMap: candidate.claimMap && typeof candidate.claimMap === "object"
+      ? clone(candidate.claimMap)
+      : clone(defaults.claimMap || null),
+    angleOptions,
+    selectedAngleIndex: Number.isInteger(nextSelectedAngleIndex)
+      ? Math.max(0, Math.min(nextSelectedAngleIndex, maxAngleIndex))
+      : Math.max(0, Math.min(defaults.selectedAngleIndex || 0, maxAngleIndex)),
+    reviewFindings: candidate.reviewFindings && typeof candidate.reviewFindings === "object"
+      ? clone(candidate.reviewFindings)
+      : clone(defaults.reviewFindings || null),
+    generationRuns: normalizeLocalRuns(candidate.generationRuns ?? defaults.generationRuns ?? [])
+  };
+}
+
+function buildDemoIntakeBrief(context) {
+  return {
+    summary: `The core ask is to explain ${context.claim.title.replace(/\.$/, "")} without repeating the loudest framing.`,
+    peopleThink: shortSentence(context.storeQuestion || context.packet.question, 260),
+    recordSays: shortSentence(`${context.claim.summary} ${context.claim.evidence}`, 280),
+    missing: shortSentence(context.claim.gap, 260),
+    recommendedPacketId: context.packet.id,
+    recommendedClaimIndex: context.workspace.selectedClaimIndex,
+    model: "puentes-demo",
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function buildDemoClaimMap(context) {
+  return {
+    framing: shortSentence(`This claim should be framed as ${context.claim.status} rather than absolute. Start from what the packet can defend, then show the open gap.`, 300),
+    supportedPoints: sanitizeList([
+      context.claim.summary,
+      context.claim.evidence,
+      `${context.packet.shortLabel} packet sources stay attached in the handoff.`
+    ], 4, 220),
+    openQuestions: sanitizeList([
+      context.claim.gap,
+      context.packet.amplification
+    ], 4, 220),
+    languageRisks: sanitizeList([
+      ...context.packet.manipulation.slice(0, 2),
+      ...context.claim.signals.slice(0, 2)
+    ], 4, 220),
+    model: "puentes-demo",
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function buildDemoAngleOptions(context) {
+  return [
+    {
+      label: "Myth reset",
+      hook: shortSentence(`Quick reset: ${context.claim.title.replace(/\.$/, "")} is not the whole record.`, 160),
+      audienceFit: `Best when the audience already saw the misleading post and needs a fast correction for ${context.audience.label.toLowerCase()} mode.`,
+      riskNote: "Do not overstate certainty. Keep one unresolved point visible.",
+      avoidWhen: "Avoid when the story needs a full sequence of policy changes, not just a reset."
+    },
+    {
+      label: "What changed",
+      hook: shortSentence(`What actually changed in ${context.packet.shortLabel.toLowerCase()} and what did not?`, 160),
+      audienceFit: "Best for carousels or explainers where comparison matters more than clapback energy.",
+      riskNote: "Make the before/after concrete so the post does not collapse into vibes.",
+      avoidWhen: "Avoid when the audience needs a short myth check more than a fuller comparison."
+    },
+    {
+      label: "What people miss",
+      hook: shortSentence(`The part most people are skipping is the unresolved gap in the record.`, 160),
+      audienceFit: "Best when the issue is being flattened into certainty and you need to reintroduce nuance without losing clarity.",
+      riskNote: "Do not sound evasive. Pair the uncertainty with the strongest documented point.",
+      avoidWhen: "Avoid when the packet is too weak to support a strong documented spine first."
+    }
+  ];
+}
+
+function buildDemoReviewFindings(context) {
+  const bundle = getBundle();
+  return {
+    verdict: "needs-review",
+    summary: shortSentence(`The draft is usable, but a human should confirm the citation visibility and unresolved gap before export.`, 260),
+    strengths: sanitizeList([
+      `Keeps the packet centered around ${context.claim.title}`,
+      "Maintains a source-linked tone without panic framing"
+    ], 4, 220),
+    risks: sanitizeList([
+      context.claim.gap,
+      context.packet.amplification
+    ], 5, 220),
+    fixes: sanitizeList([
+      "Bring one citation line closer to the opening hook.",
+      "Make the unresolved point more explicit before approval."
+    ], 5, 220),
+    model: "puentes-demo",
+    generatedAt: new Date().toISOString()
   };
 }
 
@@ -810,16 +1077,32 @@ function watchlistMarkup(question, index) {
 }
 
 function historyMarkup(entry) {
+  const meta = new Date(entry.timestamp).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   return `
     <li>
       <strong>${escapeHtml(entry.action)}</strong>
       <span>${escapeHtml(entry.detail || "")}</span>
-      <span class="history-meta">${escapeHtml(new Date(entry.timestamp).toLocaleString([], {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      }))}</span>
+      <span class="history-meta">${escapeHtml(meta)}</span>
+    </li>
+  `;
+}
+
+function runMarkup(run) {
+  const timestamp = new Date(run.generatedAt);
+  const meta = `${run.model || "demo"} | ${timestamp.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  })}`;
+  return `
+    <li>
+      <strong>${escapeHtml(run.type.replace(/_/g, " "))}</strong>
+      <span>${escapeHtml(run.target || run.status)}</span>
+      <span class="history-meta">${escapeHtml(meta)}</span>
     </li>
   `;
 }
@@ -942,6 +1225,21 @@ function buildExportText() {
   const imageAsset = getImageAsset();
   const videoAsset = getVideoAsset();
   const feed = getFeedSignals(packet.id);
+  const intakeBrief = getIntakeBrief();
+  const claimMap = getClaimMap();
+  const reviewFindings = getReviewFindings();
+  const selectedAngle = getSelectedAngle();
+  const angleOptions = getAngleOptions();
+  const generationRuns = getGenerationRuns();
+  const packagingPreset = PACKAGING_PRESETS[getPackagingPreset()]?.label || "Fast myth check";
+  const hookVariants = [
+    bundle.hook,
+    selectedAngle?.hook || "",
+    `What changed, what stayed, and what is still unresolved in ${packet.shortLabel}.`
+  ].filter(Boolean);
+  const whatNotToSay = reviewFindings?.risks?.length
+    ? reviewFindings.risks
+    : buildFallbackSafetyNotes(packet, claim, audience);
 
   return [
     "Puentes creator handoff",
@@ -949,21 +1247,36 @@ function buildExportText() {
     `Packet: ${packet.label}`,
     `Audience: ${audience.label}`,
     `Format: ${bundle.label}`,
+    `Packaging mode: ${packagingPreset}`,
+    `Confidence: ${claimStatusText(claim.status)}`,
     `Review status: ${workspace.reviewStatus}`,
     `Feed platform: ${feed.platform}`,
     `Spread heat: ${feed.spreadHeat}`,
     `Detector read: ${feed.detectorLabel}`,
     `Confidence band: ${detector.confidenceBand}`,
     `Response lane: ${detector.responseMode}`,
+    `Draft model: ${getAiSettings().textModel}`,
+    `Review model: ${getAiSettings().reviewModel}`,
     "",
     "Title",
     bundle.title,
     "",
-    "Hook",
-    bundle.hook,
-    "",
-    "Caption",
+    "Primary caption",
     bundle.caption,
+    "",
+    "Hook variants",
+    ...hookVariants.map((hook, index) => `${index + 1}. ${hook}`),
+    "",
+    "Thumbnail line",
+    selectedAngle?.label ? `${selectedAngle.label}: ${selectedAngle.hook}` : bundle.hook,
+    "",
+    "Angle stack",
+    ...(angleOptions.length
+      ? angleOptions.map((angle, index) => `${index + 1}. ${angle.label}: ${angle.hook}`)
+      : ["No angle stack generated."]),
+    "",
+    "Pinned comment",
+    `${bundle.commentPrompt} Sources are attached in the handoff.`,
     "",
     "Script / talking path",
     bundle.script,
@@ -1005,6 +1318,17 @@ function buildExportText() {
     `On-screen receipt: ${claim.citations[0] || bundle.citations[0] || "Keep a source line visible."}`,
     `Pinned comment: ${bundle.commentPrompt} Sources in caption.`,
     `Stitch-safe line: ${detector.responseMode} with the missing context first.`,
+    "Intake brief",
+    intakeBrief?.summary || "No intake brief generated.",
+    intakeBrief?.peopleThink ? `What people think: ${intakeBrief.peopleThink}` : "",
+    intakeBrief?.recordSays ? `What the record says: ${intakeBrief.recordSays}` : "",
+    intakeBrief?.missing ? `Still missing: ${intakeBrief.missing}` : "",
+    "",
+    "Claim map",
+    claimMap?.framing || "No claim map generated.",
+    ...(claimMap?.supportedPoints || []).map((item) => `Supported: ${item}`),
+    ...(claimMap?.openQuestions || []).map((item) => `Open: ${item}`),
+    ...(claimMap?.languageRisks || []).map((item) => `Risk: ${item}`),
     "",
     "Citations",
     ...bundle.citations.map((citation) => `- ${citation}`),
@@ -1012,16 +1336,27 @@ function buildExportText() {
     "Reviewer notes",
     workspace.reviewerNotes || "No reviewer note added.",
     "",
-    "Safety notes",
-    ...(bundle.safetyNotes?.length ? bundle.safetyNotes : buildFallbackSafetyNotes(packet, claim, audience)),
+    "Review copilot",
+    reviewFindings?.summary || "No review findings generated.",
+    ...(reviewFindings?.strengths || []).map((item) => `Strength: ${item}`),
+    ...(reviewFindings?.risks || []).map((item) => `Risk: ${item}`),
+    ...(reviewFindings?.fixes || []).map((item) => `Fix: ${item}`),
+    "",
+    "What not to say",
+    ...whatNotToSay.map((item) => `- ${item}`),
     "",
     "Share summary",
     bundle.shareSummary,
     "",
     "Generated media",
     imageAsset?.dataUrl ? "Cover visual ready" : "No generated visual saved",
-    videoAsset?.id ? `Video status: ${readableVideoStatus(videoAsset.status)}` : "No generated video job"
-  ].join("\n");
+    videoAsset?.id ? `Video status: ${readableVideoStatus(videoAsset.status)}` : "No generated video job",
+    "",
+    "Run log",
+    ...(generationRuns.length
+      ? generationRuns.map((run) => `- ${run.type} | ${run.model} | ${run.target} | ${run.status}`)
+      : ["- No AI runs recorded yet."])
+  ].filter(Boolean).join("\n");
 }
 
 function setAppStatus(message = "", state = "loading", autoHide = false) {
@@ -1131,6 +1466,7 @@ function renderAiStudio() {
   const generatedBundle = getGeneratedBundle();
   const imageAsset = getImageAsset();
   const videoAsset = getVideoAsset();
+  const aiSettings = getAiSettings();
   const safetyNotes = bundle?.safetyNotes?.length ? bundle.safetyNotes : buildFallbackSafetyNotes(packet, claim, audience);
   const visualPrompt = buildVisualPrompt(bundle, packet, audience, claim);
   const videoPrompt = buildVideoPrompt(bundle, packet, audience, claim);
@@ -1220,6 +1556,15 @@ function renderAiStudio() {
     setPillState(elements.videoStatus, "No video yet");
   }
 
+  setPillState(elements.aiProviderBadge, runtimeConfig?.text?.provider?.toUpperCase?.() || "OPENAI");
+  elements.aiConfigNote.textContent = runtimeConfig?.apiKeysConfigured?.openai
+    ? "Keys stay server-side. The browser only chooses between allowed model IDs."
+    : "No API key detected. Demo fallbacks will keep the workflow usable locally.";
+  elements.visualBriefText.textContent = `${visualPrompt} Model: ${aiSettings.imageModel}.`;
+  elements.videoBriefText.textContent = videoUnlocked
+    ? `${videoPrompt} Model: ${aiSettings.videoModel}.`
+    : "Generate a fresh draft first. The motion pass is slower and works best once the text handoff already feels right.";
+
   elements.videoJobStatus.textContent = videoAsset?.id
     ? videoAsset.demo
       ? videoState === "ready"
@@ -1238,6 +1583,7 @@ function renderAiStudio() {
   }
 
   elements.generateText.disabled = readonlyMode || pendingState.text;
+  elements.reviewDraft.disabled = readonlyMode || pendingState.text;
   elements.refineHook.disabled = readonlyMode || pendingState.text;
   elements.refineCaption.disabled = readonlyMode || pendingState.text;
   elements.refineReceipts.disabled = readonlyMode || pendingState.text;
@@ -1248,6 +1594,153 @@ function renderAiStudio() {
   elements.downloadImage.disabled = !imageAsset?.dataUrl;
   elements.refreshVideo.disabled = !videoAsset?.id || pendingState.video || videoAsset?.demo;
   elements.downloadVideo.disabled = !videoIsReady(videoAsset) || videoAsset?.demo;
+}
+
+function renderSessionStrip() {
+  const packet = getPacket();
+  const audience = getAudience();
+  const workspace = getWorkspace();
+  const bundle = getBundle();
+  const nextTitle = elements.nextActionTitle.textContent || "Continue the workflow";
+  const nextText = elements.nextActionText.textContent || "";
+
+  elements.sessionPacket.textContent = packet.label;
+  elements.sessionAudience.textContent = audience.label;
+  elements.sessionFormat.textContent = bundle.label;
+  elements.sessionModel.textContent = getAiSettings().textModel;
+  elements.sessionNext.textContent = `${nextTitle}${nextText ? `: ${nextText}` : ""}`;
+
+  elements.textModelSelect.disabled = readonlyMode;
+  elements.reviewModelSelect.disabled = readonlyMode;
+  elements.imageModelSelect.disabled = readonlyMode;
+  elements.videoModelSelect.disabled = readonlyMode;
+  elements.generateIntakeBrief.disabled = readonlyMode || pendingState.text;
+  elements.generateClaimMap.disabled = readonlyMode || pendingState.text;
+}
+
+function renderAiSettings() {
+  const aiSettings = getAiSettings();
+  const fields = [
+    [elements.textModelSelect, runtimeConfig?.text?.availableModels || [aiSettings.textModel], aiSettings.textModel],
+    [elements.reviewModelSelect, runtimeConfig?.review?.availableModels || [aiSettings.reviewModel], aiSettings.reviewModel],
+    [elements.imageModelSelect, runtimeConfig?.image?.availableModels || [aiSettings.imageModel], aiSettings.imageModel],
+    [elements.videoModelSelect, runtimeConfig?.video?.availableModels || [aiSettings.videoModel], aiSettings.videoModel]
+  ];
+
+  for (const [select, models, selected] of fields) {
+    const options = models.length ? models : [selected];
+    if (select.dataset.options !== options.join("|")) {
+      select.innerHTML = options.map((model) => `<option value="${escapeHtml(model)}">${escapeHtml(model)}</option>`).join("");
+      select.dataset.options = options.join("|");
+    }
+    select.value = options.includes(selected) ? selected : options[0];
+  }
+}
+
+function renderPackagingPresets() {
+  const selected = getPackagingPreset();
+  document.querySelectorAll("[data-packaging-preset]").forEach((button) => {
+    const active = button.dataset.packagingPreset === selected;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+function renderAngleOptions() {
+  const options = getAngleOptions();
+  const selectedAngle = getSelectedAngle();
+
+  if (!options.length) {
+    elements.angleOptionsList.innerHTML = `<article class="angle-option empty-state">Generate angles to compare myth-reset, context, and nuance-first packaging choices.</article>`;
+    setPillState(elements.angleStatus, "Not run");
+    return;
+  }
+
+  elements.angleOptionsList.innerHTML = options.map((angle, index) => `
+    <button
+      class="angle-option${angle.label === selectedAngle?.label ? " is-active" : ""}"
+      type="button"
+      data-angle-index="${index}"
+      aria-pressed="${angle.label === selectedAngle?.label ? "true" : "false"}"
+      ${readonlyMode ? "disabled" : ""}
+    >
+      <span class="detail-kicker">${escapeHtml(angle.label)}</span>
+      <strong>${escapeHtml(angle.hook)}</strong>
+      <p>${escapeHtml(angle.audienceFit)}</p>
+      <ul class="detail-list">
+        <li>${escapeHtml(angle.riskNote)}</li>
+        <li>${escapeHtml(angle.avoidWhen)}</li>
+      </ul>
+    </button>
+  `).join("");
+  setPillState(
+    elements.angleStatus,
+    selectedAngle ? `${options.length} ready | ${selectedAngle.label}` : `${options.length} ready`,
+    "is-ready"
+  );
+}
+
+function renderIntakeBrief() {
+  const intakeBrief = getIntakeBrief();
+  if (!intakeBrief) {
+    elements.intakeBriefSummary.textContent = "Run the intake brief to clarify the job before moving to claim review.";
+    elements.intakeBriefThink.textContent = "";
+    elements.intakeBriefRecord.textContent = "";
+    elements.intakeBriefMissing.textContent = "";
+    setPillState(elements.intakeBriefStatus, "Not run");
+    return;
+  }
+
+  elements.intakeBriefSummary.textContent = intakeBrief.summary;
+  elements.intakeBriefThink.textContent = intakeBrief.peopleThink;
+  elements.intakeBriefRecord.textContent = intakeBrief.recordSays;
+  elements.intakeBriefMissing.textContent = intakeBrief.missing;
+  setPillState(elements.intakeBriefStatus, intakeBrief.model || "Ready", "is-ready");
+}
+
+function renderClaimMap() {
+  const claimMap = getClaimMap();
+  if (!claimMap) {
+    elements.claimMapFraming.textContent = "Run the claim map to see what the packet can support before drafting.";
+    elements.claimMapSupported.innerHTML = createListMarkup([], "No supported points yet.");
+    elements.claimMapOpen.innerHTML = createListMarkup([], "No open questions yet.");
+    elements.claimMapRisks.innerHTML = createListMarkup([], "No language risks yet.");
+    setPillState(elements.claimMapStatus, "Not run");
+    return;
+  }
+
+  elements.claimMapFraming.textContent = claimMap.framing;
+  elements.claimMapSupported.innerHTML = createListMarkup(claimMap.supportedPoints, "No supported points.");
+  elements.claimMapOpen.innerHTML = createListMarkup(claimMap.openQuestions, "No open questions.");
+  elements.claimMapRisks.innerHTML = createListMarkup(claimMap.languageRisks, "No language risks.");
+  setPillState(elements.claimMapStatus, claimMap.model || "Ready", "is-ready");
+}
+
+function renderReviewFindings() {
+  const findings = getReviewFindings();
+  if (!findings) {
+    elements.reviewVerdict.textContent = "Run the review copilot after drafting to surface citation, tone, and certainty issues.";
+    elements.reviewSummary.textContent = "";
+    elements.reviewStrengths.innerHTML = createListMarkup([], "No strengths logged yet.");
+    elements.reviewRisks.innerHTML = createListMarkup([], "No risks logged yet.");
+    elements.reviewFixes.innerHTML = createListMarkup([], "No fixes logged yet.");
+    setPillState(elements.reviewFindingsStatus, "Not run");
+    return;
+  }
+
+  elements.reviewVerdict.textContent = findings.verdict;
+  elements.reviewSummary.textContent = findings.summary;
+  elements.reviewStrengths.innerHTML = createListMarkup(findings.strengths, "No strengths logged.");
+  elements.reviewRisks.innerHTML = createListMarkup(findings.risks, "No risks logged.");
+  elements.reviewFixes.innerHTML = createListMarkup(findings.fixes, "No fixes logged.");
+  setPillState(elements.reviewFindingsStatus, findings.model || "Ready", findings.verdict === "ready" ? "is-ready" : "is-busy");
+}
+
+function renderRunHistory() {
+  const runs = getGenerationRuns();
+  elements.runHistoryList.innerHTML = runs.length
+    ? runs.map(runMarkup).join("")
+    : `<li class="empty-state">AI runs will appear here after you start the workflow.</li>`;
 }
 
 function renderHero() {
@@ -1379,6 +1872,8 @@ function renderDraft() {
   const bundle = getBundle();
   const generatedBundle = getGeneratedBundle();
   const feed = getFeedSignals();
+  const packagingPreset = PACKAGING_PRESETS[getPackagingPreset()]?.label || "Fast myth check";
+  const selectedAngle = getSelectedAngle();
 
   elements.draftKicker.textContent = generatedBundle
     ? `${bundle.label} / AI-assisted ${audience.label.toLowerCase()} mode`
@@ -1387,6 +1882,8 @@ function renderDraft() {
   elements.draftSummary.textContent = generatedBundle
     ? `Fresh AI pass built from the current packet, claim, and audience framing. Feed lens: ${feed.detectorLabel}. Best correction: ${feed.correctionMode}. ${audience.draftRule}`
     : `${draft.summary} Feed lens: ${feed.detectorLabel}. ${audience.draftRule}`;
+    ? `Fresh AI pass built from the current packet, claim, and audience framing. Packaging mode: ${packagingPreset}.${selectedAngle ? ` Selected angle: ${selectedAngle.label}.` : ""} ${audience.draftRule}`
+    : `${draft.summary} Packaging mode: ${packagingPreset}.${selectedAngle ? ` Selected angle: ${selectedAngle.label}.` : ""} ${audience.draftRule}`;
   elements.draftHook.textContent = bundle.hook;
   elements.draftCaption.textContent = bundle.caption;
   elements.draftScript.textContent = bundle.script;
@@ -1477,6 +1974,12 @@ function renderExportCard() {
   const feed = getFeedSignals(packet.id);
   const detector = getClaimDetector(packet.id);
   const claim = getClaim(packet.id);
+  const claim = getClaim();
+  const selectedAngle = getSelectedAngle();
+  const packagingPreset = PACKAGING_PRESETS[getPackagingPreset()]?.label || "Fast myth check";
+  const reviewFindings = getReviewFindings();
+  const intakeBrief = getIntakeBrief();
+  const claimMap = getClaimMap();
   const approved = workspace.reviewStatus === "approved";
   const blockers = getBlockers(workspace);
   const exportedFormats = workspace.exportedFormats || [];
@@ -1506,6 +2009,19 @@ function renderExportCard() {
   elements.exportPreviewSummary.textContent = bundle.shareSummary;
   elements.exportPreviewPrompt.textContent = bundle.commentPrompt;
   elements.exportPreviewGuardrail.textContent = detector.missingContextType;
+  elements.exportPackaging.textContent = packagingPreset;
+  elements.exportConfidence.textContent = claimStatusText(claim.status);
+  elements.exportAngle.textContent = selectedAngle
+    ? `${selectedAngle.label}: ${selectedAngle.hook}`
+    : "Generate an angle stack to compare how this truth can travel.";
+  elements.exportModels.textContent = `${getAiSettings().textModel} draft + ${getAiSettings().reviewModel} review`;
+  elements.exportAssets.textContent = assetSummary || "No generated media attached yet.";
+  elements.exportPreviewTitle.textContent = selectedAngle?.hook || bundle.hook;
+  elements.exportPreviewSummary.textContent = intakeBrief?.summary || bundle.shareSummary;
+  elements.exportPreviewPrompt.textContent = bundle.commentPrompt;
+  elements.exportPreviewGuardrail.textContent = reviewFindings?.risks?.[0]
+    || claimMap?.languageRisks?.[0]
+    || "Keep the uncertainty line visible if the packet does not support a full conclusion.";
 
   elements.exportHandoffStatus.dataset.status = approved ? "supported" : "draft";
   elements.exportHandoffStatus.textContent = approved ? "Handoff ready" : "Review locked";
@@ -1561,7 +2077,7 @@ function renderStepRail() {
   elements.saveStatus.textContent = saveStatusText(store.workspace.lastSavedAt);
   elements.stageHost.classList.add("has-active");
 
-  document.querySelectorAll("[data-stage-trigger]").forEach((button) => {
+  document.querySelectorAll(".step-card[data-stage-trigger]").forEach((button) => {
     const stage = button.dataset.stageTrigger;
     const isActive = stage === activeStage;
     button.classList.toggle("is-active", isActive);
@@ -1703,12 +2219,17 @@ function renderAll() {
   renderReadonlyState();
   renderHero();
   renderAudience();
+  renderAiSettings();
+  renderPackagingPresets();
+  renderIntakeBrief();
   renderQueue();
   renderPackets();
   renderPacketDetail();
   renderClaims();
   renderClaimDetail();
   renderClaimDetector();
+  renderClaimMap();
+  renderAngleOptions();
   renderFormats();
   renderDraft();
   renderResponseKit();
@@ -1716,11 +2237,14 @@ function renderAll() {
   renderRisks();
   renderChecklist();
   renderReviewerNotes();
+  renderReviewFindings();
   renderGateStatus();
   renderExportCard();
   renderHistory();
+  renderRunHistory();
   renderStepRail();
   renderNextAction();
+  renderSessionStrip();
 }
 
 function setActiveStage(stage) {
@@ -1747,16 +2271,13 @@ function chooseDefaultStage() {
     activeStage = "export";
     return;
   }
-
-  if (store.workspace.queue.length && activeStage === "intake") {
-    activeStage = "verify";
-  }
 }
 
 function hydrateStore(data) {
   store.audiences = data.audiences;
   store.packets = data.packets;
   store.workspace = data.workspace;
+  runtimeConfig = data.ai || runtimeConfig || getDefaultRuntimeConfig();
 }
 
 function switchToLocalMode(message) {
@@ -2039,6 +2560,12 @@ async function refreshVideoStatus(packetId = getPacket()?.id, format = getWorksp
     };
 
     saveMediaSnapshot();
+    await persistState({
+      packetId,
+      workspacePatch: {
+        generationRuns: syncLatestRunStatus(getWorkspace(packetId), "generate_video", readableVideoStatus(status))
+      }
+    }, "", "");
 
     if (readableVideoStatus(status) === "processing" || readableVideoStatus(status) === "queued") {
       scheduleVideoPoll(packetId, format);
@@ -2066,6 +2593,12 @@ async function refreshVideoStatus(packetId = getPacket()?.id, format = getWorksp
       checkedAt: new Date().toISOString()
     };
     saveMediaSnapshot();
+    await persistState({
+      packetId,
+      workspacePatch: {
+        generationRuns: syncLatestRunStatus(getWorkspace(packetId), "generate_video", "error")
+      }
+    }, "", "");
     renderAll();
 
     if (!silent) {
@@ -2105,10 +2638,21 @@ function buildTextGenerationRequest(extraInstructions = []) {
   const audience = getAudience();
   const claim = getClaim();
   const workspace = getWorkspace();
+  const aiSettings = getAiSettings();
+  const packagingPreset = getPackagingPreset();
+  const selectedAngle = getSelectedAngle();
   const seedBundle = packet.outputBundles[workspace.selectedFormat] || getBundle();
   const currentBundle = getBundle();
   const currentQueue = store.workspace?.queue?.[0] || packet.question;
   const feed = getFeedSignals(packet.id);
+  const presetInstructions = PACKAGING_PRESETS[packagingPreset]?.instructions || [];
+  const selectedAngleInstructions = selectedAngle
+    ? [
+      `Use this selected editorial angle label: ${selectedAngle.label}.`,
+      `Lean into this hook direction: ${selectedAngle.hook}.`,
+      `Respect this risk note: ${selectedAngle.riskNote}.`
+    ]
+    : [];
 
   return {
     packet,
@@ -2119,7 +2663,12 @@ function buildTextGenerationRequest(extraInstructions = []) {
     body: {
       audience: audience.id,
       goal: `Create a ${seedBundle.label.toLowerCase()} for ${audience.label.toLowerCase()} mode that can interrupt a TikTok-style misinformation loop.`,
+      packetId: packet.id,
+      claimIndex: workspace.selectedClaimIndex,
+      goal: `Create a ${seedBundle.label.toLowerCase()} for ${audience.label.toLowerCase()} mode.`,
       format: workspace.selectedFormat,
+      taskType: "creator_bundle",
+      model: aiSettings.textModel,
       packetTitle: packet.label,
       packetSummary: packet.summary,
       coreQuestion: currentQueue,
@@ -2130,6 +2679,8 @@ function buildTextGenerationRequest(extraInstructions = []) {
       manipulationSignals: [...packet.manipulation, ...claim.signals].slice(0, 5),
       additionalContext: `${audience.draftRule} ${packet.amplification} Feed pattern: ${feed.spreadPattern}. Detector read: ${feed.detectorLabel}. Correction mode: ${feed.correctionMode}.`,
       feedSignals: feed,
+      additionalContext: `${audience.draftRule} ${packet.amplification}`,
+      packagingPreset,
       currentDraft: currentBundle ? {
         title: currentBundle.title,
         hook: currentBundle.hook,
@@ -2141,9 +2692,36 @@ function buildTextGenerationRequest(extraInstructions = []) {
         shareSummary: currentBundle.shareSummary,
         note: currentBundle.note
       } : {},
-      instructions: extraInstructions
+      instructions: [...presetInstructions, ...selectedAngleInstructions, ...extraInstructions]
     }
   };
+}
+
+function buildRunEntry(type, model, target, status = "ready") {
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    type,
+    model,
+    target,
+    status,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function withRunEntry(workspace, runEntry) {
+  return [runEntry, ...(workspace.generationRuns || [])].slice(0, 24);
+}
+
+function syncLatestRunStatus(workspace, type, status) {
+  let updated = false;
+  const runs = (workspace.generationRuns || []).map((run) => {
+    if (!updated && run.type === type) {
+      updated = true;
+      return { ...run, status };
+    }
+    return run;
+  });
+  return updated ? runs : withRunEntry(workspace, buildRunEntry(type, getAiSettings().videoModel, workspace.selectedFormat, status));
 }
 
 async function runTextGeneration({
@@ -2178,12 +2756,17 @@ async function runTextGeneration({
         baseBundle: request.seedBundle
       })
     };
+    const generationRuns = withRunEntry(
+      request.workspace,
+      buildRunEntry("creator_bundle", sanitizeLocalText(payload.model, 80), request.workspace.selectedFormat)
+    );
 
     await persistState(
       {
         packetId: request.packet.id,
         workspacePatch: {
           generatedBundlesByFormat,
+          generationRuns,
           reviewStatus: "pending",
           shareReady: false,
           shareUrl: ""
@@ -2202,12 +2785,17 @@ async function runTextGeneration({
         ...(request.workspace.generatedBundlesByFormat || {}),
         [request.workspace.selectedFormat]: buildDemoGeneratedBundle(request, demoPresetKey)
       };
+      const generationRuns = withRunEntry(
+        request.workspace,
+        buildRunEntry("creator_bundle", "puentes-demo", request.workspace.selectedFormat)
+      );
 
       await persistState(
         {
           packetId: request.packet.id,
           workspacePatch: {
             generatedBundlesByFormat,
+            generationRuns,
             reviewStatus: "pending",
             shareReady: false,
             shareUrl: ""
@@ -2263,6 +2851,269 @@ async function refineTextDraft(presetKey, button) {
   });
 }
 
+async function generateIntakeBrief(button = elements.generateIntakeBrief) {
+  const request = buildTextGenerationRequest();
+  const runBase = {
+    packet: request.packet,
+    claim: request.claim,
+    workspace: request.workspace,
+    storeQuestion: request.body.coreQuestion
+  };
+
+  pendingState.text = true;
+  setButtonBusy(button, "Briefing...");
+  setAppStatus("Generating intake brief...", "loading");
+  renderAll();
+
+  try {
+    const payload = await requestJson("/api/generate-text", {
+      method: "POST",
+      body: JSON.stringify({
+        ...request.body,
+        taskType: "intake_brief",
+        model: getAiSettings().textModel
+      })
+    });
+    const intakeBrief = {
+      ...payload.output,
+      model: sanitizeLocalText(payload.model, 80),
+      generatedAt: new Date().toISOString()
+    };
+    const recommendedPacketId = store.packets.some((candidate) => candidate.id === intakeBrief.recommendedPacketId)
+      ? intakeBrief.recommendedPacketId
+      : request.packet.id;
+
+    await persistState({
+      appPatch: { activePacketId: recommendedPacketId },
+      packetId: recommendedPacketId,
+      workspacePatch: {
+        intakeBrief,
+        selectedClaimIndex: recommendedPacketId === intakeBrief.recommendedPacketId
+          ? intakeBrief.recommendedClaimIndex
+          : request.workspace.selectedClaimIndex,
+        generationRuns: withRunEntry(request.workspace, buildRunEntry("intake_brief", intakeBrief.model, request.packet.shortLabel))
+      }
+    }, "Generated intake brief", request.packet.label);
+    pulseButtonDone(button, "Brief ready");
+    flashFeedback("Intake brief generated.");
+    setActiveStage("verify");
+    setAppStatus("Intake brief generated.", "success", true);
+  } catch (error) {
+    if (useDemoTextFallback(error)) {
+      const intakeBrief = buildDemoIntakeBrief(runBase);
+      await persistState({
+        packetId: request.packet.id,
+        workspacePatch: {
+          intakeBrief,
+          selectedClaimIndex: request.workspace.selectedClaimIndex,
+          generationRuns: withRunEntry(request.workspace, buildRunEntry("intake_brief", intakeBrief.model, request.packet.shortLabel))
+        }
+      }, "Generated intake brief", request.packet.label);
+      pulseButtonDone(button, "Brief ready");
+      setActiveStage("verify");
+      setAppStatus("Demo intake brief generated locally.", "success", true);
+    } else {
+      clearButtonBusy(button);
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.text = false;
+    renderAll();
+  }
+}
+
+async function generateClaimMap(button = elements.generateClaimMap) {
+  const request = buildTextGenerationRequest();
+  const runBase = {
+    packet: request.packet,
+    claim: request.claim,
+    workspace: request.workspace
+  };
+
+  pendingState.text = true;
+  setButtonBusy(button, "Mapping...");
+  setAppStatus("Generating claim map...", "loading");
+  renderAll();
+
+  try {
+    const payload = await requestJson("/api/generate-text", {
+      method: "POST",
+      body: JSON.stringify({
+        ...request.body,
+        taskType: "claim_map",
+        model: getAiSettings().textModel
+      })
+    });
+    const claimMap = {
+      ...payload.output,
+      model: sanitizeLocalText(payload.model, 80),
+      generatedAt: new Date().toISOString()
+    };
+
+    await persistState({
+      packetId: request.packet.id,
+      workspacePatch: {
+        claimMap,
+        generationRuns: withRunEntry(request.workspace, buildRunEntry("claim_map", claimMap.model, request.claim.title))
+      }
+    }, "Generated claim map", request.claim.title);
+    pulseButtonDone(button, "Map ready");
+    flashFeedback("Claim map generated.");
+    setAppStatus("Claim map generated.", "success", true);
+  } catch (error) {
+    if (useDemoTextFallback(error)) {
+      const claimMap = buildDemoClaimMap(runBase);
+      await persistState({
+        packetId: request.packet.id,
+        workspacePatch: {
+          claimMap,
+          generationRuns: withRunEntry(request.workspace, buildRunEntry("claim_map", claimMap.model, request.claim.title))
+        }
+      }, "Generated claim map", request.claim.title);
+      pulseButtonDone(button, "Map ready");
+      setAppStatus("Demo claim map generated locally.", "success", true);
+    } else {
+      clearButtonBusy(button);
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.text = false;
+    renderAll();
+  }
+}
+
+async function generateAngleOptions(button = elements.generateAngleOptions) {
+  const request = buildTextGenerationRequest();
+  const runBase = {
+    packet: request.packet,
+    claim: request.claim,
+    audience: request.audience
+  };
+
+  pendingState.text = true;
+  setButtonBusy(button, "Thinking...");
+  setAppStatus("Generating angle stack...", "loading");
+  renderAll();
+
+  try {
+    const payload = await requestJson("/api/generate-text", {
+      method: "POST",
+      body: JSON.stringify({
+        ...request.body,
+        taskType: "angle_options",
+        model: getAiSettings().textModel
+      })
+    });
+    const angleOptions = Array.isArray(payload.output?.angles) ? payload.output.angles : [];
+    await persistState({
+      packetId: request.packet.id,
+      workspacePatch: {
+        angleOptions,
+        selectedAngleIndex: 0,
+        generationRuns: withRunEntry(request.workspace, buildRunEntry("angle_options", sanitizeLocalText(payload.model, 80), request.packet.shortLabel))
+      }
+    }, "Generated angle stack", request.packet.label);
+    pulseButtonDone(button, "Angles ready");
+    flashFeedback("Angle stack generated.");
+    setAppStatus("Angle stack generated.", "success", true);
+  } catch (error) {
+    if (useDemoTextFallback(error)) {
+      const angleOptions = buildDemoAngleOptions(runBase);
+      await persistState({
+        packetId: request.packet.id,
+        workspacePatch: {
+          angleOptions,
+          selectedAngleIndex: 0,
+          generationRuns: withRunEntry(request.workspace, buildRunEntry("angle_options", "puentes-demo", request.packet.shortLabel))
+        }
+      }, "Generated angle stack", request.packet.label);
+      pulseButtonDone(button, "Angles ready");
+      setAppStatus("Demo angle stack generated locally.", "success", true);
+    } else {
+      clearButtonBusy(button);
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.text = false;
+    renderAll();
+  }
+}
+
+async function reviewDraftWithAi(button = elements.reviewDraft) {
+  const packet = getPacket();
+  const claim = getClaim();
+  const workspace = getWorkspace();
+  const bundle = getBundle();
+  const aiSettings = getAiSettings();
+  const requestBody = {
+    audience: getAudience().id,
+    format: workspace.selectedFormat,
+    packetTitle: packet.label,
+    packetSummary: packet.summary,
+    claim: `${claim.title} ${claim.summary}`,
+    citations: bundle.citations,
+    manipulationSignals: [...packet.manipulation, ...claim.signals].slice(0, 5),
+    model: aiSettings.reviewModel,
+    draft: {
+      title: bundle.title,
+      hook: bundle.hook,
+      caption: bundle.caption,
+      script: bundle.script,
+      slides: bundle.slides,
+      commentPrompt: bundle.commentPrompt,
+      shareSummary: bundle.shareSummary,
+      note: bundle.note
+    }
+  };
+
+  pendingState.text = true;
+  setButtonBusy(button, "Reviewing...");
+  setAppStatus("Running review copilot...", "loading");
+  renderAll();
+
+  try {
+    const payload = await requestJson("/api/review-draft", {
+      method: "POST",
+      body: JSON.stringify(requestBody)
+    });
+    const reviewFindings = {
+      ...payload.output,
+      model: sanitizeLocalText(payload.model, 80),
+      generatedAt: new Date().toISOString()
+    };
+
+    await persistState({
+      packetId: packet.id,
+      workspacePatch: {
+        reviewFindings,
+        generationRuns: withRunEntry(workspace, buildRunEntry("review_draft", reviewFindings.model, workspace.selectedFormat))
+      }
+    }, "Ran review copilot", `${packet.label} -> ${workspace.selectedFormat}`);
+    pulseButtonDone(button, "Review ready");
+    flashFeedback("Review findings generated.");
+    setAppStatus("Review findings generated.", "success", true);
+  } catch (error) {
+    if (useDemoTextFallback(error)) {
+      const reviewFindings = buildDemoReviewFindings({ packet, claim });
+      await persistState({
+        packetId: packet.id,
+        workspacePatch: {
+          reviewFindings,
+          generationRuns: withRunEntry(workspace, buildRunEntry("review_draft", reviewFindings.model, workspace.selectedFormat))
+        }
+      }, "Ran review copilot", `${packet.label} -> ${workspace.selectedFormat}`);
+      pulseButtonDone(button, "Review ready");
+      setAppStatus("Demo review findings generated locally.", "success", true);
+    } else {
+      clearButtonBusy(button);
+      setAppStatus(error.message, "error");
+    }
+  } finally {
+    pendingState.text = false;
+    renderAll();
+  }
+}
+
 async function generateImageConcept(button = elements.generateImage) {
   const packet = getPacket();
   const workspace = getWorkspace();
@@ -2283,7 +3134,13 @@ async function generateImageConcept(button = elements.generateImage) {
   try {
     const payload = await requestJson("/api/generate-image", {
       method: "POST",
-      body: JSON.stringify({ prompt, size: "1536x1024", quality: "medium", outputFormat: "png" })
+      body: JSON.stringify({
+        prompt,
+        size: "1536x1024",
+        quality: "medium",
+        outputFormat: "png",
+        model: getAiSettings().imageModel
+      })
     });
 
     packetMedia.imagesByFormat[workspace.selectedFormat] = {
@@ -2295,6 +3152,12 @@ async function generateImageConcept(button = elements.generateImage) {
       revisedPrompt: sanitizeLocalNote(payload.image?.revisedPrompt || "", 1200)
     };
     saveMediaSnapshot();
+    await persistState({
+      packetId: packet.id,
+      workspacePatch: {
+        generationRuns: withRunEntry(workspace, buildRunEntry("generate_image", sanitizeLocalText(payload.model, 80), workspace.selectedFormat))
+      }
+    }, "Generated visual concept", `${packet.label} -> ${workspace.selectedFormat}`);
     renderAll();
     pulseButtonDone(button, "Visual ready");
     setAppStatus("Visual concept generated.", "success", true);
@@ -2308,6 +3171,12 @@ async function generateImageConcept(button = elements.generateImage) {
         workspace
       });
       saveMediaSnapshot();
+      await persistState({
+        packetId: packet.id,
+        workspacePatch: {
+          generationRuns: withRunEntry(workspace, buildRunEntry("generate_image", "puentes-demo", workspace.selectedFormat))
+        }
+      }, "Generated visual concept", `${packet.label} -> ${workspace.selectedFormat}`);
       renderAll();
       pulseButtonDone(button, "Visual ready");
       setAppStatus("Demo visual generated locally.", "success", true);
@@ -2350,7 +3219,12 @@ async function generateVideoConcept(button = elements.generateVideo) {
   try {
     const payload = await requestJson("/api/generate-video", {
       method: "POST",
-      body: JSON.stringify({ prompt, size: "1280x720", seconds: 8 })
+      body: JSON.stringify({
+        prompt,
+        size: "1280x720",
+        seconds: 8,
+        model: getAiSettings().videoModel
+      })
     });
 
     packetMedia.videosByFormat[workspace.selectedFormat] = {
@@ -2365,6 +3239,12 @@ async function generateVideoConcept(button = elements.generateVideo) {
       }
     };
     saveMediaSnapshot();
+    await persistState({
+      packetId: packet.id,
+      workspacePatch: {
+        generationRuns: withRunEntry(workspace, buildRunEntry("generate_video", sanitizeLocalText(payload.model, 80), workspace.selectedFormat, "queued"))
+      }
+    }, "Queued short video", `${packet.label} -> ${workspace.selectedFormat}`);
     renderAll();
     pulseButtonDone(button, "Job started");
     setAppStatus("Video job started. Puentes will keep checking status.", "success", true);
@@ -2378,6 +3258,12 @@ async function generateVideoConcept(button = elements.generateVideo) {
         workspace
       });
       saveMediaSnapshot();
+      await persistState({
+        packetId: packet.id,
+        workspacePatch: {
+          generationRuns: withRunEntry(workspace, buildRunEntry("generate_video", "puentes-demo", workspace.selectedFormat, "ready"))
+        }
+      }, "Queued short video", `${packet.label} -> ${workspace.selectedFormat}`);
       renderAll();
       pulseButtonDone(button, "Queued");
       setAppStatus("Demo video concept started locally.", "success", true);
@@ -2583,12 +3469,94 @@ function bindEvents() {
       return;
     }
 
+    const packagingButton = event.target.closest("[data-packaging-preset]");
+    if (packagingButton) {
+      if (readonlyMode) {
+        return;
+      }
+
+      try {
+        await persistState(
+          {
+            packetId: packet.id,
+            workspacePatch: {
+              packagingPreset: packagingButton.dataset.packagingPreset
+            }
+          },
+          "Updated packaging mode",
+          packagingButton.textContent.trim()
+        );
+      } catch (error) {
+        setAppStatus(error.message, "error");
+      }
+      return;
+    }
+
+    const angleButton = event.target.closest("[data-angle-index]");
+    if (angleButton) {
+      if (readonlyMode) {
+        return;
+      }
+
+      try {
+        await persistState(
+          {
+            packetId: packet.id,
+            workspacePatch: {
+              selectedAngleIndex: Number(angleButton.dataset.angleIndex)
+            }
+          },
+          "Selected angle",
+          angleButton.textContent.trim().slice(0, 80)
+        );
+      } catch (error) {
+        setAppStatus(error.message, "error");
+      }
+      return;
+    }
+
     if (event.target.id === "generate-text") {
       if (readonlyMode) {
         return;
       }
 
       await generateTextDraft(elements.generateText);
+      return;
+    }
+
+    if (event.target.id === "generate-intake-brief") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await generateIntakeBrief(elements.generateIntakeBrief);
+      return;
+    }
+
+    if (event.target.id === "generate-claim-map") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await generateClaimMap(elements.generateClaimMap);
+      return;
+    }
+
+    if (event.target.id === "generate-angle-options") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await generateAngleOptions(elements.generateAngleOptions);
+      return;
+    }
+
+    if (event.target.id === "review-draft") {
+      if (readonlyMode) {
+        return;
+      }
+
+      await reviewDraftWithAi(elements.reviewDraft);
       return;
     }
 
@@ -2933,6 +3901,30 @@ function bindEvents() {
   });
 
   document.addEventListener("change", async (event) => {
+    if (["text-model-select", "review-model-select", "image-model-select", "video-model-select"].includes(event.target.id)) {
+      if (readonlyMode) {
+        return;
+      }
+
+      try {
+        await persistState({
+          packetId: getPacket().id,
+          workspacePatch: {
+            aiSettings: {
+              ...getAiSettings(),
+              textModel: elements.textModelSelect.value,
+              reviewModel: elements.reviewModelSelect.value,
+              imageModel: elements.imageModelSelect.value,
+              videoModel: elements.videoModelSelect.value
+            }
+          }
+        }, "Updated model desk", getPacket().label);
+      } catch (error) {
+        setAppStatus(error.message, "error");
+      }
+      return;
+    }
+
     const checkbox = event.target.closest("[data-check-id]");
     if (!checkbox || readonlyMode) {
       return;

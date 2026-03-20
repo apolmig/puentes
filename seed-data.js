@@ -566,6 +566,12 @@ const packets = rawPackets.map((packet) => ({
 }));
 
 const audienceDefaults = Object.fromEntries(audiences.map((audience) => [audience.id, audience.defaultFormat]));
+const packagingPresetIds = new Set([
+  "fast_myth_check",
+  "context_carousel",
+  "comment_deescalator",
+  "teacher_safe"
+]);
 
 function buildChecklistState(checklist = []) {
   const overrides = new Map(
@@ -601,6 +607,7 @@ function createWorkspaceState(packetId, overrides = {}) {
   const selectedClaimIndex = Number.isInteger(overrides.selectedClaimIndex)
     ? Math.max(0, Math.min(overrides.selectedClaimIndex, (packet?.claims.length || 1) - 1))
     : 0;
+  const angleOptions = Array.isArray(overrides.angleOptions) ? clone(overrides.angleOptions) : [];
   const history = Array.isArray(overrides.history) && overrides.history.length
     ? overrides.history
     : createInitialHistory(packetId);
@@ -620,6 +627,21 @@ function createWorkspaceState(packetId, overrides = {}) {
       : [],
     shareReady: Boolean(overrides.shareReady),
     shareUrl: typeof overrides.shareUrl === "string" ? overrides.shareUrl : "",
+    packagingPreset: packagingPresetIds.has(overrides.packagingPreset) ? overrides.packagingPreset : "fast_myth_check",
+    aiSettings: {
+      textModel: typeof overrides.aiSettings?.textModel === "string" ? overrides.aiSettings.textModel : "gpt-5",
+      reviewModel: typeof overrides.aiSettings?.reviewModel === "string" ? overrides.aiSettings.reviewModel : "gpt-5-mini",
+      imageModel: typeof overrides.aiSettings?.imageModel === "string" ? overrides.aiSettings.imageModel : "gpt-image-1.5",
+      videoModel: typeof overrides.aiSettings?.videoModel === "string" ? overrides.aiSettings.videoModel : "sora-2"
+    },
+    intakeBrief: overrides.intakeBrief && typeof overrides.intakeBrief === "object" ? clone(overrides.intakeBrief) : null,
+    claimMap: overrides.claimMap && typeof overrides.claimMap === "object" ? clone(overrides.claimMap) : null,
+    angleOptions,
+    selectedAngleIndex: Number.isInteger(overrides.selectedAngleIndex)
+      ? Math.max(0, Math.min(overrides.selectedAngleIndex, Math.max(angleOptions.length - 1, 0)))
+      : 0,
+    reviewFindings: overrides.reviewFindings && typeof overrides.reviewFindings === "object" ? clone(overrides.reviewFindings) : null,
+    generationRuns: Array.isArray(overrides.generationRuns) ? clone(overrides.generationRuns) : [],
     generatedBundlesByFormat: overrides.generatedBundlesByFormat && typeof overrides.generatedBundlesByFormat === "object"
       ? clone(overrides.generatedBundlesByFormat)
       : {},
@@ -648,7 +670,7 @@ workspaceStateByPacket.housing = createWorkspaceState("housing", {
 });
 
 return {
-  meta: { version: 3 },
+  meta: { version: 4 },
   audiences,
   packets,
   workspace: {

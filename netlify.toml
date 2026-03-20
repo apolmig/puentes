@@ -23,6 +23,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/review-draft"
+  to = "/.netlify/functions/review-draft"
+  status = 200
+
+[[redirects]]
+  from = "/api/ai-config"
+  to = "/.netlify/functions/ai-config"
+  status = 200
+
+[[redirects]]
   from = "/api/generate-image"
   to = "/.netlify/functions/generate-image"
   status = 200

@@ -245,6 +245,8 @@ async function main() {
       "Detector layer renders",
       typeof heroClaim === "string" && heroClaim.includes("Out-of-context policy clip"),
       heroClaim
+      typeof heroText === "string" && /source-linked (cut|handoff)/i.test(heroText),
+      heroText || await page.title()
     );
 
     const audienceCount = await page.locator("#audience-tabs button").count();
@@ -336,6 +338,7 @@ async function main() {
     const exportStatus = await page.locator("#export-handoff-status").textContent();
     const exportSummary = await page.locator("#export-summary").textContent();
     const correctionMode = await page.locator("#export-packaging").textContent();
+    const previewTitle = await page.locator("#export-preview-title").textContent();
     record(
       results,
       "Approval gate updates",
@@ -365,6 +368,9 @@ async function main() {
         shareView.shareModeClass === true &&
         shareView.stepRailDisplay === "none",
       JSON.stringify(shareView)
+        typeof previewTitle === "string" &&
+        previewTitle.trim().length > 10,
+      `${gateTitle} / ${exportStatus} / ${previewTitle}`
     );
     await sharePage.close();
 

@@ -7,12 +7,15 @@
   <meta
     name="description"
     content="Puentes helps educators, youth organizations, and trusted creators detect political fake news, map virality, and ship source-linked responses built for feed-first audiences."
+  <title>Puentes | Source-Linked Civic Workbench</title>
+  <meta
+    name="description"
+    content="Puentes is an AI-assisted civic workbench for trusted creators, educators, and youth teams turning messy claims into source-linked handoffs."
   >
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23ff6b3d"/%3E%3Cpath d="M20 44V20h13c8 0 13 4.5 13 11.5S41 43 33 43h-6v1z" fill="%23fff7f1"/%3E%3C/svg%3E'>
-  <link rel="shortcut icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23ff6b3d"/%3E%3Cpath d="M20 44V20h13c8 0 13 4.5 13 11.5S41 43 33 43h-6v1z" fill="%23fff7f1"/%3E%3C/svg%3E'>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="16" fill="%23d46335"/%3E%3Cpath d="M20 44V20h13c8 0 13 4.5 13 11.5S41 43 33 43h-6v1z" fill="%23fffaf3"/%3E%3C/svg%3E'>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -23,12 +26,15 @@
         <span class="wordmark-copy">
           <strong>Puentes</strong>
           <span>Feed-native civic detection and response</span>
+          <span>Editorial control room for civic explainers</span>
         </span>
       </a>
       <nav class="site-nav" aria-label="Primary">
+        <a href="#workspace">Workbench</a>
         <a href="#mission">Who it helps</a>
         <a href="#workspace">Workspace</a>
         <a href="#safeguards">Detector</a>
+        <a href="#safeguards">Trust layer</a>
         <a href="#blueprint">System</a>
       </nav>
     </header>
@@ -116,6 +122,29 @@
             <article class="hero-chip">
               <span>Human approval</span>
               <p>Nothing leaves the room until a reviewer signs off on the handoff.</p>
+      <section class="hero hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">AI-assisted civic workbench</p>
+          <h1>Turn civic rumor into a source-linked cut people can actually use.</h1>
+          <p class="hero-text">
+            Built for trusted creators, educators, and youth teams who need speed, clarity, and visible receipts without sliding into panic framing.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#workspace">Open workbench</a>
+            <a class="button button-secondary" href="#safeguards">Inspect trust model</a>
+          </div>
+          <div class="hero-highlights">
+            <article class="hero-chip">
+              <span>Packet-grounded</span>
+              <p>Every output starts from a packet, a claim, and an explicit evidence gap.</p>
+            </article>
+            <article class="hero-chip">
+              <span>AI where it helps</span>
+              <p>Use copilot passes for intake, mapping, drafting, review, image, and optional video.</p>
+            </article>
+            <article class="hero-chip">
+              <span>Human gate stays</span>
+              <p>Nothing becomes share-ready until a real reviewer clears the checklist.</p>
             </article>
           </div>
         </div>
@@ -134,6 +163,15 @@
             <span class="feed-tag">Spiking now</span>
             <span class="feed-tag">Reviewer locked</span>
           </div>
+        <aside class="hero-preview panel" aria-label="Live reviewed handoff preview">
+          <div class="panel-header preview-header">
+            <div>
+              <span class="detail-kicker">Live handoff preview</span>
+              <h2>One packet. One grounded cut.</h2>
+            </div>
+            <div class="meta-pill" id="save-status">Saved locally</div>
+          </div>
+          <p class="preview-text">The workbench keeps the question, the source packet, and the review state in the same frame.</p>
           <div class="concept-rail">
             <article class="concept-card">
               <span class="detail-kicker">Source packet</span>
@@ -145,11 +183,17 @@
             </article>
             <article class="concept-card">
               <span class="detail-kicker">Response cut</span>
+              <span class="detail-kicker">Pressure point</span>
+              <p id="visual-claim"></p>
+            </article>
+            <article class="concept-card">
+              <span class="detail-kicker">Share summary</span>
               <p id="visual-share-summary"></p>
             </article>
           </div>
           <article class="question-card">
             <span class="detail-kicker">Incoming spike</span>
+            <span class="detail-kicker">Question coming in</span>
             <p id="hero-question"></p>
           </article>
           <div class="storyboard-stage">
@@ -162,7 +206,7 @@
                 <span class="phone-dot"></span>
                 <span class="phone-dot"></span>
                 <span class="phone-dot"></span>
-                <span class="phone-chip">Puentes preview</span>
+                <span class="phone-chip">Puentes output</span>
               </div>
               <div class="phone-screen">
                 <span class="screen-badge">Source-linked cut</span>
@@ -172,7 +216,7 @@
               </div>
             </div>
             <article class="preview-card after-card floating-proof">
-              <span class="detail-kicker">Why it helps</span>
+              <span class="detail-kicker">Comment prompt</span>
               <p id="visual-comment"></p>
               <div class="preview-proof-row">
                 <span class="receipt-badge">Built with receipts</span>
@@ -181,10 +225,33 @@
             </article>
           </div>
           <div class="preview-footer">
-            <span class="receipt-badge">Built with receipts</span>
+            <span class="receipt-badge">Source trail</span>
             <p id="visual-source"></p>
           </div>
         </aside>
+      </section>
+
+      <section class="session-strip panel">
+        <div class="session-cell">
+          <span class="detail-kicker">Active packet</span>
+          <strong id="session-packet">Housing</strong>
+        </div>
+        <div class="session-cell">
+          <span class="detail-kicker">Audience</span>
+          <strong id="session-audience">Creator</strong>
+        </div>
+        <div class="session-cell">
+          <span class="detail-kicker">Format</span>
+          <strong id="session-format">Creator caption</strong>
+        </div>
+        <div class="session-cell">
+          <span class="detail-kicker">Model desk</span>
+          <strong id="session-model">gpt-5</strong>
+        </div>
+        <div class="session-cell session-cell-wide">
+          <span class="detail-kicker">Recommended next move</span>
+          <strong id="session-next">Ground the strongest claim before generating.</strong>
+        </div>
       </section>
 
       <section class="workflow-shell" id="workspace">
@@ -193,6 +260,10 @@
           <h2>A feed-native path from spike to verified response.</h2>
           <p>
             Detect the tactic, ground the claim, shape the cut, and approve the handoff before it leaves the room.
+          <p class="eyebrow">Workbench</p>
+          <h2>Brief the room. Ground the claim. Compose the handoff. Review before it ships.</h2>
+          <p>
+            Puentes now runs as an editorial control room: packet dossier on one side, AI Studio and handoff controls on the other.
           </p>
         </div>
 
@@ -315,32 +386,56 @@
             <div>
               <h3>Export</h3>
               <p>Review + share.</p>
+        <div class="workbench-grid">
+          <aside class="workbench-rail">
+            <div class="step-rail" role="tablist" aria-label="Workflow steps">
+              <button class="step-card" id="step-intake-card" data-stage-trigger="intake" type="button">
+                <span class="step-number">01</span>
+                <div>
+                  <h3>Triage</h3>
+                  <p>Question + job framing.</p>
+                </div>
+                <span class="step-status" id="step-intake-status">Ready</span>
+              </button>
+              <button class="step-card" id="step-verify-card" data-stage-trigger="verify" type="button">
+                <span class="step-number">02</span>
+                <div>
+                  <h3>Ground</h3>
+                  <p>Packet + claim check.</p>
+                </div>
+                <span class="step-status" id="step-verify-status">In review</span>
+              </button>
+              <button class="step-card" id="step-draft-card" data-stage-trigger="draft" type="button">
+                <span class="step-number">03</span>
+                <div>
+                  <h3>Compose</h3>
+                  <p>Draft + asset chain.</p>
+                </div>
+                <span class="step-status" id="step-draft-status">Bundle ready</span>
+              </button>
+              <button class="step-card" id="step-export-card" data-stage-trigger="export" type="button">
+                <span class="step-number">04</span>
+                <div>
+                  <h3>Review &amp; Ship</h3>
+                  <p>Gate + export.</p>
+                </div>
+                <span class="step-status" id="step-export-status">Blocked</span>
+              </button>
             </div>
-            <span class="step-status" id="step-export-status">Blocked</span>
-          </button>
-        </div>
 
-        <div class="status-banner" id="app-status" hidden></div>
+            <div class="status-banner" id="app-status" hidden></div>
 
-        <article class="next-action-card panel">
-          <div>
-            <span class="detail-kicker" id="next-action-label">Recommended next step</span>
-            <h3 id="next-action-title">Start with intake</h3>
-            <p id="next-action-text">Pick the audience and paste the real question people are circulating.</p>
-          </div>
-          <button class="button button-primary" id="next-action-button" data-stage-trigger="intake" type="button">Go to intake</button>
-        </article>
-
-        <div class="stage-host" id="stage-host">
-          <section class="panel intake-panel stage-panel" id="step1" data-stage-panel="intake">
-            <div class="panel-header">
+            <article class="next-action-card panel">
               <div>
                 <span class="detail-kicker">Step 01</span>
                 <h3>Catch the claim before the algorithm hardens it.</h3>
                 <p class="panel-note">Choose the handoff mode, drop in the question people are circulating, and start from lived confusion instead of the loudest clip.</p>
+                <span class="detail-kicker" id="next-action-label">Recommended next step</span>
+                <h3 id="next-action-title">Start with triage</h3>
+                <p id="next-action-text">Pick the audience and paste the real question people are circulating.</p>
               </div>
-              <div class="meta-pill">Intake</div>
-            </div>
+              <button class="button button-primary" id="next-action-button" data-stage-trigger="intake" type="button">Go to triage</button>
+            </article>
 
             <div class="audience-ribbon">
               <div>
@@ -348,54 +443,117 @@
                 <h4>Switch the response between student, creator, and educator.</h4>
                 <p>Each mode changes framing, tone, and the default output format.</p>
                 <div class="audience-tabs" id="audience-tabs" role="tablist" aria-label="Audience modes"></div>
+            <article class="panel rail-card">
+              <div class="panel-header compact-header">
+                <div>
+                  <span class="detail-kicker">Queue</span>
+                  <h4>Open confusion driving the next handoff</h4>
+                </div>
+                <div class="meta-pill" id="queue-count">0</div>
               </div>
-              <article class="audience-panel">
-                <span class="detail-kicker" id="audience-kicker"></span>
-                <h4 id="audience-title"></h4>
-                <p id="audience-summary"></p>
-                <ul class="detail-list" id="audience-focus"></ul>
-              </article>
-            </div>
+              <ul class="queue-list" id="queue-list"></ul>
+            </article>
 
             <div class="intake-ribbon">
               <div class="intake-copy">
                 <span class="detail-kicker">Question intake</span>
                 <h4>Drop in a creator angle, student confusion point, or community question.</h4>
                 <p>The goal is to anchor the workflow in the real question, not the loudest clip or the most shareable distortion.</p>
-              </div>
-              <div class="intake-form">
-                <label class="sr-only" for="question-input">Community question</label>
-                <textarea id="question-input" rows="3"></textarea>
-                <div class="intake-actions">
-                  <button class="button button-primary" id="queue-question" type="button">Add question</button>
-                  <button class="button button-secondary" id="load-next-packet" type="button">Try another packet</button>
+            <article class="panel rail-card">
+              <div class="panel-header compact-header">
+                <div>
+                  <span class="detail-kicker">Run log</span>
+                  <h4>AI actions and audit trail</h4>
                 </div>
               </div>
-              <article class="queue-card">
+              <ul class="history-list" id="run-history-list"></ul>
+            </article>
+          </aside>
+
+          <div class="stage-host" id="stage-host">
+            <section class="panel intake-panel stage-panel" id="step1" data-stage-panel="intake">
+              <div class="panel-header">
+                <div>
+                  <span class="detail-kicker">Step 01</span>
+                  <h3>Triage the real question before the feed writes the frame for you.</h3>
+                  <p class="panel-note">Start from lived confusion, choose the audience, and use AI only to clarify the assignment.</p>
+                </div>
+                <div class="meta-pill">Triage</div>
+              </div>
+
+              <div class="triage-layout">
+                <article class="panel">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Audience mode</span>
+                      <h4>Shift the job to student, creator, or educator.</h4>
+                    </div>
+                  </div>
+                  <div class="audience-ribbon">
+                    <div>
+                      <p>Mode changes tone, output defaults, and review expectations.</p>
+                      <div class="audience-tabs" id="audience-tabs" role="tablist" aria-label="Audience modes"></div>
+                    </div>
+                    <article class="audience-panel">
+                      <span class="detail-kicker" id="audience-kicker"></span>
+                      <h4 id="audience-title"></h4>
+                      <p id="audience-summary"></p>
+                      <ul class="detail-list" id="audience-focus"></ul>
+                    </article>
+                  </div>
+                </article>
+
+                <article class="panel">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Question intake</span>
+                      <h4>Drop the exact claim, confusion point, or angle you need to answer.</h4>
+                    </div>
+                  </div>
+                  <div class="intake-form">
+                    <label class="sr-only" for="question-input">Community question</label>
+                    <textarea id="question-input" rows="4"></textarea>
+                    <div class="intake-actions">
+                      <button class="button button-primary" id="queue-question" type="button">Add to queue</button>
+                      <button class="button button-secondary" id="load-next-packet" type="button">Load next packet</button>
+                      <button class="button button-secondary" id="generate-intake-brief" type="button">Generate intake brief</button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <article class="panel ai-brief-card">
                 <div class="panel-header compact-header">
                   <div>
-                    <span class="detail-kicker">Queue</span>
-                    <h4>What creators want clarified next</h4>
+                    <span class="detail-kicker">Intake copilot</span>
+                    <h4>What people think, what the record says, what is still missing.</h4>
                   </div>
-                  <div class="meta-pill" id="queue-count">0</div>
+                  <div class="meta-pill" id="intake-brief-status">Not run</div>
                 </div>
-                <ul class="queue-list" id="queue-list"></ul>
+                <div class="brief-grid">
+                  <article>
+                    <span class="detail-kicker">Summary</span>
+                    <p id="intake-brief-summary">Run the intake brief to clarify the job before moving to claim review.</p>
+                  </article>
+                  <article>
+                    <span class="detail-kicker">What people think</span>
+                    <p id="intake-brief-think"></p>
+                  </article>
+                  <article>
+                    <span class="detail-kicker">What the record says</span>
+                    <p id="intake-brief-record"></p>
+                  </article>
+                  <article>
+                    <span class="detail-kicker">What is still missing</span>
+                    <p id="intake-brief-missing"></p>
+                  </article>
+                </div>
               </article>
-            </div>
-            <div class="panel-nav">
-              <button class="button button-primary" data-stage-trigger="verify" type="button">Continue to verify</button>
-            </div>
-          </section>
 
-          <section class="panel verify-panel stage-panel" id="step2" data-stage-panel="verify">
-            <div class="panel-header">
-              <div>
-                <span class="detail-kicker">Step 02</span>
-                <h3>Verify what is true, what is overstated, and what still needs context.</h3>
-                <p class="panel-note">This is where the workflow stays useful instead of becoming another machine for faster civic hype.</p>
+              <div class="panel-nav">
+                <button class="button button-primary" data-stage-trigger="verify" type="button">Continue to ground</button>
               </div>
-              <div class="meta-pill" id="packet-count"></div>
-            </div>
+            </section>
 
             <div class="verify-layout">
               <article class="verify-card">
@@ -420,15 +578,89 @@
                       <div>
                         <span class="detail-kicker">Core question</span>
                         <p id="packet-question"></p>
-                      </div>
-                      <div>
-                        <span class="detail-kicker">Source mix</span>
-                        <ul class="source-links" id="packet-sources"></ul>
-                      </div>
-                    </div>
-                  </article>
+            <section class="panel verify-panel stage-panel" id="step2" data-stage-panel="verify">
+              <div class="panel-header">
+                <div>
+                  <span class="detail-kicker">Step 02</span>
+                  <h3>Ground the exact claim you need to answer.</h3>
+                  <p class="panel-note">This is the packet dossier: what the packet can defend, what is mixed, and what still needs caution.</p>
                 </div>
-              </article>
+                <div class="meta-pill" id="packet-count"></div>
+              </div>
+
+              <div class="verify-layout">
+                <article class="verify-card">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Packet dossier</span>
+                      <h4>Pick the source packet driving the handoff.</h4>
+                    </div>
+                    <div class="meta-pill">Packet</div>
+                  </div>
+                  <div class="packet-layout">
+                    <div class="packet-list" id="packet-list" role="tablist" aria-label="Source packets"></div>
+                    <article class="packet-detail">
+                      <div class="packet-meta-row">
+                        <span class="status-chip" id="packet-type"></span>
+                        <span class="meta-pill" id="packet-date"></span>
+                        <span class="meta-pill" id="packet-trust"></span>
+                      </div>
+                      <h4 id="packet-title"></h4>
+                      <p id="packet-summary"></p>
+                      <div class="packet-context">
+                        <div>
+                          <span class="detail-kicker">Core question</span>
+                          <p id="packet-question"></p>
+                        </div>
+                        <div>
+                          <span class="detail-kicker">Source mix</span>
+                          <ul class="source-links" id="packet-sources"></ul>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </article>
+
+                <article class="verify-card">
+                  <div class="panel-header compact-header">
+                    <div>
+                      <span class="detail-kicker">Selected claim</span>
+                      <h4>Choose the claim that needs the clearest correction.</h4>
+                    </div>
+                    <div class="meta-pill" id="claim-count"></div>
+                  </div>
+                  <div class="claim-layout">
+                    <div class="claim-list" id="claim-list" role="tablist" aria-label="Claims under review"></div>
+                    <article class="claim-detail">
+                      <div class="claim-header-row">
+                        <h4 id="claim-title"></h4>
+                        <span class="status-chip" id="claim-status"></span>
+                      </div>
+                      <p id="claim-summary"></p>
+                      <div class="detail-columns">
+                        <div>
+                          <span class="detail-kicker">What backs this up</span>
+                          <p id="claim-evidence"></p>
+                        </div>
+                        <div>
+                          <span class="detail-kicker">What still needs checking</span>
+                          <p id="claim-gap"></p>
+                        </div>
+                      </div>
+                      <div class="detail-columns">
+                        <div>
+                          <span class="detail-kicker">Receipts kept in the draft</span>
+                          <ul class="detail-list" id="claim-citations"></ul>
+                        </div>
+                        <div>
+                          <span class="detail-kicker">Language watchouts</span>
+                          <ul class="detail-list" id="claim-signals"></ul>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </article>
+              </div>
 
               <article class="verify-card">
               <div class="panel-header compact-header">
@@ -447,25 +679,109 @@
                     </div>
                     <p id="claim-summary"></p>
                     <div class="detail-columns">
+              <article class="panel ai-brief-card">
+                <div class="panel-header compact-header">
+                  <div>
+                    <span class="detail-kicker">Claim map</span>
+                    <h4>Structured evidence, open questions, and language risks.</h4>
+                  </div>
+                  <div class="control-row">
+                    <div class="meta-pill" id="claim-map-status">Not run</div>
+                    <button class="button button-secondary" id="generate-claim-map" type="button">Generate claim map</button>
+                  </div>
+                </div>
+                <div class="brief-grid">
+                  <article>
+                    <span class="detail-kicker">Framing</span>
+                    <p id="claim-map-framing">Run the claim map to see what the packet can support before drafting.</p>
+                  </article>
+                  <article>
+                    <span class="detail-kicker">Supported points</span>
+                    <ul class="detail-list" id="claim-map-supported"></ul>
+                  </article>
+                  <article>
+                    <span class="detail-kicker">Open questions</span>
+                    <ul class="detail-list" id="claim-map-open"></ul>
+                  </article>
+                  <article>
+                    <span class="detail-kicker">Language risks</span>
+                    <ul class="detail-list" id="claim-map-risks"></ul>
+                  </article>
+                </div>
+              </article>
+
+              <div class="panel-nav">
+                <button class="button button-secondary" data-stage-trigger="intake" type="button">Back to triage</button>
+                <button class="button button-primary" data-stage-trigger="draft" type="button">Continue to compose</button>
+              </div>
+            </section>
+            <section class="panel draft-panel stage-panel" id="step3" data-stage-panel="draft">
+              <div class="panel-header">
+                <div>
+                  <span class="detail-kicker">Step 03</span>
+                  <h3>Compose inside the AI Studio without losing the packet spine.</h3>
+                  <p class="panel-note">Draft text first, then layer on image and optional video once the handoff is grounded enough to survive review.</p>
+                </div>
+              </div>
+
+              <div class="compose-grid">
+                <div class="compose-main">
+                  <article class="panel studio-settings">
+                    <div class="panel-header compact-header">
                       <div>
-                        <span class="detail-kicker">What backs this up</span>
-                        <p id="claim-evidence"></p>
+                        <span class="detail-kicker">Model desk</span>
+                        <h4>Choose which server-approved models run each step.</h4>
                       </div>
+                      <div class="meta-pill" id="ai-provider-badge">OpenAI</div>
+                    </div>
+                    <div class="settings-grid">
+                      <label class="field">
+                        <span>Draft model</span>
+                        <select id="text-model-select"></select>
+                      </label>
+                      <label class="field">
+                        <span>Review model</span>
+                        <select id="review-model-select"></select>
+                      </label>
+                      <label class="field">
+                        <span>Image model</span>
+                        <select id="image-model-select"></select>
+                      </label>
+                      <label class="field">
+                        <span>Video model</span>
+                        <select id="video-model-select"></select>
+                      </label>
+                    </div>
+                    <p class="panel-note" id="ai-config-note">Keys stay server-side. The browser only chooses between allowed model IDs.</p>
+                  </article>
+
+                  <article class="panel packaging-card">
+                    <div class="panel-header compact-header">
                       <div>
-                        <span class="detail-kicker">What still needs checking</span>
-                        <p id="claim-gap"></p>
+                        <span class="detail-kicker">Packaging mode</span>
+                        <h4>Bias the draft toward how this will travel.</h4>
                       </div>
                     </div>
-                    <div class="detail-columns">
+                    <div class="packaging-presets" id="packaging-presets">
+                      <button class="button button-secondary packaging-button" data-packaging-preset="fast_myth_check" type="button">Fast myth check</button>
+                      <button class="button button-secondary packaging-button" data-packaging-preset="context_carousel" type="button">Context carousel</button>
+                      <button class="button button-secondary packaging-button" data-packaging-preset="comment_deescalator" type="button">Comment-war de-escalator</button>
+                      <button class="button button-secondary packaging-button" data-packaging-preset="teacher_safe" type="button">Teacher-safe explainer</button>
+                    </div>
+                  </article>
+
+                  <article class="panel angle-card">
+                    <div class="panel-header compact-header">
                       <div>
-                        <span class="detail-kicker">Receipts kept in the draft</span>
-                        <ul class="detail-list" id="claim-citations"></ul>
+                        <span class="detail-kicker">Angle stack</span>
+                        <h4>Compare three ways to package the same truth.</h4>
                       </div>
-                      <div>
-                        <span class="detail-kicker">Language watchouts</span>
-                        <ul class="detail-list" id="claim-signals"></ul>
+                      <div class="control-row">
+                        <div class="meta-pill" id="angle-status">Not run</div>
+                        <button class="button button-secondary" id="generate-angle-options" type="button">Generate angles</button>
                       </div>
                     </div>
+                    <div class="angle-options-list" id="angle-options-list"></div>
                   </article>
                 </div>
                 <article class="detector-board">
@@ -545,129 +861,134 @@
               <button class="format-tab" data-format="creator" type="button" aria-selected="false">Creator caption</button>
             </div>
 
-            <div class="creator-canvas">
-              <article class="creator-preview">
-                <div class="creator-preview-head">
-                  <div>
-                    <span class="detail-kicker" id="draft-kicker"></span>
-                    <h4 id="draft-title"></h4>
+                  <div class="format-tabs" id="format-tabs" role="tablist" aria-label="Draft formats">
+                    <button class="format-tab" data-format="carousel" type="button" aria-selected="false">Carousel pack</button>
+                    <button class="format-tab" data-format="video" type="button" aria-selected="false">Short video</button>
+                    <button class="format-tab" data-format="classroom" type="button" aria-selected="false">Class prompts</button>
+                    <button class="format-tab" data-format="creator" type="button" aria-selected="false">Creator caption</button>
                   </div>
-                  <div class="creator-preview-pills">
-                    <span class="meta-pill" id="draft-state">Creator draft</span>
-                    <span class="receipt-badge">Built with receipts</span>
-                  </div>
-                </div>
 
-                <p class="creator-preview-summary" id="draft-summary"></p>
-
-                <div class="creator-stage">
-                  <article class="creator-side-card creator-side-card-hook">
-                    <span class="detail-kicker">Hook</span>
-                    <h5 id="draft-hook"></h5>
-                    <p id="draft-caption"></p>
-                  </article>
-
-                  <div class="phone-shell creator-phone-shell">
-                    <div class="phone-header">
-                      <span class="phone-dot"></span>
-                      <span class="phone-dot"></span>
-                      <span class="phone-dot"></span>
-                      <span class="phone-chip">creator canvas</span>
-                    </div>
-                    <div class="phone-screen creator-phone-screen">
-                      <span class="screen-badge">Ready-to-post core</span>
-                      <p class="creator-script" id="draft-script"></p>
-                      <div class="canvas-comment-block">
-                        <span class="detail-kicker">Comment prompt</span>
-                        <p id="draft-comment-prompt"></p>
+                  <article class="creator-preview panel">
+                    <div class="creator-preview-head">
+                      <div>
+                        <span class="detail-kicker" id="draft-kicker"></span>
+                        <h4 id="draft-title"></h4>
                       </div>
-                      <div class="canvas-slide-block">
-                        <span class="detail-kicker">Slide / beat plan</span>
-                        <ol class="detail-list ordered-list" id="draft-slides"></ol>
+                      <div class="creator-preview-pills">
+                        <span class="meta-pill" id="draft-state">Draft</span>
+                        <span class="receipt-badge">Receipts attached</span>
                       </div>
                     </div>
-                  </div>
 
-                  <article class="creator-side-card creator-side-card-share">
-                    <span class="detail-kicker">Share summary</span>
-                    <p id="draft-share-summary"></p>
-                    <div class="creator-rule">
-                      <span class="detail-kicker">Output rule</span>
-                      <p id="draft-note"></p>
+                    <p class="creator-preview-summary" id="draft-summary"></p>
+
+                    <div class="creator-stage">
+                      <article class="creator-side-card creator-side-card-hook">
+                        <span class="detail-kicker">Hook + caption</span>
+                        <h5 id="draft-hook"></h5>
+                        <p id="draft-caption"></p>
+                      </article>
+
+                      <div class="phone-shell creator-phone-shell">
+                        <div class="phone-header">
+                          <span class="phone-dot"></span>
+                          <span class="phone-dot"></span>
+                          <span class="phone-dot"></span>
+                          <span class="phone-chip">AI Studio</span>
+                        </div>
+                        <div class="phone-screen creator-phone-screen">
+                          <span class="screen-badge">Narration / beat plan</span>
+                          <p class="creator-script" id="draft-script"></p>
+                          <div class="canvas-comment-block">
+                            <span class="detail-kicker">Comment prompt</span>
+                            <p id="draft-comment-prompt"></p>
+                          </div>
+                          <div class="canvas-slide-block">
+                            <span class="detail-kicker">Slide / beat plan</span>
+                            <ol class="detail-list ordered-list" id="draft-slides"></ol>
+                          </div>
+                        </div>
+                      </div>
+
+                      <article class="creator-side-card creator-side-card-share">
+                        <span class="detail-kicker">Share summary</span>
+                        <p id="draft-share-summary"></p>
+                        <div class="creator-rule">
+                          <span class="detail-kicker">Output rule</span>
+                          <p id="draft-note"></p>
+                        </div>
+                      </article>
                     </div>
                   </article>
                 </div>
-              </article>
 
-              <aside class="creator-sidebar">
-                <article class="creator-control-card">
-                  <div class="panel-header compact-header">
-                    <div>
-                      <span class="detail-kicker">Generate</span>
-                      <h4>Make one strong creator-ready handoff.</h4>
+                <aside class="creator-sidebar">
+                  <article class="creator-control-card panel">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">AI Studio</span>
+                        <h4>Run the chain in order.</h4>
+                      </div>
+                      <div class="meta-pill" id="ai-status-pill">Ready to generate</div>
                     </div>
-                    <div class="meta-pill" id="ai-status-pill">Ready to generate</div>
-                  </div>
-                  <p class="panel-note">Start with a fresh draft. Then add a visual if it sharpens the first impression. Video stays optional and slower.</p>
-                  <button class="button button-primary button-block" id="generate-text" type="button">Generate fresh draft</button>
-                  <div class="refinement-block">
-                    <span class="detail-kicker">Quick refinements</span>
-                    <div class="refinement-actions">
-                      <button class="button button-secondary" id="refine-hook" type="button">Stronger hook</button>
-                      <button class="button button-secondary" id="refine-caption" type="button">Tighter caption</button>
-                      <button class="button button-secondary" id="refine-receipts" type="button">More source visible</button>
-                      <button class="button button-secondary" id="refine-uncertainty" type="button">Clearer uncertainty</button>
+                    <p class="panel-note">Draft, refine, review, then generate assets from the grounded handoff.</p>
+                    <div class="stacked-actions">
+                      <button class="button button-primary button-block" id="generate-text" type="button">Generate fresh draft</button>
+                      <button class="button button-secondary button-block" id="review-draft" type="button">Run review copilot</button>
                     </div>
-                  </div>
-                  <div class="creator-secondary-actions">
-                    <button class="button button-secondary" id="generate-image" type="button">Generate cover visual</button>
-                    <button class="button button-secondary" id="reset-generated" type="button">Reset to packet default</button>
-                  </div>
-                </article>
+                    <div class="refinement-block">
+                      <span class="detail-kicker">Quick refinements</span>
+                      <div class="refinement-actions">
+                        <button class="button button-secondary" id="refine-hook" type="button">Stronger hook</button>
+                        <button class="button button-secondary" id="refine-caption" type="button">Tighter caption</button>
+                        <button class="button button-secondary" id="refine-receipts" type="button">More source visible</button>
+                        <button class="button button-secondary" id="refine-uncertainty" type="button">Clearer uncertainty</button>
+                      </div>
+                    </div>
+                    <div class="creator-secondary-actions">
+                      <button class="button button-secondary" id="generate-image" type="button">Generate cover visual</button>
+                      <button class="button button-secondary" id="generate-video" type="button">Generate short video</button>
+                      <button class="button button-secondary" id="reset-generated" type="button">Reset to packet default</button>
+                    </div>
+                  </article>
 
-                <article class="creator-visual-card">
-                  <div class="panel-header compact-header">
-                    <div>
-                      <span class="detail-kicker">Visual concept</span>
-                      <h4>Feed-ready first impression</h4>
+                  <article class="creator-visual-card panel">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">Visual concept</span>
+                        <h4>Feed-ready first impression</h4>
+                      </div>
+                      <span class="meta-pill" id="image-status">No visual yet</span>
                     </div>
-                    <span class="meta-pill" id="image-status">No visual yet</span>
-                  </div>
-                  <p id="visual-brief-text">Generate a visual concept to turn this packet into a stronger first impression.</p>
-                  <div class="generated-image-frame" id="generated-image-frame" data-state="empty">
-                    <img id="generated-image" alt="Generated Puentes visual concept" hidden>
-                  </div>
-                  <div class="asset-inline-actions">
-                    <button class="button button-secondary" id="download-image" type="button">Download visual</button>
-                  </div>
-                </article>
-
-                <article class="creator-video-card">
-                  <div class="panel-header compact-header">
-                    <div>
-                      <span class="detail-kicker">Experimental motion</span>
-                      <h4>Optional short video pass</h4>
+                    <p id="visual-brief-text">Generate a visual concept to turn this packet into a stronger first impression.</p>
+                    <div class="generated-image-frame" id="generated-image-frame" data-state="empty">
+                      <img id="generated-image" alt="Generated Puentes visual concept" hidden>
                     </div>
-                    <span class="meta-pill" id="video-status">No video yet</span>
-                  </div>
-                  <p class="panel-note">This is slower and optional. Use it after the draft feels right.</p>
-                  <p id="video-brief-text">Generate a short explainer cut from the verified packet once the draft feels strong.</p>
-                  <p class="video-job-status" id="video-job-status">No video job started.</p>
-                  <div class="asset-inline-actions">
-                    <button class="button button-secondary" id="generate-video" type="button">Generate short video</button>
-                    <button class="button button-secondary" id="refresh-video" type="button">Refresh status</button>
-                    <button class="button button-secondary" id="download-video" type="button">Download video</button>
-                  </div>
-                  <div class="generated-video-frame generated-video-frame-compact" id="generated-video-frame" data-state="empty">
-                    <video id="generated-video" controls playsinline preload="metadata" hidden></video>
-                    <div class="generated-video-demo" id="generated-video-demo" hidden></div>
-                  </div>
-                </article>
+                    <div class="asset-inline-actions">
+                      <button class="button button-secondary" id="download-image" type="button">Download visual</button>
+                    </div>
+                  </article>
 
-                <details class="creator-drawer" open>
-                  <summary>Receipts and citations</summary>
-                  <ul class="detail-list" id="draft-citations"></ul>
-                </details>
+                  <article class="creator-video-card panel">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">Motion pass</span>
+                        <h4>Optional short video chain</h4>
+                      </div>
+                      <span class="meta-pill" id="video-status">No video yet</span>
+                    </div>
+                    <p class="panel-note">Keep this downstream from text review so the motion inherits the right framing.</p>
+                    <p id="video-brief-text">Generate a short explainer cut from the verified packet once the draft feels strong.</p>
+                    <p class="video-job-status" id="video-job-status">No video job started.</p>
+                    <div class="asset-inline-actions">
+                      <button class="button button-secondary" id="refresh-video" type="button">Refresh status</button>
+                      <button class="button button-secondary" id="download-video" type="button">Download video</button>
+                    </div>
+                    <div class="generated-video-frame generated-video-frame-compact" id="generated-video-frame" data-state="empty">
+                      <video id="generated-video" controls playsinline preload="metadata" hidden></video>
+                      <div class="generated-video-demo" id="generated-video-demo" hidden></div>
+                    </div>
+                  </article>
 
                 <article class="response-kit-card">
                   <div class="panel-header compact-header">
@@ -718,67 +1039,108 @@
                 <span class="detail-kicker">Step 04</span>
                 <h3>Approve, export, and share the handoff once the risk checks are done.</h3>
                 <p class="panel-note">This is the handoff layer. Approval unlocks the export package, not autoposting.</p>
+                  <details class="creator-drawer" open>
+                    <summary>Receipts and citations</summary>
+                    <ul class="detail-list" id="draft-citations"></ul>
+                  </details>
+
+                  <details class="creator-drawer" open>
+                    <summary>Safety and moderation notes</summary>
+                    <ul class="detail-list" id="safety-notes"></ul>
+                  </details>
+                </aside>
               </div>
-              <div class="meta-pill">Export</div>
-            </div>
 
-            <div class="risk-stack">
-              <article class="risk-card">
-                <span class="detail-kicker">Manipulation signals</span>
-                <ul class="detail-list" id="manipulation-list"></ul>
-              </article>
-              <article class="risk-card">
-                <span class="detail-kicker">Amplification note</span>
-                <p id="amplification-note"></p>
-              </article>
-            </div>
+              <div class="panel-nav">
+                <button class="button button-secondary" data-stage-trigger="verify" type="button">Back to ground</button>
+                <button class="button button-primary" data-stage-trigger="export" type="button">Continue to review</button>
+              </div>
+            </section>
 
-            <div class="checklist-block">
-              <div class="panel-header compact-header">
+            <aside class="panel export-panel stage-panel" id="step4" data-stage-panel="export">
+              <div class="panel-header">
                 <div>
-                  <span class="detail-kicker">Reviewer checklist</span>
-                  <h4>What must be true before export</h4>
+                  <span class="detail-kicker">Step 04</span>
+                  <h3>Review the risk, approve the handoff, and only then unlock shipping.</h3>
+                  <p class="panel-note">AI can flag problems. Human review still decides whether this handoff should travel.</p>
                 </div>
-                <div class="meta-pill" id="checklist-progress">0 / 0</div>
+                <div class="meta-pill">Review &amp; Ship</div>
               </div>
-              <div class="checklist" id="review-checklist"></div>
-            </div>
 
-            <article class="blocker-card">
-              <span class="detail-kicker">What is blocking export</span>
-              <ul class="detail-list" id="blocker-list"></ul>
-            </article>
+              <div class="review-grid">
+                <div class="review-main">
+                  <div class="risk-stack">
+                    <article class="risk-card">
+                      <span class="detail-kicker">Manipulation signals</span>
+                      <ul class="detail-list" id="manipulation-list"></ul>
+                    </article>
+                    <article class="risk-card">
+                      <span class="detail-kicker">Amplification note</span>
+                      <p id="amplification-note"></p>
+                    </article>
+                  </div>
 
-            <div class="notes-block">
-              <div class="panel-header compact-header">
-                <div>
-                  <span class="detail-kicker">Reviewer notes</span>
-                  <h4>Keep context for the next creator</h4>
-                </div>
-              </div>
-              <textarea id="reviewer-notes" rows="4" placeholder="Leave context for the next creator, editor, or educator handoff."></textarea>
-              <div class="note-actions">
-                <button class="button button-secondary" id="clear-note" type="button">Clear</button>
-                <button class="button button-primary" id="save-note" type="button">Save note</button>
-              </div>
-            </div>
+                  <article class="panel review-findings-card">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">Review copilot</span>
+                        <h4>AI findings before human approval</h4>
+                      </div>
+                      <div class="meta-pill" id="review-findings-status">Not run</div>
+                    </div>
+                    <div class="review-findings-grid">
+                      <article>
+                        <span class="detail-kicker">Verdict</span>
+                        <p id="review-verdict">Run the review copilot after drafting to surface citation, tone, and certainty issues.</p>
+                      </article>
+                      <article>
+                        <span class="detail-kicker">Summary</span>
+                        <p id="review-summary"></p>
+                      </article>
+                      <article>
+                        <span class="detail-kicker">Strengths</span>
+                        <ul class="detail-list" id="review-strengths"></ul>
+                      </article>
+                      <article>
+                        <span class="detail-kicker">Risks</span>
+                        <ul class="detail-list" id="review-risks"></ul>
+                      </article>
+                      <article class="review-fixes-block">
+                        <span class="detail-kicker">Suggested fixes</span>
+                        <ul class="detail-list" id="review-fixes"></ul>
+                      </article>
+                    </div>
+                  </article>
 
-            <div class="review-actions">
-              <button class="button button-primary" id="approve-review" type="button">Approve and unlock export</button>
-              <button class="button button-secondary" id="request-revision" type="button">Send back for revision</button>
-            </div>
+                  <div class="checklist-block panel">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">Reviewer checklist</span>
+                        <h4>What must be true before export</h4>
+                      </div>
+                      <div class="meta-pill" id="checklist-progress">0 / 0</div>
+                    </div>
+                    <div class="checklist" id="review-checklist"></div>
+                  </div>
 
-            <article class="gate-status-card" id="gate-status-card" data-state="pending">
-              <span class="detail-kicker">Current gate status</span>
-              <h4 id="gate-status-title">Waiting for reviewer checks</h4>
-              <p id="gate-status-text">Complete the checklist before approving a draft for creator or educator handoff.</p>
-            </article>
+                  <article class="blocker-card panel">
+                    <span class="detail-kicker">What is blocking export</span>
+                    <ul class="detail-list" id="blocker-list"></ul>
+                  </article>
 
-            <article class="export-card">
-              <div class="panel-header compact-header">
-                <div>
-                  <span class="detail-kicker">Creator handoff package</span>
-                  <h4 id="export-title">Export unlocks after approval</h4>
+                  <div class="notes-block panel">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">Reviewer notes</span>
+                        <h4>Leave context for the next editor, creator, or educator.</h4>
+                      </div>
+                    </div>
+                    <textarea id="reviewer-notes" rows="4" placeholder="Leave context for the next creator, editor, or educator handoff."></textarea>
+                    <div class="note-actions">
+                      <button class="button button-secondary" id="clear-note" type="button">Clear</button>
+                      <button class="button button-primary" id="save-note" type="button">Save note</button>
+                    </div>
+                  </div>
                 </div>
                 <span class="receipt-badge">Built with receipts</span>
               </div>
@@ -848,18 +1210,95 @@
                 <button class="button button-secondary" id="copy-share-link" type="button">Copy preview link</button>
                 <button class="button button-secondary" id="download-output" type="button">Download text</button>
                 <button class="button button-secondary" id="duplicate-audience" type="button">Remix audience</button>
-              </div>
-              <p class="export-guidance" id="export-guidance">Finish review to unlock the handoff actions.</p>
-            </article>
 
-            <article class="history-card">
-              <span class="detail-kicker">Activity history</span>
-              <ul class="history-list" id="history-list"></ul>
-            </article>
-            <div class="panel-nav">
-              <button class="button button-secondary" data-stage-trigger="draft" type="button">Back to draft</button>
-            </div>
-          </aside>
+                <aside class="review-side">
+                  <div class="review-actions">
+                    <button class="button button-primary" id="approve-review" type="button">Approve and unlock export</button>
+                    <button class="button button-secondary" id="request-revision" type="button">Send back for revision</button>
+                  </div>
+
+                  <article class="gate-status-card panel" id="gate-status-card" data-state="pending">
+                    <span class="detail-kicker">Current gate status</span>
+                    <h4 id="gate-status-title">Waiting for reviewer checks</h4>
+                    <p id="gate-status-text">Complete the checklist before approving a draft for creator or educator handoff.</p>
+                  </article>
+
+                  <article class="export-card panel">
+                    <div class="panel-header compact-header">
+                      <div>
+                        <span class="detail-kicker">Ship package</span>
+                        <h4 id="export-title">Export unlocks after approval</h4>
+                      </div>
+                      <span class="receipt-badge">Human gate</span>
+                    </div>
+                    <p id="export-summary">Approve the packet to unlock copy, download, and share actions.</p>
+                    <div class="export-status-strip">
+                      <span class="status-chip" id="export-handoff-status" data-status="draft">Review locked</span>
+                      <span class="status-chip" id="export-preview-status" data-status="packet">Preview locked</span>
+                    </div>
+                    <div class="export-proof-grid">
+                      <article class="export-proof-card">
+                        <span class="detail-kicker">Packaging</span>
+                        <p id="export-packaging">Fast myth check</p>
+                      </article>
+                      <article class="export-proof-card">
+                        <span class="detail-kicker">Confidence</span>
+                        <p id="export-confidence">Unclear</p>
+                      </article>
+                      <article class="export-proof-card export-proof-card-wide">
+                        <span class="detail-kicker">Angle in play</span>
+                        <p id="export-angle">Generate an angle stack to compare how this will travel.</p>
+                      </article>
+                      <article class="export-proof-card">
+                        <span class="detail-kicker">Models</span>
+                        <p id="export-models">gpt-5 draft + gpt-5-mini review</p>
+                      </article>
+                      <article class="export-proof-card export-proof-card-wide">
+                        <span class="detail-kicker">Assets attached</span>
+                        <p id="export-assets">No generated media attached yet.</p>
+                      </article>
+                    </div>
+                    <article class="export-preview-card">
+                      <span class="detail-kicker">Preview card</span>
+                      <h5 id="export-preview-title">The headline or hook shipping with this handoff.</h5>
+                      <p id="export-preview-summary">The summary that should travel with the package.</p>
+                      <div class="export-preview-meta">
+                        <div>
+                          <span class="detail-kicker">Comment prompt</span>
+                          <p id="export-preview-prompt">Prompt will appear here after drafting.</p>
+                        </div>
+                        <div>
+                          <span class="detail-kicker">Guardrail</span>
+                          <p id="export-preview-guardrail">Review guardrail will appear here after the AI copilot or human review flags one.</p>
+                        </div>
+                      </div>
+                    </article>
+                    <div class="share-link-card">
+                      <span class="detail-kicker">Read-only share link</span>
+                      <p class="share-link" id="share-link">Share preview will appear here after approval.</p>
+                    </div>
+                    <div class="export-actions">
+                      <button class="button button-primary" id="copy-output" type="button">Copy handoff</button>
+                      <button class="button button-secondary" id="open-share-preview" type="button">Open preview</button>
+                      <button class="button button-secondary" id="copy-share-link" type="button">Copy preview link</button>
+                      <button class="button button-secondary" id="download-output" type="button">Download text</button>
+                      <button class="button button-secondary" id="duplicate-audience" type="button">Remix audience</button>
+                    </div>
+                    <p class="export-guidance" id="export-guidance">Finish review to unlock the handoff actions.</p>
+                  </article>
+
+                  <article class="history-card panel">
+                    <span class="detail-kicker">Activity history</span>
+                    <ul class="history-list" id="history-list"></ul>
+                  </article>
+                </aside>
+              </div>
+
+              <div class="panel-nav">
+                <button class="button button-secondary" data-stage-trigger="draft" type="button">Back to compose</button>
+              </div>
+            </aside>
+          </div>
         </div>
 
         <div class="feedback-toast" id="feedback-toast" hidden></div>
@@ -871,6 +1310,10 @@
           <h2>Built for people who need to catch the lie and publish the correction fast.</h2>
           <p>
             Puentes is for the people translating civic noise into something grounded, usable, and safe to pass on inside the feed.
+          <p class="eyebrow">Who it helps</p>
+          <h2>Built for people translating civic noise into something usable fast.</h2>
+          <p>
+            The product is tuned for teams who need enough AI to move faster, but not so much that the handoff stops being accountable.
           </p>
         </div>
 
@@ -891,9 +1334,9 @@
             <p>Keep the hook usable, the sourcing visible, and the final call human, even when the feed wants the sharpest outrage.</p>
           </article>
           <article class="creator-card">
-            <span>Responsible sharing</span>
-            <h3>Help context travel</h3>
-            <p>Read-only previews and export packages let good civic explainers move farther without losing receipts.</p>
+            <span>Editors</span>
+            <h3>Audit the AI path</h3>
+            <p>Track which model ran what, what it suggested, and why the final export was approved.</p>
           </article>
         </div>
       </section>
@@ -902,20 +1345,24 @@
         <div class="section-heading">
           <p class="eyebrow">Detector layer</p>
           <h2>Trust is visible here, not decorative.</h2>
+          <p class="eyebrow">Trust layer</p>
+          <h2>The trust model is visible in the interface, not hidden in policy copy.</h2>
         </div>
 
         <div class="safeguard-grid">
           <article>
-            <h3>Manipulation detection</h3>
-            <p>Flags fear hooks, false binaries, scapegoating, and outrage packaging designed to trigger identity-first reactions.</p>
+            <h3>Packet-first generation</h3>
+            <p>The app keeps packet facts, AI interpretation, and export-ready copy visibly separate.</p>
           </article>
           <article>
             <h3>Amplification awareness</h3>
             <p>Shows when a claim is spreading because it is algorithmically loud, not because it is well sourced or actually new.</p>
+            <h3>Review copilot, not autopilot</h3>
+            <p>AI can flag citation drift, certainty inflation, and manipulation risk, but approval stays human.</p>
           </article>
           <article>
-            <h3>Human review gate</h3>
-            <p>Every export is handoff-ready, not publish-ready. Real people still decide what should go live.</p>
+            <h3>Model desk</h3>
+            <p>Teams can choose among approved models per workflow without exposing API keys in the browser.</p>
           </article>
           <article>
             <h3>Read-only sharing</h3>
@@ -927,45 +1374,44 @@
       <section class="section section-grid" id="blueprint">
         <div class="section-heading">
           <p class="eyebrow">System</p>
-          <h2>The structure that keeps the handoff credible.</h2>
+          <h2>What changed in the revamp.</h2>
         </div>
 
         <div class="blueprint">
           <article class="blueprint-card">
             <span>01</span>
-            <h3>Source packet</h3>
-            <p>Documents, reporting, and community questions stay grouped with provenance, date, and trust context.</p>
+            <h3>Persistent session rail</h3>
+            <p>Packet, audience, format, model, and next move stay visible while you work.</p>
           </article>
           <article class="blueprint-card">
             <span>02</span>
-            <h3>Claim check</h3>
-            <p>Claims are separated into supported, mixed, and unclear so the draft starts from what the packet can actually defend.</p>
+            <h3>AI triage and claim mapping</h3>
+            <p>Intake and verification now have their own AI passes instead of jumping straight to drafting.</p>
           </article>
           <article class="blueprint-card">
             <span>03</span>
-            <h3>Format engine</h3>
-            <p>The same packet can become a caption, a short script, a carousel pack, or a classroom prompt without losing the source trail.</p>
+            <h3>Model desk</h3>
+            <p>Text, review, image, and video can each use a different server-approved model.</p>
           </article>
           <article class="blueprint-card">
             <span>04</span>
-            <h3>Human gate</h3>
-            <p>Checklist state, notes, approvals, and revisions live per packet so the handoff does not reset every time someone switches topics.</p>
+            <h3>Review copilot</h3>
+            <p>The app now runs a structured AI review for certainty, sourcing, tone, and manipulation risk.</p>
           </article>
           <article class="blueprint-card">
             <span>05</span>
-            <h3>Export loop</h3>
-            <p>Approved packets create copyable outputs, downloadable handoffs, and share previews designed for responsible distribution.</p>
+            <h3>Audit-friendly run log</h3>
+            <p>Every AI action records task, model, target, and timing for a cleaner handoff trail.</p>
           </article>
           <article class="blueprint-card">
             <span>06</span>
-            <h3>Open trust model</h3>
-            <p>The experience remains auditable through visible sources, documented constraints, and explicit non-autoposting behavior.</p>
+            <h3>Editorial control room layout</h3>
+            <p>The app now behaves like a workspace first, with marketing compressed below the workbench.</p>
           </article>
         </div>
       </section>
     </main>
   </div>
-
   <script src="seed-data.js"></script>
   <script src="script.js"></script>
 </body>
