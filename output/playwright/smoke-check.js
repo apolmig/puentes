@@ -235,6 +235,16 @@ async function main() {
     record(
       results,
       "Home hero renders",
+      heroText === "Turn a political fake-news spike into a clean, source-linked response.",
+      heroText || await page.title()
+    );
+
+    const heroClaim = await page.locator("#visual-claim").textContent();
+    record(
+      results,
+      "Detector layer renders",
+      typeof heroClaim === "string" && heroClaim.includes("Out-of-context policy clip"),
+      heroClaim
       typeof heroText === "string" && /source-linked (cut|handoff)/i.test(heroText),
       heroText || await page.title()
     );
@@ -275,7 +285,12 @@ async function main() {
     await page.locator("#queue-question").click();
     await page.waitForTimeout(150);
     const firstQueueItem = await page.locator("#queue-list li").first().textContent();
-    record(results, "Queue submission works", firstQueueItem === queuedQuestion, firstQueueItem);
+    record(
+      results,
+      "Queue submission works",
+      typeof firstQueueItem === "string" && firstQueueItem.includes(queuedQuestion),
+      firstQueueItem
+    );
 
     await page.locator("#step-intake-card").click();
     await page.locator("#load-next-packet").waitFor({ state: "visible" });
@@ -321,16 +336,43 @@ async function main() {
     await page.waitForTimeout(150);
     const gateTitle = await page.locator("#gate-status-title").textContent();
     const exportStatus = await page.locator("#export-handoff-status").textContent();
+    const exportSummary = await page.locator("#export-summary").textContent();
+    const correctionMode = await page.locator("#export-packaging").textContent();
     const previewTitle = await page.locator("#export-preview-title").textContent();
     record(
       results,
       "Approval gate updates",
       gateTitle === "Approved for creator or educator handoff" &&
         exportStatus === "Handoff ready" &&
+        typeof correctionMode === "string" &&
+        correctionMode.trim().length > 5 &&
+        typeof exportSummary === "string" &&
+        exportSummary.includes("Feed read:"),
+      `${gateTitle} / ${exportStatus} / ${correctionMode} / ${exportSummary}`
+    );
+
+    const shareUrl = await page.locator("#share-link").textContent();
+    const sharePage = await context.newPage();
+    await sharePage.goto((shareUrl || "").trim(), { waitUntil: "networkidle" });
+    const shareView = await sharePage.evaluate(() => ({
+      readonlyBannerHidden: document.querySelector("#readonly-banner")?.hidden,
+      shareArtifactHidden: document.querySelector("#share-artifact")?.hidden,
+      shareModeClass: document.body.classList.contains("is-share-mode"),
+      stepRailDisplay: window.getComputedStyle(document.querySelector(".step-rail")).display
+    }));
+    record(
+      results,
+      "Public share mode renders",
+      shareView.readonlyBannerHidden === false &&
+        shareView.shareArtifactHidden === false &&
+        shareView.shareModeClass === true &&
+        shareView.stepRailDisplay === "none",
+      JSON.stringify(shareView)
         typeof previewTitle === "string" &&
         previewTitle.trim().length > 10,
       `${gateTitle} / ${exportStatus} / ${previewTitle}`
     );
+    await sharePage.close();
 
     const desktopShot = path.join(outputDir, "desktop-smoke.png");
     await page.screenshot({ path: desktopShot, fullPage: true });

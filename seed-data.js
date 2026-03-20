@@ -84,6 +84,19 @@ const rawPackets = [
       "Scapegoating language aimed at renters and migrants",
       "Outrage clips detached from amendment context"
     ],
+    feed: {
+      platform: "TikTok / Reels / Shorts",
+      spreadPattern: "Quote clip + comment-war stitch loop",
+      detectorLabel: "Out-of-context policy clip",
+      spreadHeat: "high",
+      correctionMode: "Myth-check video",
+      trendTags: [
+        "housing vote",
+        "tenant protections",
+        "stitch bait"
+      ],
+      hookSeed: "This clip is real, but the part that changes the story is missing."
+    },
     claims: [
       {
         title: "The vote removed all tenant protections.",
@@ -202,6 +215,19 @@ const rawPackets = [
       "Posts personalize operational decisions as moral betrayal",
       "Comment threads reward anger faster than comparison"
     ],
+    feed: {
+      platform: "TikTok / Reels / Shorts",
+      spreadPattern: "Screenshot post + route-map reaction loop",
+      detectorLabel: "Selective screenshot distortion",
+      spreadHeat: "high",
+      correctionMode: "Context carousel",
+      trendTags: [
+        "route cuts",
+        "student commute",
+        "screenshot loop"
+      ],
+      hookSeed: "The screenshot is real, but it leaves out the service table that changes the read."
+    },
     claims: [
       {
         title: "The budget cuts youth access across the board.",
@@ -319,6 +345,19 @@ const rawPackets = [
       "Selective quoting strips out procedural context",
       "Creators feel pressure to perform certainty to keep attention"
     ],
+    feed: {
+      platform: "TikTok / Reels / Shorts",
+      spreadPattern: "Panic clip + policy wording flattening",
+      detectorLabel: "Procedural rumor spiral",
+      spreadHeat: "medium",
+      correctionMode: "Teacher-safe explainer",
+      trendTags: [
+        "school board",
+        "FAQ",
+        "process explainer"
+      ],
+      hookSeed: "The rumor sounds bigger than the record, so the process needs to come first."
+    },
     claims: [
       {
         title: "The board banned civic discussion materials.",
@@ -464,6 +503,42 @@ function collectCitations(packet) {
   return unique(packet.claims.flatMap((claim) => claim.citations)).slice(0, 4);
 }
 
+function buildClaimDetector(claim, packet) {
+  const confidenceBand = claim.status === "supported"
+    ? "High confidence"
+    : claim.status === "mixed"
+      ? "Medium confidence"
+      : "Low confidence";
+  const riskToAudience = claim.status === "supported"
+    ? "Moderate risk of oversimplification if clips remove the nuance."
+    : "High risk of false certainty if the hottest framing wins.";
+  const spreadScore = claim.status === "supported"
+    ? 66
+    : claim.status === "mixed"
+      ? 79
+      : 91;
+  const evidenceScore = claim.status === "supported"
+    ? 88
+    : claim.status === "mixed"
+      ? 64
+      : 47;
+
+  return {
+    confidenceBand,
+    riskToAudience,
+    missingContextType: claim.gap,
+    deceptionPatterns: unique([
+      ...(claim.signals || []).slice(0, 2),
+      packet.feed?.spreadPattern || ""
+    ]).filter(Boolean).slice(0, 4),
+    viewerBelief: claim.title,
+    recordSays: claim.summary,
+    spreadScore,
+    evidenceScore,
+    responseMode: packet.feed?.correctionMode || "Myth-check video"
+  };
+}
+
 function buildOutputBundle(packet, format, draft) {
   return {
     label: draft.kicker,
@@ -481,6 +556,10 @@ function buildOutputBundle(packet, format, draft) {
 
 const packets = rawPackets.map((packet) => ({
   ...packet,
+  claims: packet.claims.map((claim) => ({
+    ...claim,
+    detector: claim.detector || buildClaimDetector(claim, packet)
+  })),
   outputBundles: Object.fromEntries(
     Object.entries(packet.drafts).map(([format, draft]) => [format, buildOutputBundle(packet, format, draft)])
   )
