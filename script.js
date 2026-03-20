@@ -1454,16 +1454,16 @@ function renderHero() {
   const heroCover = buildPosterDataUrl({ packet, audience, claim, bundle, mode: "case" });
 
   elements.heroQuestion.textContent = queue[0] || packet.question;
-  elements.heroBefore.textContent = `${packet.vibeLabel || packet.summary}`;
-  elements.heroAfter.textContent = sliceWords(bundle.caption, 26);
+  elements.heroBefore.textContent = `${feed.detectorLabel}. ${sliceWords(packet.summary, 20)}`;
+  elements.heroAfter.textContent = sliceWords(bundle.shareSummary || bundle.caption, 22);
   elements.heroOutputLabel.textContent = `${feed.spreadHeat.toUpperCase()} heat / ${feed.correctionMode} / ${audience.label}`;
   setImageSource(elements.heroCover, heroCover, `${packet.label} cover`);
   elements.visualPacket.textContent = `${packet.shortLabel} / ${packet.thumbnailTheme || feed.platform}`;
   elements.visualClaim.textContent = `${claimStatusText(claim.status)} / ${sliceWords(claim.title, 10)}`;
-  elements.visualShareSummary.textContent = `${bundle.label} / ${packet.creatorArchetype || feed.correctionMode}`;
+  elements.visualShareSummary.textContent = `${bundle.label} / ${feed.correctionMode}`;
   elements.visualHook.textContent = bundle.hook;
   elements.visualSlides.innerHTML = createListMarkup(bundle.slides.slice(0, 3));
-  elements.visualComment.textContent = `${bundle.commentPrompt} Keep the receipts visible.`;
+  elements.visualComment.textContent = `${bundle.commentPrompt} ${claim.citations[0] || "Keep one receipt visible."}`;
   elements.visualSource.textContent = `${feed.detectorLabel} / ${packet.artDirection || formatFeedReadout(feed)}`;
 }
 
@@ -1780,7 +1780,9 @@ function renderStepRail() {
     panel.classList.toggle("is-active", panel.dataset.stagePanel === activeStage);
   });
 
-  document.title = `Puentes | ${packet.shortLabel} -> ${bundle.label}`;
+  document.title = readonlyMode
+    ? "Puentes | Public share preview"
+    : "Puentes | Feed-first civic response";
 }
 
 function revealActiveStepCard() {
