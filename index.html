@@ -26,9 +26,9 @@
         </span>
       </a>
       <nav class="site-nav" aria-label="Primary">
-        <a href="#top">Feed</a>
-        <a href="#workspace">Case</a>
-        <a href="#share-artifact">Share</a>
+        <a href="#top" data-open-surface="feed">Feed</a>
+        <a href="#case" data-open-surface="case">Case</a>
+        <a href="#share" data-open-surface="share">Share</a>
       </nav>
     </header>
 
@@ -41,8 +41,8 @@
             Catch the clip, read the verdict, and post one reply that keeps the receipts attached.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#workspace">Enter case view</a>
-            <a class="button button-secondary" href="#share-artifact">Open share mode</a>
+            <a class="button button-primary" href="#case" data-open-surface="case">Enter case view</a>
+            <a class="button button-secondary" href="#share" data-open-surface="share">Open share mode</a>
           </div>
           <div class="hero-support-links" aria-label="Support links">
             <a href="#mission">Who it helps</a>
@@ -130,150 +130,169 @@
       </section>
 
       <section class="workflow-shell" id="workspace">
-        <div class="section-heading workspace-heading">
-          <p class="eyebrow">Case view</p>
-          <h2>Move from live spike to approved reply.</h2>
-          <p>
-            Open one stage at a time: intake, check, build, then ship once the gate is clear.
-          </p>
-        </div>
-
-        <div class="signal-board" aria-label="Current misinformation signals">
-          <article class="signal-card">
-            <span class="detail-kicker">What is moving</span>
-            <strong>Clip + screenshot loop</strong>
-            <p>The post is traveling faster than the full record behind it.</p>
-          </article>
-          <article class="signal-card">
-            <span class="detail-kicker">Detector read</span>
-            <strong>Context is getting cropped</strong>
-            <p>The loudest version removes the memo, note, or table that changes the story.</p>
-          </article>
-          <article class="signal-card">
-            <span class="detail-kicker">Best lane</span>
-            <strong>Short reply with receipts</strong>
-            <p>Lead with the correction, then keep the proof visible in the caption or first comment.</p>
-          </article>
-        </div>
-
-        <div class="readonly-banner" id="readonly-banner" hidden>
-          This is a read-only share preview. Review the handoff, inspect the receipts, and copy what you need.
-        </div>
-
-        <section class="share-artifact panel" id="share-artifact" hidden>
-          <div class="panel-header share-artifact-head">
-            <div>
-              <span class="detail-kicker">Public share artifact</span>
-              <h3 id="share-title">Source-linked civic response</h3>
-              <p class="panel-note" id="share-dek">A polished readonly handoff for public review and responsible sharing.</p>
+        <div class="workflow-overlay">
+          <div class="surface-overlay-head">
+            <div class="surface-overlay-copy">
+              <p class="eyebrow" id="surface-kicker">Case surface</p>
+              <h2 id="surface-title">Open the live case.</h2>
+              <p id="surface-description">Ground the claim, shape the reply, and ship only after review.</p>
             </div>
-            <div class="share-badge-stack">
-              <span class="receipt-badge" id="share-detector-badge">Detector read</span>
-              <span class="meta-pill" id="share-meta-badge">Creator mode</span>
+            <div class="surface-overlay-actions">
+              <div class="surface-switch" aria-label="Surface switcher">
+                <a href="#top" data-open-surface="feed">Feed</a>
+                <a href="#case" data-open-surface="case">Case</a>
+                <a href="#share" data-open-surface="share">Share</a>
+              </div>
+              <button class="surface-close" id="close-surface" type="button">Back to feed</button>
             </div>
           </div>
-          <div class="share-artifact-grid">
-            <article class="share-phone-card">
-              <div class="phone-shell share-phone-shell">
-                <div class="phone-header">
-                  <span class="phone-dot"></span>
-                  <span class="phone-dot"></span>
-                  <span class="phone-dot"></span>
-                  <span class="phone-chip">public preview</span>
-                </div>
-                <div class="phone-screen">
-                  <span class="screen-badge" id="share-response-mode">Response mode</span>
-                  <h4 id="share-hook">The lead line will appear here.</h4>
-                  <p id="share-summary">The public summary will appear here.</p>
-                  <div class="canvas-comment-block">
-                    <span class="detail-kicker">Pinned comment</span>
-                    <p id="share-pinned-comment">The pinned comment will appear here.</p>
+
+          <div class="section-heading workspace-heading">
+            <p class="eyebrow">Case view</p>
+            <h2>Move from live spike to approved reply.</h2>
+            <p>
+              Open one stage at a time: intake, check, build, then ship once the gate is clear.
+            </p>
+          </div>
+
+          <div class="signal-board" aria-label="Current misinformation signals">
+            <article class="signal-card">
+              <span class="detail-kicker">What is moving</span>
+              <strong>Clip + screenshot loop</strong>
+              <p>The post is traveling faster than the full record behind it.</p>
+            </article>
+            <article class="signal-card">
+              <span class="detail-kicker">Detector read</span>
+              <strong>Context is getting cropped</strong>
+              <p>The loudest version removes the memo, note, or table that changes the story.</p>
+            </article>
+            <article class="signal-card">
+              <span class="detail-kicker">Best lane</span>
+              <strong>Short reply with receipts</strong>
+              <p>Lead with the correction, then keep the proof visible in the caption or first comment.</p>
+            </article>
+          </div>
+
+          <div class="readonly-banner" id="readonly-banner" hidden>
+            This is a read-only share preview. Review the handoff, inspect the receipts, and copy what you need.
+          </div>
+
+          <section class="share-artifact panel" id="share-artifact" hidden>
+            <div class="panel-header share-artifact-head">
+              <div>
+                <span class="detail-kicker">Public share artifact</span>
+                <h3 id="share-title">Source-linked civic response</h3>
+                <p class="panel-note" id="share-dek">A polished readonly handoff for public review and responsible sharing.</p>
+              </div>
+              <div class="share-badge-stack">
+                <span class="receipt-badge" id="share-detector-badge">Detector read</span>
+                <span class="meta-pill" id="share-meta-badge">Creator mode</span>
+              </div>
+            </div>
+            <div class="share-artifact-grid">
+              <article class="share-phone-card">
+                <div class="phone-shell share-phone-shell">
+                  <div class="phone-header">
+                    <span class="phone-dot"></span>
+                    <span class="phone-dot"></span>
+                    <span class="phone-dot"></span>
+                    <span class="phone-chip">public preview</span>
+                  </div>
+                  <div class="phone-screen">
+                    <span class="screen-badge" id="share-response-mode">Response mode</span>
+                    <h4 id="share-hook">The lead line will appear here.</h4>
+                    <p id="share-summary">The public summary will appear here.</p>
+                    <div class="canvas-comment-block">
+                      <span class="detail-kicker">Pinned comment</span>
+                      <p id="share-pinned-comment">The pinned comment will appear here.</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-            <article class="share-proof-card">
-              <div class="share-proof-grid">
-                <div>
-                  <span class="detail-kicker">Packet</span>
-                  <p id="share-packet"></p>
+              </article>
+              <article class="share-proof-card">
+                <div class="share-proof-grid">
+                  <div>
+                    <span class="detail-kicker">Packet</span>
+                    <p id="share-packet"></p>
+                  </div>
+                  <div>
+                    <span class="detail-kicker">Audience</span>
+                    <p id="share-audience"></p>
+                  </div>
+                  <div>
+                    <span class="detail-kicker">Format</span>
+                    <p id="share-format"></p>
+                  </div>
+                  <div>
+                    <span class="detail-kicker">Confidence</span>
+                    <p id="share-confidence"></p>
+                  </div>
                 </div>
-                <div>
-                  <span class="detail-kicker">Audience</span>
-                  <p id="share-audience"></p>
+                <div class="share-proof-block">
+                  <span class="detail-kicker">Detector verdict</span>
+                  <p id="share-detector-summary"></p>
                 </div>
-                <div>
-                  <span class="detail-kicker">Format</span>
-                  <p id="share-format"></p>
+                <div class="share-proof-block">
+                  <span class="detail-kicker">Receipts kept visible</span>
+                  <ul class="detail-list" id="share-receipts"></ul>
                 </div>
-                <div>
-                  <span class="detail-kicker">Confidence</span>
-                  <p id="share-confidence"></p>
+                <div class="share-proof-block">
+                  <span class="detail-kicker">Before you repost</span>
+                  <p id="share-guidance"></p>
                 </div>
-              </div>
-              <div class="share-proof-block">
-                <span class="detail-kicker">Detector verdict</span>
-                <p id="share-detector-summary"></p>
-              </div>
-              <div class="share-proof-block">
-                <span class="detail-kicker">Receipts kept visible</span>
-                <ul class="detail-list" id="share-receipts"></ul>
-              </div>
-              <div class="share-proof-block">
-                <span class="detail-kicker">Before you repost</span>
-                <p id="share-guidance"></p>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <div class="step-rail" role="tablist" aria-label="Workflow steps">
-          <button class="step-card" id="step-intake-card" data-stage-trigger="intake" type="button">
-            <span class="step-number">01</span>
-            <div>
-              <h3>Inbox</h3>
-              <p>Claim + audience.</p>
+              </article>
             </div>
-            <span class="step-status" id="step-intake-status">Ready</span>
-          </button>
-          <button class="step-card" id="step-verify-card" data-stage-trigger="verify" type="button">
-            <span class="step-number">02</span>
-            <div>
-              <h3>Check</h3>
-              <p>Claims + receipts.</p>
-            </div>
-            <span class="step-status" id="step-verify-status">In review</span>
-          </button>
-          <button class="step-card" id="step-draft-card" data-stage-trigger="draft" type="button">
-            <span class="step-number">03</span>
-            <div>
-              <h3>Build</h3>
-              <p>Draft + cover.</p>
-            </div>
-            <span class="step-status" id="step-draft-status">Bundle ready</span>
-          </button>
-          <button class="step-card" id="step-export-card" data-stage-trigger="export" type="button">
-            <span class="step-number">04</span>
-            <div>
-              <h3>Ship</h3>
-              <p>Review + share.</p>
-            </div>
-            <span class="step-status" id="step-export-status">Blocked</span>
-          </button>
-        </div>
+          </section>
 
-        <div class="status-banner" id="app-status" hidden></div>
+          <div class="workflow-body">
+            <div class="step-rail" role="tablist" aria-label="Workflow steps">
+              <button class="step-card" id="step-intake-card" data-stage-trigger="intake" type="button">
+                <span class="step-number">01</span>
+                <div>
+                  <h3>Inbox</h3>
+                  <p>Claim + audience.</p>
+                </div>
+                <span class="step-status" id="step-intake-status">Ready</span>
+              </button>
+              <button class="step-card" id="step-verify-card" data-stage-trigger="verify" type="button">
+                <span class="step-number">02</span>
+                <div>
+                  <h3>Check</h3>
+                  <p>Claims + receipts.</p>
+                </div>
+                <span class="step-status" id="step-verify-status">In review</span>
+              </button>
+              <button class="step-card" id="step-draft-card" data-stage-trigger="draft" type="button">
+                <span class="step-number">03</span>
+                <div>
+                  <h3>Build</h3>
+                  <p>Draft + cover.</p>
+                </div>
+                <span class="step-status" id="step-draft-status">Bundle ready</span>
+              </button>
+              <button class="step-card" id="step-export-card" data-stage-trigger="export" type="button">
+                <span class="step-number">04</span>
+                <div>
+                  <h3>Ship</h3>
+                  <p>Review + share.</p>
+                </div>
+                <span class="step-status" id="step-export-status">Blocked</span>
+              </button>
+            </div>
 
-        <article class="next-action-card panel">
-          <div>
-            <span class="detail-kicker" id="next-action-label">Recommended next step</span>
-            <h3 id="next-action-title">Start with inbox</h3>
-            <p id="next-action-text">Pick the audience and paste the claim people are actually sharing.</p>
-          </div>
-          <button class="button button-primary" id="next-action-button" data-stage-trigger="intake" type="button">Open inbox</button>
-        </article>
+            <div class="workflow-main">
+              <div class="status-banner" id="app-status" hidden></div>
 
-        <div class="stage-host" id="stage-host">
+              <article class="next-action-card panel">
+                <div>
+                  <span class="detail-kicker" id="next-action-label">Recommended next step</span>
+                  <h3 id="next-action-title">Start with inbox</h3>
+                  <p id="next-action-text">Pick the audience and paste the claim people are actually sharing.</p>
+                </div>
+                <button class="button button-primary" id="next-action-button" data-stage-trigger="intake" type="button">Open inbox</button>
+              </article>
+
+              <div class="stage-host" id="stage-host">
           <section class="panel intake-panel stage-panel" id="step1" data-stage-panel="intake">
             <div class="panel-header">
               <div>
@@ -803,6 +822,9 @@
               <button class="button button-secondary" data-stage-trigger="draft" type="button">Back to draft</button>
             </div>
           </aside>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="feedback-toast" id="feedback-toast" hidden></div>

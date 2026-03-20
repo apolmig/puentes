@@ -4,6 +4,7 @@ const store = {
   workspace: null
 };
 
+const SURFACES = ["feed", "case", "share"];
 const STAGES = ["intake", "verify", "draft", "export"];
 const LOCAL_STORAGE_KEY = "puentes-visual-demo-v3";
 const MEDIA_STORAGE_KEY = "puentes-media-demo-v1";
@@ -12,6 +13,7 @@ const elements = {};
 let readonlyMode = false;
 let feedbackTimer = null;
 let persistenceMode = "api";
+let activeSurface = "feed";
 let activeStage = "intake";
 const mediaState = { byPacket: {} };
 const pendingState = { text: false, image: false, video: false };
@@ -227,6 +229,11 @@ function buildSeedVisualAsset(packetId = getPacket()?.id, format = getWorkspace(
 
 function cacheElements() {
   Object.assign(elements, {
+    workflowShell: document.getElementById("workspace"),
+    surfaceKicker: document.getElementById("surface-kicker"),
+    surfaceTitle: document.getElementById("surface-title"),
+    surfaceDescription: document.getElementById("surface-description"),
+    closeSurface: document.getElementById("close-surface"),
     saveStatus: document.getElementById("save-status"),
     heroQuestion: document.getElementById("hero-question"),
     heroBefore: document.getElementById("hero-before"),
@@ -1907,8 +1914,94 @@ function renderNextAction() {
   elements.nextActionButton.dataset.stageTrigger = config.stage;
 }
 
+function getSurfaceFromHash(hash = window.location.hash) {
+  if (hash === "#case" || hash === "#workspace") {
+    return "case";
+  }
+
+  if (hash === "#share" || hash === "#share-artifact") {
+    return "share";
+  }
+
+  return "feed";
+}
+
+function getSurfaceHash(surface = activeSurface) {
+  if (surface === "case") {
+    return "#case";
+  }
+
+  if (surface === "share") {
+    return "#share";
+  }
+
+  return "#top";
+}
+
+function applySurfaceFromUrl() {
+  if (readonlyMode) {
+    activeSurface = "share";
+    activeStage = "export";
+    return;
+  }
+
+  activeSurface = getSurfaceFromHash();
+  if (activeSurface === "share") {
+    activeStage = "export";
+  }
+}
+
+function renderSurfaceShell() {
+  const packet = getPacket();
+  const workspace = getWorkspace(packet?.id);
+  const audience = getAudience(packet?.id);
+  const bundle = getBundle(packet?.id);
+  const claim = getClaim(packet?.id);
+  const overlayOpen = readonlyMode || activeSurface !== "feed";
+  const shareSurface = readonlyMode || activeSurface === "share";
+
+  document.body.classList.toggle("is-feed-surface", !overlayOpen);
+  document.body.classList.toggle("is-case-surface", overlayOpen && !shareSurface);
+  document.body.classList.toggle("is-share-surface", shareSurface);
+  document.body.classList.toggle("is-surface-open", overlayOpen);
+  document.body.classList.toggle("has-surface-lock", overlayOpen && !readonlyMode);
+
+  if (elements.workflowShell) {
+    elements.workflowShell.setAttribute("aria-hidden", String(!overlayOpen));
+  }
+
+  if (elements.surfaceKicker && elements.surfaceTitle && elements.surfaceDescription) {
+    if (shareSurface) {
+      elements.surfaceKicker.textContent = readonlyMode ? "Public share" : "Share surface";
+      elements.surfaceTitle.textContent = readonlyMode
+        ? `${packet.shortLabel} public handoff`
+        : `Review and ship ${packet.shortLabel}.`;
+      elements.surfaceDescription.textContent = readonlyMode
+        ? "Readonly view with the claim, correction, and receipts intact."
+        : workspace.reviewStatus === "approved"
+          ? `${bundle.label} is approved for ${audience.label.toLowerCase()} mode.`
+          : "Finish the checklist, unlock the handoff, and open the public preview.";
+    } else {
+      elements.surfaceKicker.textContent = "Case surface";
+      elements.surfaceTitle.textContent = `${packet.shortLabel} live case`;
+      elements.surfaceDescription.textContent = `${claimStatusText(claim.status)} claim / ${bundle.label} / ${audience.label} mode.`;
+    }
+  }
+
+  if (elements.closeSurface) {
+    elements.closeSurface.hidden = readonlyMode;
+  }
+
+  document.querySelectorAll("[data-open-surface]").forEach((link) => {
+    const isActive = link.dataset.openSurface === (shareSurface ? "share" : activeSurface);
+    link.classList.toggle("is-active", isActive);
+    link.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+}
+
 function renderAll() {
   renderReadonlyState();
+  renderSurfaceShell();
   renderHero();
   renderAudience();
   renderQueue();
@@ -1941,6 +2034,46 @@ function setActiveStage(stage) {
     renderStepRail();
     revealActiveStepCard();
   }
+}
+
+function setSurface(surface, { syncHash = true } = {}) {
+  const nextSurface = readonlyMode
+    ? "share"
+    : SURFACES.includes(surface)
+      ? surface
+      : "feed";
+  const workspace = getWorkspace();
+
+  activeSurface = nextSurface;
+  if (activeSurface === "share") {
+    activeStage = "export";
+  } else if (activeSurface === "case" && activeStage === "export") {
+    activeStage = workspace?.reviewStatus === "approved" ? "draft" : "verify";
+  }
+
+  if (syncHash && !readonlyMode) {
+    const nextHash = getSurfaceHash(activeSurface);
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+      return;
+    }
+  }
+
+  renderAll();
+}
+
+function focusStage(stage, { syncHash = true } = {}) {
+  if (!STAGES.includes(stage)) {
+    return;
+  }
+
+  activeStage = stage;
+  setSurface(stage === "export" ? "share" : "case", { syncHash });
+}
+
+function handleSurfaceHashChange() {
+  applySurfaceFromUrl();
+  renderAll();
 }
 
 function chooseDefaultStage() {
@@ -2035,6 +2168,7 @@ function applyShareModeFromUrl() {
     return;
   }
 
+  activeSurface = "share";
   activeStage = "export";
 
   const requestedAudience = params.get("audience");
@@ -2062,6 +2196,9 @@ function applyStageFromUrl() {
   }
 
   activeStage = requestedStage;
+  if (!readonlyMode) {
+    activeSurface = requestedStage === "export" ? "share" : "case";
+  }
 }
 
 async function bootstrap() {
@@ -2081,6 +2218,7 @@ async function bootstrap() {
   }
 
   applyShareModeFromUrl();
+  applySurfaceFromUrl();
   applyStageFromUrl();
   renderAll();
 }
@@ -2285,7 +2423,7 @@ async function refreshVideoStatus(packetId = getPacket()?.id, format = getWorksp
 }
 
 async function runSmokeDemoFlow() {
-  setActiveStage("draft");
+  focusStage("draft", { syncHash: false });
   setAppStatus("Running demo smoke flow...", "loading");
 
   await generateTextDraft(elements.generateText);
@@ -2667,10 +2805,28 @@ function bindEvents() {
   document.addEventListener("click", async (event) => {
     const packet = getPacket();
     const workspace = getWorkspace();
+    const surfaceLink = event.target.closest("[data-open-surface]");
     const stageTrigger = event.target.closest("[data-stage-trigger]");
 
+    if (surfaceLink) {
+      event.preventDefault();
+      const surface = surfaceLink.dataset.openSurface;
+      if (surface === "share") {
+        focusStage("export");
+        return;
+      }
+
+      setSurface(surface || "feed");
+      return;
+    }
+
+    if (event.target.id === "close-surface") {
+      setSurface("feed");
+      return;
+    }
+
     if (stageTrigger) {
-      setActiveStage(stageTrigger.dataset.stageTrigger);
+      focusStage(stageTrigger.dataset.stageTrigger);
       return;
     }
 
@@ -2700,7 +2856,7 @@ function bindEvents() {
           `${packet.label} -> ${audience.label} mode`
         );
         setAppStatus("Audience updated.", "success", true);
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2729,7 +2885,7 @@ function bindEvents() {
           nextPacket.label
         );
         setAppStatus("Packet loaded.", "success", true);
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2760,7 +2916,7 @@ function bindEvents() {
           "Opened claim",
           claim.title
         );
-        setActiveStage("draft");
+        focusStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2784,7 +2940,7 @@ function bindEvents() {
           "Switched output",
           formatButton.textContent.trim()
         );
-        setActiveStage("draft");
+        focusStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2912,7 +3068,7 @@ function bindEvents() {
         await queueQuestion(question);
         elements.questionInput.value = "";
         setAppStatus("Question added to the queue.", "success", true);
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2936,7 +3092,7 @@ function bindEvents() {
           "Opened packet",
           nextPacket.label
         );
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3012,7 +3168,7 @@ function bindEvents() {
           packet.label
         );
         flashFeedback("Export package unlocked.");
-        setActiveStage("export");
+        focusStage("export");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3034,7 +3190,7 @@ function bindEvents() {
           packet.label
         );
         flashFeedback("Packet marked for revision.");
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3133,7 +3289,7 @@ function bindEvents() {
         );
         pulseButtonDone(elements.duplicateAudience, "Remixed");
         flashFeedback(`Remixed for ${nextAudience.label.toLowerCase()} mode.`);
-        setActiveStage("draft");
+        focusStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3176,6 +3332,7 @@ async function init() {
   cacheElements();
   hydrateMediaSnapshot(loadMediaSnapshot());
   bindEvents();
+  window.addEventListener("hashchange", handleSurfaceHashChange);
   setAppStatus("Loading creator workflow...", "loading");
 
   try {

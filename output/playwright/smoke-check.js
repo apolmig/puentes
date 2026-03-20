@@ -229,7 +229,7 @@ async function main() {
     });
 
     await page.goto(server.url, { waitUntil: "networkidle" });
-    await page.waitForSelector("#audience-tabs button");
+    await page.waitForSelector("h1");
 
     const heroText = await page.locator("h1").first().textContent();
     record(
@@ -258,12 +258,23 @@ async function main() {
     );
 
     await verifyAnchor(page, results, "Use cases", "#mission", "#mission");
-    await verifyAnchor(page, results, "Workspace", "#workspace", "#workspace");
     await verifyAnchor(page, results, "Trust", "#safeguards", "#safeguards");
     await verifyAnchor(page, results, "Blueprint", "#blueprint", "#blueprint");
 
-    await page.locator("a[href='#workspace']").first().click();
-    await page.waitForTimeout(150);
+    await page.locator("a[href='#case']").first().click();
+    await page.waitForFunction(() => document.body.classList.contains("is-case-surface"), null, { timeout: 3000 });
+    const caseSurface = await page.evaluate(() => ({
+      hash: window.location.hash,
+      caseOpen: document.body.classList.contains("is-case-surface"),
+      ariaHidden: document.querySelector("#workspace")?.getAttribute("aria-hidden")
+    }));
+    record(
+      results,
+      "Case surface opens",
+      caseSurface.hash === "#case" && caseSurface.caseOpen === true && caseSurface.ariaHidden === "false",
+      JSON.stringify(caseSurface)
+    );
+
     await page.locator("#step-intake-card").click();
     await page.locator("#question-input").waitFor({ state: "visible" });
     await page.locator("[data-audience-id='educator']").click();
@@ -336,6 +347,10 @@ async function main() {
     const exportStatus = await page.locator("#export-handoff-status").textContent();
     const exportSummary = await page.locator("#export-summary").textContent();
     const correctionMode = await page.locator("#export-packaging").textContent();
+    const shareSurface = await page.evaluate(() => ({
+      hash: window.location.hash,
+      shareOpen: document.body.classList.contains("is-share-surface")
+    }));
     record(
       results,
       "Approval gate updates",
@@ -344,8 +359,10 @@ async function main() {
         typeof correctionMode === "string" &&
         correctionMode.trim().length > 5 &&
         typeof exportSummary === "string" &&
-        exportSummary.includes("ready for creator mode"),
-      `${gateTitle} / ${exportStatus} / ${correctionMode} / ${exportSummary}`
+        exportSummary.includes("ready for creator mode") &&
+        shareSurface.hash === "#share" &&
+        shareSurface.shareOpen === true,
+      `${gateTitle} / ${exportStatus} / ${correctionMode} / ${exportSummary} / ${JSON.stringify(shareSurface)}`
     );
 
     const shareUrl = await page.locator("#share-link").textContent();
@@ -386,20 +403,22 @@ async function main() {
     mobilePage.on("pageerror", (error) => results.pageErrors.push(`[mobile] ${error.message}`));
 
     await mobilePage.goto(server.url, { waitUntil: "networkidle" });
-    await mobilePage.locator(".hero-actions a[href='#workspace']").click();
+    await mobilePage.locator(".hero-actions a[href='#case']").click();
     await mobilePage.waitForTimeout(150);
 
     const mobileLayout = await mobilePage.evaluate(() => ({
       navDisplay: window.getComputedStyle(document.querySelector(".site-nav")).display,
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
-      hash: window.location.hash
+      hash: window.location.hash,
+      caseOpen: document.body.classList.contains("is-case-surface")
     }));
     record(
       results,
       "Mobile layout holds",
       mobileLayout.navDisplay === "none" &&
-        mobileLayout.hash === "#workspace" &&
+        mobileLayout.hash === "#case" &&
+        mobileLayout.caseOpen === true &&
         mobileLayout.scrollWidth <= mobileLayout.innerWidth + 1,
       JSON.stringify(mobileLayout)
     );
