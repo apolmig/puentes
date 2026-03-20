@@ -44,11 +44,6 @@
             <a class="button button-primary" href="#case" data-open-surface="case">Enter case view</a>
             <a class="button button-secondary" href="#share" data-open-surface="share">Open share mode</a>
           </div>
-          <div class="hero-support-links" aria-label="Support links">
-            <a href="#mission">Who it helps</a>
-            <a href="#safeguards">Detector</a>
-            <a href="#blueprint">System</a>
-          </div>
           <article class="hero-case-card">
             <div class="hero-case-head">
               <div>
@@ -129,6 +124,70 @@
         </aside>
       </section>
 
+      <section class="feed-home" aria-label="Live civic feed">
+        <article class="feed-feature panel">
+          <div class="panel-header compact-header">
+            <div>
+              <span class="detail-kicker">Live feed</span>
+              <h2>One case, multiple assets, one clear reply lane.</h2>
+            </div>
+            <a class="button button-secondary" href="#case" data-open-surface="case">Open case</a>
+          </div>
+          <div class="feed-feature-body">
+            <img class="feed-feature-cover" id="feed-feature-cover" alt="Current case cover">
+            <div class="feed-feature-copy">
+              <span class="status-chip" id="feed-feature-status" data-status="packet">Packet ready</span>
+              <h3 id="feed-feature-title"></h3>
+              <p id="feed-feature-summary"></p>
+              <div class="feed-feature-meta">
+                <span class="feed-tag" id="feed-feature-platform"></span>
+                <span class="feed-tag" id="feed-feature-mode"></span>
+                <span class="feed-tag" id="feed-feature-audience"></span>
+              </div>
+              <ul class="detail-list" id="feed-feature-receipts"></ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="feed-media panel">
+          <div class="panel-header compact-header">
+            <div>
+              <span class="detail-kicker">Media pulse</span>
+              <h3>Visuals and motion stay attached to the case.</h3>
+            </div>
+            <a class="button button-secondary" href="#share" data-open-surface="share">Open share</a>
+          </div>
+          <div class="feed-media-frame" id="feed-media-frame" data-state="image">
+            <video id="feed-media-video" controls playsinline preload="metadata" hidden></video>
+            <img id="feed-media-image" alt="Current media preview" hidden>
+            <div class="feed-media-demo" id="feed-media-demo" hidden></div>
+          </div>
+          <p class="panel-note" id="feed-media-copy"></p>
+        </article>
+
+        <article class="feed-rail panel">
+          <div class="panel-header compact-header">
+            <div>
+              <span class="detail-kicker">Trending packets</span>
+              <h3>Jump into the spike that needs the cleanest correction.</h3>
+            </div>
+            <span class="meta-pill">Feed-led</span>
+          </div>
+          <div class="feed-rail-list" id="feed-live-list"></div>
+        </article>
+
+        <article class="feed-bundle-panel panel">
+          <div class="panel-header compact-header">
+            <div>
+              <span class="detail-kicker">Publishing cuts</span>
+              <h3>Switch the same case across formats without losing the receipts.</h3>
+            </div>
+            <span class="meta-pill">Tap to build</span>
+          </div>
+          <div class="feed-bundle-grid" id="feed-bundle-list"></div>
+        </article>
+      </section>
+
       <section class="workflow-shell" id="workspace">
         <div class="workflow-overlay">
           <div class="surface-overlay-head">
@@ -200,6 +259,7 @@
                   </div>
                   <div class="phone-screen">
                     <span class="screen-badge" id="share-response-mode">Response mode</span>
+                    <img class="phone-cover share-cover" id="share-cover" alt="Share cover preview">
                     <h4 id="share-hook">The lead line will appear here.</h4>
                     <p id="share-summary">The public summary will appear here.</p>
                     <div class="canvas-comment-block">
@@ -538,6 +598,7 @@
                     </div>
                     <div class="phone-screen creator-phone-screen">
                       <span class="screen-badge">Ready-to-post core</span>
+                      <img class="phone-cover creator-cover" id="draft-cover" alt="Draft cover preview">
                       <p class="creator-script" id="draft-script"></p>
                       <div class="canvas-comment-block">
                         <span class="detail-kicker">Comment prompt</span>
@@ -787,6 +848,7 @@
               </div>
               <article class="export-preview-card">
                 <span class="detail-kicker">Preview card</span>
+                <img class="export-preview-cover" id="export-preview-cover" alt="Export preview cover">
                 <h5 id="export-preview-title">The headline or hook shipping with this handoff.</h5>
                 <p id="export-preview-summary">The summary that should travel with the package.</p>
                 <div class="export-preview-meta">

@@ -257,9 +257,23 @@ async function main() {
       `audiences=${audienceCount}, steps=${stepCount}, packets=${packetCount}`
     );
 
-    await verifyAnchor(page, results, "Use cases", "#mission", "#mission");
-    await verifyAnchor(page, results, "Trust", "#safeguards", "#safeguards");
-    await verifyAnchor(page, results, "Blueprint", "#blueprint", "#blueprint");
+    const liveFeedCount = await page.locator("#feed-live-list button").count();
+    const publishingCuts = await page.locator("#feed-bundle-list button").count();
+    const feedFeatureTitle = await page.locator("#feed-feature-title").textContent();
+    const feedMediaVisible = await page.locator("#feed-media-frame").isVisible();
+    record(
+      results,
+      "Feed home renders",
+      liveFeedCount === 3 &&
+        publishingCuts === 4 &&
+        feedMediaVisible === true &&
+        typeof feedFeatureTitle === "string" &&
+        feedFeatureTitle.includes("The vote removed all tenant protections"),
+      `live=${liveFeedCount}, cuts=${publishingCuts}, title=${feedFeatureTitle}`
+    );
+
+    const supportCount = await page.locator(".support-panel").count();
+    record(results, "Support panels remain reachable", supportCount === 3, `supportPanels=${supportCount}`);
 
     await page.locator("a[href='#case']").first().click();
     await page.waitForFunction(() => document.body.classList.contains("is-case-surface"), null, { timeout: 3000 });
@@ -317,7 +331,7 @@ async function main() {
 
     await page.locator("#step-draft-card").click();
     await page.locator("#draft-title").waitFor({ state: "visible" });
-    await page.locator("[data-format='video']").click();
+    await page.locator(".format-tab[data-format='video']").click();
     await page.waitForTimeout(150);
     const draftTitle = await page.locator("#draft-title").textContent();
     record(results, "Format switching works", draftTitle === "A 30-second map myth check", draftTitle);
