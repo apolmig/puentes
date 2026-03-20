@@ -8,9 +8,9 @@
   root.PUENTES_STATIC_DATA = data;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
 const baseChecklist = [
-  { id: "sources", label: "Sources checked and citation lines kept in the handoff.", done: false },
-  { id: "tone", label: "Tone reviewed for the selected audience, clarity, and nonpartisan framing.", done: false },
-  { id: "risks", label: "Manipulation and amplification risks reviewed before handoff.", done: false }
+  { id: "sources", label: "Sources checked and kept visible.", done: false },
+  { id: "tone", label: "Tone fits the audience and stays nonpartisan.", done: false },
+  { id: "risks", label: "Manipulation and amplification risks reviewed.", done: false }
 ];
 
 const seedTimestamp = "2026-03-16T20:00:00.000Z";
@@ -20,46 +20,46 @@ const audiences = [
     id: "student",
     label: "Student",
     kicker: "Student mode",
-    title: "Fast clarity for someone meeting this issue in the feed",
-    summary: "Prioritizes plain language, shorter definitions, and one clean discussion question so the content feels useful instead of lecture-heavy.",
+    title: "Fast clarity for a feed-native class discussion",
+    summary: "Plain language, fewer terms, one question people can actually discuss.",
     focus: [
-      "Define civic terms the first time they appear",
-      "Lead with what changed before explaining the conflict",
-      "End with one question students can actually discuss"
+      "Define civic terms once",
+      "Lead with what changed",
+      "End with one real discussion question"
     ],
-    questionPlaceholder: "Example: Everyone at school is reposting this claim. What is actually true, and what is just people picking sides?",
+    questionPlaceholder: "Example: Everyone is reposting this claim. What is actually true, and what is just noise?",
     defaultFormat: "carousel",
-    draftRule: "Keep jargon low, make uncertainty visible, and avoid sounding like an institution talking at young people."
+    draftRule: "Keep it simple, visible, and classroom-safe."
   },
   {
     id: "creator",
     label: "Creator",
     kicker: "Creator mode",
-    title: "Built for trusted creators who need a usable handoff",
-    summary: "Prioritizes hooks, caption structure, short-video pacing, and a tone that feels native to the feed without slipping into outrage voice.",
+    title: "For trusted creators who need a clean handoff",
+    summary: "Hooks, captions, and pacing that feel native without sounding like outrage.",
     focus: [
-      "Use a natural hook, not a panic hook",
-      "Keep every claim source-linked in the handoff",
-      "Leave space for comments without farming conflict"
+      "Use a natural hook",
+      "Keep every claim source-linked",
+      "Leave room for comments without farming conflict"
     ],
-    questionPlaceholder: "Example: I want a 30-second explainer that sounds natural in the feed but still keeps the receipts. What is the cleanest version?",
+    questionPlaceholder: "Example: I need a 30-second explainer that feels native but keeps the receipts. What's the clean version?",
     defaultFormat: "creator",
-    draftRule: "Sound human and familiar, but do not borrow the emotional framing of rage-bait or certainty theater."
+    draftRule: "Sound human, not hype-driven."
   },
   {
     id: "educator",
     label: "Educator",
     kicker: "Educator mode",
-    title: "Shaped for classroom use, youth workshops, and guided discussion",
-    summary: "Prioritizes context, discussion prompts, and framing that helps a teacher or mentor hold a constructive conversation without flattening disagreement.",
+    title: "For classrooms, clubs, and guided discussion",
+    summary: "Context, prompts, and framing for constructive conversation.",
     focus: [
-      "Surface what is known, contested, and still missing",
+      "Surface what is known and missing",
       "Turn claims into discussion-ready questions",
-      "Keep the tone grounded for mixed classrooms and community groups"
+      "Keep the tone grounded for mixed groups"
     ],
-    questionPlaceholder: "Example: I need a classroom-safe explainer and a few discussion prompts that help students compare evidence instead of repeat the loudest post.",
+    questionPlaceholder: "Example: I need a classroom-safe explainer and a few prompts to compare evidence.",
     defaultFormat: "classroom",
-    draftRule: "Preserve nuance, keep facilitation language calm, and make the source trail easy for educators to follow."
+    draftRule: "Stay calm, clear, and easy to facilitate."
   }
 ];
 
@@ -71,19 +71,23 @@ const rawPackets = [
     type: "City docs + reporting",
     date: "Updated Mar 16",
     trust: "Mixed public record",
-    summary: "A packet combining city council notes, local reporting, and youth questions about a housing vote that is getting flattened online into team sports.",
-    question: "What actually changed in the housing vote, and which clips are turning a complicated issue into engagement bait?",
+    summary: "City notes, reporting, and youth questions about a housing vote getting flattened into team-sport clips.",
+    question: "What actually changed in the vote, and which clips are missing the real context?",
     sources: [
-      "City council agenda summary and amendment notes",
-      "Local newsroom explainer on zoning and tenant protections",
-      "Youth workshop questions collected after the vote"
+      "Council agenda and amendment notes",
+      "Local reporting on zoning and tenant protections",
+      "Youth workshop questions"
     ],
-    amplification: "Short clips are pushing the fight between two council members harder than the policy details, so the conflict is spreading faster than the facts.",
+    amplification: "Clips are amplifying the council fight more than the policy details, so the conflict is outrunning the facts.",
     manipulation: [
-      "False binary framing: either pro-housing or anti-neighborhood",
-      "Scapegoating language aimed at renters and migrants",
+      "False binary: pro-housing or anti-neighborhood",
+      "Scapegoating aimed at renters and migrants",
       "Outrage clips detached from amendment context"
     ],
+    artDirection: "Warm civic print with bold orange highlights",
+    vibeLabel: "Feed conflict",
+    thumbnailTheme: "Council screenshot with red callouts",
+    creatorArchetype: "Explainer creator",
     feed: {
       platform: "TikTok / Reels / Shorts",
       spreadPattern: "Quote clip + comment-war stitch loop",
@@ -101,97 +105,97 @@ const rawPackets = [
       {
         title: "The vote removed all tenant protections.",
         status: "unclear",
-        summary: "Some tenant provisions changed, but the packet does not support the idea that every protection disappeared.",
-        evidence: "Amendment notes show tenant notice requirements stayed in place while affordability thresholds changed in two zones.",
-        gap: "A final implementation memo is still missing, so the downstream effect on enforcement is not yet fully known.",
+        summary: "Some tenant rules changed, but the record does not support 'all protections gone.'",
+        evidence: "Notice requirements stayed; affordability thresholds changed in two zones.",
+        gap: "Implementation memo still missing, so enforcement impact is unclear.",
         citations: [
           "Council amendment tracker section 4",
           "Local newsroom explainer paragraph on tenant notice"
         ],
         signals: [
-          "Absolute language like all or none overstates the record",
-          "Posts pair policy edits with eviction imagery not tied to the vote"
+          "All-or-none language overstates the record",
+          "Eviction imagery is being paired with unrelated policy edits"
         ]
       },
       {
         title: "The measure only benefits developers.",
         status: "mixed",
-        summary: "Developers do gain from increased buildability, but the packet also shows affordability and permit conditions that shape public outcomes.",
-        evidence: "The city summary links density bonuses to affordability targets and transit-access rules, though critics note those targets may still be weak.",
-        gap: "Long-term delivery depends on enforcement and market behavior, which this packet cannot fully verify yet.",
+        summary: "Developers gain buildability, but affordability and permit rules still shape the outcome.",
+        evidence: "Density bonuses are tied to affordability targets and transit-access rules.",
+        gap: "Long-term impact depends on enforcement and market behavior.",
         citations: [
           "City summary on density bonuses",
           "Reporter interview with housing researchers"
         ],
         signals: [
-          "Identity-based villain language narrows discussion",
-          "Memes collapse incentive design into personal motive"
+          "Villain language narrows discussion",
+          "Memes collapse policy tradeoffs into personal motive"
         ]
       },
       {
-        title: "Young renters asked for clearer explanations, not just campaign slogans.",
+        title: "Young renters want plain-language comparisons, not slogans.",
         status: "supported",
-        summary: "Community questions keep asking for plain-language comparisons of what changed and who is affected.",
-        evidence: "Workshop intake notes include repeated requests for side-by-side comparisons and simpler terms around zoning and affordability bands.",
-        gap: "The sample is from one network and should not be treated as universal youth opinion.",
+        summary: "Intake notes keep asking for side-by-side comparisons and simpler terms.",
+        evidence: "Workshop notes ask for plain comparisons of zoning and affordability bands.",
+        gap: "The sample is narrow, so treat it as directional.",
         citations: [
           "Workshop intake sheet",
           "Mentor debrief summary"
         ],
         signals: [
-          "Useful reframing opportunity: move from factional slogans to concrete changes",
-          "Keep audience language direct without sounding patronizing"
+          "Useful reset from slogans to concrete changes",
+          "Keep the language direct, not patronizing"
         ]
       }
     ],
     drafts: {
       carousel: {
         kicker: "Carousel pack",
-        title: "Housing vote in 5 slides: what changed, what did not, what is still unclear",
-        summary: "Start with the real change, show what stayed, and leave room for uncertainty instead of pretending the story is settled.",
+        title: "Housing vote: what changed, what didn't, what is still unclear",
+        summary: "Lead with the real change, keep the caveats visible, and skip fake certainty.",
         points: [
-          "Slide 1 hook: People online are saying the housing vote changed everything. The record is more specific than that.",
-          "Slide 2: Show the two edits that actually happened in plain language.",
-          "Slide 3: Name one tenant protection that stayed in place.",
-          "Slide 4: Add a what we still do not know box on implementation.",
-          "Slide 5: Close with sources and one question for discussion."
+          "Slide 1: People are saying the vote changed everything. The record is more specific.",
+          "Slide 2: Show the two edits that actually happened.",
+          "Slide 3: Name one protection that stayed in place.",
+          "Slide 4: Flag what is still unknown.",
+          "Slide 5: Close with sources and one question."
         ],
-        note: "Keep every slide tied to a document line or reporting note so the post feels native but still has receipts."
+        note: "Keep each slide tied to a line in the record."
       },
       video: {
         kicker: "Short video script",
-        title: "A 45-second housing vote myth check",
-        summary: "Use one viral claim, one grounded correction, and one open question so the script stays clear without overstating certainty.",
+        title: "Housing vote: a 45-second myth check",
+        summary: "Open with the viral claim, correct it fast, and leave one open question.",
         points: [
-          "Hook: Online, people are saying the vote killed every tenant protection. That is not what the packet shows.",
+          "Hook: People are saying the vote killed every tenant protection. That is not what the packet shows.",
           "Beat 2: Show the two policy edits that actually happened.",
-          "Beat 3: Name one protection that stayed and one implementation question that is still open.",
-          "Close: Point viewers to the source list instead of ending on outrage."
+          "Beat 3: Name one protection that stayed and one open question.",
+          "Close: Point viewers to the source list."
         ],
-        note: "Do not use confrontation clips unless they add factual context instead of just emotional heat."
+        note: "Use only clips that add context."
       },
       classroom: {
         kicker: "Class prompts",
-        title: "How do housing policy debates get flattened online?",
-        summary: "Use the packet to separate document-backed facts from identity-based framing and high-engagement simplification.",
+        title: "How do housing debates get flattened online?",
+        summary: "Separate record, reaction, and what is still missing.",
         points: [
-          "Which claim in the packet is strongest, and what source makes it strongest?",
-          "Where do you see a false binary shaping how the issue is talked about?",
-          "What missing information would you want before making a hard conclusion?"
+          "Which claim is strongest, and what source supports it?",
+          "Where do you see a false binary?",
+          "What is still missing before you decide?"
         ],
-        note: "Prompt inquiry, not alignment. The goal is evidence comparison and language awareness."
+        note: "Prompt inquiry, not alignment."
       },
       creator: {
         kicker: "Creator caption",
-        title: "Low-drama caption + comment prompt",
-        summary: "A creator-facing handoff that sounds natural in the feed while making the sourcing visible and keeping the tone calm.",
+        title: "Low-drama caption and comment prompt",
+        summary: "Feed-native, source-linked, and calm.",
         points: [
-          "Caption opener: Quick reset - the housing vote did change some rules, but not in the all-or-nothing way people are posting it.",
-          "Middle line: Here is what changed, here is what stayed, and here is what is still unresolved.",
-          "Comment prompt: What part of this issue gets most distorted when it hits the feed?",
-          "End line: Sources are in the caption notes so people can check the record themselves."
+          "Caption opener: Quick reset - the vote changed some rules, but not all of them.",
+          "Middle line: Here is what changed, what stayed, and what is still unresolved.",
+          "Comment prompt: What gets distorted fastest when this hits the feed?",
+          "End line: Sources are in the caption notes."
         ],
-        note: "This handoff should help a trusted creator sound grounded, not forced, and not like another outrage page."
+        note: "Help the creator sound grounded, not forced."
       }
     }
   },
@@ -202,19 +206,23 @@ const rawPackets = [
     type: "Budget review",
     date: "Updated Mar 12",
     trust: "Public budget plus reporting",
-    summary: "A packet on a regional transit budget debate where viral screenshots are shaping the story faster than the actual route notes and service tables.",
-    question: "How should young riders understand route cuts and expansions without getting dragged into culture-war framing?",
+    summary: "A regional transit budget debate where screenshots are spreading faster than the route notes.",
+    question: "How should young riders understand route cuts and expansions without getting pulled into culture-war framing?",
     sources: [
-      "Regional transit draft budget tables",
+      "Draft budget tables",
       "Service equity memo",
-      "Local reporting on rider impact and public comment"
+      "Reporting on rider impact and public comment"
     ],
-    amplification: "Platform conversation is being driven by map screenshots without the budget notes that explain service frequency and coverage tradeoffs.",
+    amplification: "Map screenshots are driving the conversation without the budget notes behind them.",
     manipulation: [
-      "Selective screenshots hide route additions while spotlighting cuts",
-      "Posts personalize operational decisions as moral betrayal",
-      "Comment threads reward anger faster than comparison"
+      "Selective screenshots hide route additions",
+      "Operational choices are framed as betrayal",
+      "Anger travels faster than comparison"
     ],
+    artDirection: "Transit-map blues with hard white overlays",
+    vibeLabel: "Screenshot panic",
+    thumbnailTheme: "Route map with cut lines highlighted",
+    creatorArchetype: "Rider explainer",
     feed: {
       platform: "TikTok / Reels / Shorts",
       spreadPattern: "Screenshot post + route-map reaction loop",
@@ -232,45 +240,45 @@ const rawPackets = [
       {
         title: "The budget cuts youth access across the board.",
         status: "mixed",
-        summary: "Some riders lose direct routes, but the packet also shows expanded frequency in other corridors used by students and shift workers.",
-        evidence: "The budget tables reduce service on two lines while increasing frequency on three overlapping corridors with higher ridership and school connections.",
-        gap: "The packet does not yet include travel-time estimates for every affected neighborhood.",
+        summary: "Some riders lose direct routes, but other corridors gain frequency.",
+        evidence: "Service drops on two lines while three overlapping corridors get more frequency.",
+        gap: "Travel-time estimates are still missing for every neighborhood.",
         citations: [
           "Draft budget service table",
           "Equity memo on corridor frequency"
         ],
         signals: [
-          "Across the board language hides uneven impacts",
-          "Map visuals can imply universal loss when the record is mixed"
+          "Across-the-board language hides uneven impacts",
+          "Maps can imply universal loss when the record is mixed"
         ]
       },
       {
         title: "The agency ignored public comment entirely.",
         status: "unclear",
-        summary: "The record shows public comments were logged and cited, but it is not yet clear how much they changed the final proposal.",
-        evidence: "The board packet references public comment themes, including student commute concerns and weekend access issues.",
-        gap: "The revised final budget packet has not been released, so response quality cannot be fully scored yet.",
+        summary: "Comments were logged and cited, but the final impact is still unclear.",
+        evidence: "The packet references student commute concerns and weekend access issues.",
+        gap: "The revised final budget has not been released.",
         citations: [
           "Board packet appendix on public comments",
           "Reporter notes from committee hearing"
         ],
         signals: [
-          "Totalizing phrases like ignored entirely flatten partial responsiveness",
-          "Clips of frustrated testimony are circulating without board replies"
+          "Ignored entirely flattens partial responsiveness",
+          "Frustrated testimony is circulating without replies"
         ]
       },
       {
-        title: "Young riders need a route-by-route explanation, not a spreadsheet dump.",
+        title: "Young riders want route-by-route explanations, not a spreadsheet dump.",
         status: "supported",
-        summary: "Community intake shows demand for simpler route explainers and impact summaries.",
-        evidence: "Questions from youth groups focus on commute impact, weekend job access, and what alternative routes actually exist.",
-        gap: "A clearer rider-facing explainer still has to be produced.",
+        summary: "Community intake shows demand for simpler route explainers.",
+        evidence: "Youth groups ask about commute impact, weekend jobs, and actual alternatives.",
+        gap: "A clearer rider-facing explainer still needs to be made.",
         citations: [
           "Youth transport clinic notes",
           "Teacher feedback summary"
         ],
         signals: [
-          "Opportunity to reframe technical tables into practical rider impact",
+          "Reframe the tables into practical rider impact",
           "Use plain language about time, access, and reliability"
         ]
       }
@@ -278,50 +286,50 @@ const rawPackets = [
     drafts: {
       carousel: {
         kicker: "Carousel pack",
-        title: "Transit budget in 4 quick cards",
-        summary: "Translate the budget into direct rider impact, show who gains or loses frequency, and name what is still pending.",
+        title: "Transit budget: 4 quick cards",
+        summary: "Translate the budget into rider impact, show who gains or loses frequency, and flag what is pending.",
         points: [
-          "Card 1 hook: This screenshot is real, but it is not the full transit story.",
-          "Card 2: Name the two biggest cuts in plain language.",
-          "Card 3: Show the key frequency increases students should also know about.",
-          "Card 4: End with what the final board vote could still change."
+          "Card 1: This screenshot is real, but it is not the full story.",
+          "Card 2: Name the two biggest cuts.",
+          "Card 3: Show the frequency increases students should know.",
+          "Card 4: End with what could still change."
         ],
-        note: "Anchor every route claim to the budget table or public hearing record so the post is usable and checkable."
+        note: "Anchor each route claim to the budget table."
       },
       video: {
         kicker: "Short video script",
         title: "A 30-second map myth check",
-        summary: "Use the viral screenshot as the opening, then widen the frame with the missing service data.",
+        summary: "Open with the screenshot, then widen the frame with the missing service data.",
         points: [
           "Hook: This map screenshot is real, but it leaves out the service changes around it.",
-          "Beat 2: Show one route loss and one frequency gain affecting student travel.",
-          "Beat 3: Explain what riders still need from the final board vote.",
-          "Close: Tell viewers where the actual route table lives."
+          "Beat 2: Show one route loss and one frequency gain.",
+          "Beat 3: Explain what riders still need from the vote.",
+          "Close: Tell viewers where the route table lives."
         ],
-        note: "Do not crop the evidence in a way that recreates the same misleading effect."
+        note: "Do not crop the evidence into the same lie."
       },
       classroom: {
         kicker: "Class prompts",
-        title: "How do budget decisions become feed narratives?",
-        summary: "Compare technical evidence with platform framing and ask students what information changed their interpretation.",
+        title: "How do budget decisions become feed stories?",
+        summary: "Compare technical evidence with platform framing.",
         points: [
-          "Which post in the packet feels most persuasive before checking sources, and why?",
-          "What data point complicated your first impression?",
-          "How would you explain the issue to a friend who only saw one screenshot?"
+          "Which post feels most persuasive before checking sources?",
+          "What data point changed your first impression?",
+          "How would you explain it from one screenshot?"
         ],
-        note: "Keep the discussion centered on evidence, framing, and public reasoning."
+        note: "Keep the discussion centered on evidence and framing."
       },
       creator: {
         kicker: "Creator caption",
         title: "Caption structure for a transit explainer",
-        summary: "A creator handoff that opens with the screenshot people already saw, then calmly adds the missing context.",
+        summary: "Open with the screenshot people saw, then add the missing context.",
         points: [
-          "Caption opener: A lot of people are posting this transit map like it tells the whole story. It does not.",
-          "Middle line: Some riders are losing direct service, but other student-used corridors are gaining frequency.",
+          "Caption opener: People are posting this map like it tells the whole story. It does not.",
+          "Middle line: Some riders lose direct service, but other corridors gain frequency.",
           "Comment prompt: What route detail would help you understand the tradeoff faster?",
-          "End line: Sources are linked so riders can compare the screenshot to the actual budget notes."
+          "End line: Sources are linked so riders can compare the map to the notes."
         ],
-        note: "Keep the tone practical and rider-first so the creator is useful, not just loud."
+        note: "Keep the tone practical and rider-first."
       }
     }
   },
@@ -332,19 +340,23 @@ const rawPackets = [
     type: "Education policy",
     date: "Updated Mar 10",
     trust: "Board record plus community notes",
-    summary: "A packet on a school board discussion about curriculum transparency, where reaction content is outrunning the actual board FAQ and process notes.",
-    question: "How can Puentes help educators and youth creators explain the policy without becoming another outrage account?",
+    summary: "A school board discussion where reaction clips are outrunning the FAQ and process notes.",
+    question: "How can Puentes help educators and youth creators explain the policy without becoming another outrage page?",
     sources: [
-      "School board agenda and public FAQ",
-      "Local education reporter notes",
-      "Questions from youth media club mentors and teachers"
+      "Board agenda and public FAQ",
+      "Local education reporting",
+      "Questions from mentors and teachers"
     ],
-    amplification: "Algorithmic spread is favoring identity-conflict clips and reaction videos rather than the board FAQ or classroom-facing guidance.",
+    amplification: "Algorithmic spread favors identity-conflict clips over the FAQ and classroom guidance.",
     manipulation: [
-      "Culture-war labels replace actual policy language",
-      "Selective quoting strips out procedural context",
-      "Creators feel pressure to perform certainty to keep attention"
+      "Culture-war labels replace policy language",
+      "Selective quotes strip procedural context",
+      "Creators feel pressure to sound certain"
     ],
+    artDirection: "Paper notices with sharp black type and red flags",
+    vibeLabel: "Process spiral",
+    thumbnailTheme: "FAQ page with reaction overlays",
+    creatorArchetype: "Teacher-safe explainer",
     feed: {
       platform: "TikTok / Reels / Shorts",
       spreadPattern: "Panic clip + policy wording flattening",
@@ -362,45 +374,45 @@ const rawPackets = [
       {
         title: "The board banned civic discussion materials.",
         status: "unclear",
-        summary: "The packet shows new review procedures and disclosure rules, but not a blanket ban on civic discussion materials.",
-        evidence: "The agenda language focuses on review, notification, and approved resource lists rather than removing all discussion materials.",
-        gap: "Teachers are still waiting for the implementation memo that defines how the review procedure works in practice.",
+        summary: "The packet shows review rules, but not a blanket ban on civic materials.",
+        evidence: "The agenda focuses on review, notification, and approved resource lists.",
+        gap: "Teachers are still waiting for the implementation memo.",
         citations: [
           "Board agenda item on instructional review",
           "FAQ on classroom resources"
         ],
         signals: [
-          "Ban language compresses a procedural issue into a maximal claim",
-          "Reaction posts often skip the FAQ entirely"
+          "Ban language compresses a procedural issue",
+          "Reaction posts skip the FAQ"
         ]
       },
       {
         title: "Educators want a transparent process and fewer rumor cycles.",
         status: "supported",
-        summary: "Teacher and mentor questions repeatedly ask for clearer process explanations so families and students are not left to infer changes from viral clips.",
-        evidence: "Community notes request short process explainers, appeal timelines, and examples of how a review decision would be communicated.",
-        gap: "The board has not yet published a youth-facing communication template.",
+        summary: "Teachers and mentors want clearer process explanations.",
+        evidence: "Community notes ask for short explainers, appeal timelines, and decision examples.",
+        gap: "The board has not yet published a youth-facing template.",
         citations: [
           "Teacher roundtable notes",
           "Mentor debrief on family questions"
         ],
         signals: [
-          "Useful depolarizing move: explain process before debate",
-          "Keep wording concrete and avoid culture-war shortcuts"
+          "Explain process before debate",
+          "Keep wording concrete"
         ]
       },
       {
-        title: "Online creators are being pushed toward hot takes instead of source-linked explainers.",
+        title: "Creators are being pushed toward hot takes instead of source-linked explainers.",
         status: "supported",
-        summary: "The packet includes creator feedback that speed and platform pressure make it harder to publish nuanced civic explainers.",
-        evidence: "Trusted creators reported that reaction-style content outperforms citation-heavy explainers even when they prefer the latter format.",
-        gap: "The packet is anecdotal and does not quantify the platform effect across creators.",
+        summary: "Speed and platform pressure make nuanced civic explainers harder to publish.",
+        evidence: "Creators say reaction content outperforms citation-heavy explainers.",
+        gap: "The packet is anecdotal and does not quantify the effect.",
         citations: [
           "Creator feedback interviews",
           "Youth media mentor notes"
         ],
         signals: [
-          "Important product need: faster rigor, not faster outrage",
+          "Need faster rigor, not faster outrage",
           "Acknowledge uncertainty without losing clarity"
         ]
       }
@@ -409,49 +421,49 @@ const rawPackets = [
       carousel: {
         kicker: "Carousel pack",
         title: "School board update in plain language",
-        summary: "Explain the procedural change first, then separate verified facts from rumor-driven interpretations.",
+        summary: "Explain the procedural change first, then separate facts from rumor.",
         points: [
-          "Card 1 hook: People online are calling this a ban. The board record says something narrower.",
+          "Card 1: People are calling this a ban. The record says something narrower.",
           "Card 2: Define the procedural change in one sentence.",
-          "Card 3: Show what is documented already and what still depends on implementation.",
-          "Card 4: End with how students and families can follow future updates."
+          "Card 3: Show what is documented and what still depends on implementation.",
+          "Card 4: End with how families can follow updates."
         ],
-        note: "Preserve citations so educators and creators can point back to the board record instead of debate clips."
+        note: "Preserve citations so people can point back to the record."
       },
       video: {
         kicker: "Short video script",
-        title: "Process before panic: a 40-second board vote recap",
-        summary: "Open with the rumor, correct it using the record, then explain what viewers should watch next.",
+        title: "Process before panic: a 40-second recap",
+        summary: "Open with the rumor, correct it with the record, and say what to watch next.",
         points: [
-          "Hook: People online are calling this a ban. The board packet shows something more procedural.",
-          "Beat 2: Show the two changes that are actually documented.",
+          "Hook: People are calling this a ban. The packet shows something more procedural.",
+          "Beat 2: Show the two changes that are documented.",
           "Beat 3: Name the implementation memo as the next thing to watch.",
-          "Close: Point viewers to the FAQ and meeting notes."
+          "Close: Point viewers to the FAQ and notes."
         ],
-        note: "Keep the tone calm and source-led so the creator does not become part of the rumor cycle."
+        note: "Keep the tone calm and source-led."
       },
       classroom: {
         kicker: "Class prompts",
         title: "How do procedural issues become polarized online?",
-        summary: "Use the packet to compare official documents, reporting, and creator pressure in one discussion set.",
+        summary: "Compare official docs, reporting, and creator pressure.",
         points: [
-          "Which term in the online debate carries more emotion than evidence?",
-          "What source best clarified the difference between rumor and record?",
-          "How should trusted creators communicate uncertainty to young audiences?"
+          "Which term carries more emotion than evidence?",
+          "What source clarified rumor vs record?",
+          "How should creators communicate uncertainty?"
         ],
-        note: "Frame discussion around media literacy, civic process, and audience trust."
+        note: "Frame the discussion around media literacy and trust."
       },
       creator: {
         kicker: "Creator caption",
         title: "Caption handoff for a school board explainer",
-        summary: "A creator-ready draft that keeps the opening familiar while resisting panic framing.",
+        summary: "Keep the opening familiar while resisting panic framing.",
         points: [
-          "Caption opener: Quick context before this turns into another rumor spiral - the board changed review procedures, not everything people are claiming.",
-          "Middle line: Here is what is documented, here is what is still unclear, and here is the next record to watch.",
-          "Comment prompt: What is the hardest part of explaining school policy without it turning into a culture-war fight?",
-          "End line: Sources are attached so this stays grounded in the record."
+          "Caption opener: Quick context before this becomes another rumor spiral - the board changed review procedures, not everything people are claiming.",
+          "Middle line: Here is what is documented, what is still unclear, and what to watch next.",
+          "Comment prompt: What is hardest about explaining school policy without a culture-war fight?",
+          "End line: Sources are attached so this stays grounded."
         ],
-        note: "The creator handoff should sound human and familiar without borrowing the emotional framing of outrage content."
+        note: "Sound human and familiar without borrowing outrage framing."
       }
     }
   }
@@ -566,12 +578,6 @@ const packets = rawPackets.map((packet) => ({
 }));
 
 const audienceDefaults = Object.fromEntries(audiences.map((audience) => [audience.id, audience.defaultFormat]));
-const packagingPresetIds = new Set([
-  "fast_myth_check",
-  "context_carousel",
-  "comment_deescalator",
-  "teacher_safe"
-]);
 
 function buildChecklistState(checklist = []) {
   const overrides = new Map(
@@ -607,7 +613,6 @@ function createWorkspaceState(packetId, overrides = {}) {
   const selectedClaimIndex = Number.isInteger(overrides.selectedClaimIndex)
     ? Math.max(0, Math.min(overrides.selectedClaimIndex, (packet?.claims.length || 1) - 1))
     : 0;
-  const angleOptions = Array.isArray(overrides.angleOptions) ? clone(overrides.angleOptions) : [];
   const history = Array.isArray(overrides.history) && overrides.history.length
     ? overrides.history
     : createInitialHistory(packetId);
@@ -627,21 +632,6 @@ function createWorkspaceState(packetId, overrides = {}) {
       : [],
     shareReady: Boolean(overrides.shareReady),
     shareUrl: typeof overrides.shareUrl === "string" ? overrides.shareUrl : "",
-    packagingPreset: packagingPresetIds.has(overrides.packagingPreset) ? overrides.packagingPreset : "fast_myth_check",
-    aiSettings: {
-      textModel: typeof overrides.aiSettings?.textModel === "string" ? overrides.aiSettings.textModel : "gpt-5",
-      reviewModel: typeof overrides.aiSettings?.reviewModel === "string" ? overrides.aiSettings.reviewModel : "gpt-5-mini",
-      imageModel: typeof overrides.aiSettings?.imageModel === "string" ? overrides.aiSettings.imageModel : "gpt-image-1.5",
-      videoModel: typeof overrides.aiSettings?.videoModel === "string" ? overrides.aiSettings.videoModel : "sora-2"
-    },
-    intakeBrief: overrides.intakeBrief && typeof overrides.intakeBrief === "object" ? clone(overrides.intakeBrief) : null,
-    claimMap: overrides.claimMap && typeof overrides.claimMap === "object" ? clone(overrides.claimMap) : null,
-    angleOptions,
-    selectedAngleIndex: Number.isInteger(overrides.selectedAngleIndex)
-      ? Math.max(0, Math.min(overrides.selectedAngleIndex, Math.max(angleOptions.length - 1, 0)))
-      : 0,
-    reviewFindings: overrides.reviewFindings && typeof overrides.reviewFindings === "object" ? clone(overrides.reviewFindings) : null,
-    generationRuns: Array.isArray(overrides.generationRuns) ? clone(overrides.generationRuns) : [],
     generatedBundlesByFormat: overrides.generatedBundlesByFormat && typeof overrides.generatedBundlesByFormat === "object"
       ? clone(overrides.generatedBundlesByFormat)
       : {},
@@ -670,7 +660,7 @@ workspaceStateByPacket.housing = createWorkspaceState("housing", {
 });
 
 return {
-  meta: { version: 4 },
+  meta: { version: 3 },
   audiences,
   packets,
   workspace: {
