@@ -4,6 +4,7 @@ const store = {
   workspace: null
 };
 
+const SURFACES = ["feed", "case", "share"];
 const STAGES = ["intake", "verify", "draft", "export"];
 const LOCAL_STORAGE_KEY = "puentes-visual-demo-v3";
 const MEDIA_STORAGE_KEY = "puentes-media-demo-v1";
@@ -12,6 +13,7 @@ const elements = {};
 let readonlyMode = false;
 let feedbackTimer = null;
 let persistenceMode = "api";
+let activeSurface = "feed";
 let activeStage = "intake";
 const mediaState = { byPacket: {} };
 const pendingState = { text: false, image: false, video: false };
@@ -227,7 +229,27 @@ function buildSeedVisualAsset(packetId = getPacket()?.id, format = getWorkspace(
 
 function cacheElements() {
   Object.assign(elements, {
+    workflowShell: document.getElementById("workspace"),
+    surfaceKicker: document.getElementById("surface-kicker"),
+    surfaceTitle: document.getElementById("surface-title"),
+    surfaceDescription: document.getElementById("surface-description"),
+    closeSurface: document.getElementById("close-surface"),
     saveStatus: document.getElementById("save-status"),
+    feedFeatureCover: document.getElementById("feed-feature-cover"),
+    feedFeatureStatus: document.getElementById("feed-feature-status"),
+    feedFeatureTitle: document.getElementById("feed-feature-title"),
+    feedFeatureSummary: document.getElementById("feed-feature-summary"),
+    feedFeaturePlatform: document.getElementById("feed-feature-platform"),
+    feedFeatureMode: document.getElementById("feed-feature-mode"),
+    feedFeatureAudience: document.getElementById("feed-feature-audience"),
+    feedFeatureReceipts: document.getElementById("feed-feature-receipts"),
+    feedMediaFrame: document.getElementById("feed-media-frame"),
+    feedMediaVideo: document.getElementById("feed-media-video"),
+    feedMediaImage: document.getElementById("feed-media-image"),
+    feedMediaDemo: document.getElementById("feed-media-demo"),
+    feedMediaCopy: document.getElementById("feed-media-copy"),
+    feedLiveList: document.getElementById("feed-live-list"),
+    feedBundleList: document.getElementById("feed-bundle-list"),
     heroQuestion: document.getElementById("hero-question"),
     heroBefore: document.getElementById("hero-before"),
     heroAfter: document.getElementById("hero-after"),
@@ -282,6 +304,7 @@ function cacheElements() {
     draftKicker: document.getElementById("draft-kicker"),
     draftTitle: document.getElementById("draft-title"),
     draftSummary: document.getElementById("draft-summary"),
+    draftCover: document.getElementById("draft-cover"),
     draftHook: document.getElementById("draft-hook"),
     draftCaption: document.getElementById("draft-caption"),
     draftScript: document.getElementById("draft-script"),
@@ -341,6 +364,7 @@ function cacheElements() {
     exportAvoidLine: document.getElementById("export-avoid-line"),
     exportModerationNote: document.getElementById("export-moderation-note"),
     exportReceiptsLine: document.getElementById("export-receipts-line"),
+    exportPreviewCover: document.getElementById("export-preview-cover"),
     exportPreviewTitle: document.getElementById("export-preview-title"),
     exportPreviewSummary: document.getElementById("export-preview-summary"),
     exportPreviewPrompt: document.getElementById("export-preview-prompt"),
@@ -370,6 +394,7 @@ function cacheElements() {
     shareDetectorBadge: document.getElementById("share-detector-badge"),
     shareMetaBadge: document.getElementById("share-meta-badge"),
     shareResponseMode: document.getElementById("share-response-mode"),
+    shareCover: document.getElementById("share-cover"),
     shareHook: document.getElementById("share-hook"),
     shareSummary: document.getElementById("share-summary"),
     sharePinnedComment: document.getElementById("share-pinned-comment"),
@@ -943,13 +968,14 @@ function watchlistMarkup(question, index) {
   const claim = packet?.claims?.[0];
   const audience = getAudience(packet?.id);
   const feed = getFeedSignals(packet?.id);
-  const cover = buildPosterDataUrl({
-    packet,
-    claim,
-    audience,
-    bundle: packet?.outputBundles?.[getWorkspace(packet?.id)?.selectedFormat] || packet?.outputBundles?.creator,
-    mode: "thumb"
-  });
+  const cover = getDisplayImageAsset(packet?.id, getWorkspace(packet?.id)?.selectedFormat)?.dataUrl
+    || buildPosterDataUrl({
+      packet,
+      claim,
+      audience,
+      bundle: packet?.outputBundles?.[getWorkspace(packet?.id)?.selectedFormat] || packet?.outputBundles?.creator,
+      mode: "thumb"
+    });
 
   return `
     <li class="watchlist-card">
@@ -1008,13 +1034,14 @@ function packetTabMarkup(packet) {
   const feed = getFeedSignals(packet.id);
   const leadClaim = packet.claims?.[0];
   const audience = getAudience(packet.id);
-  const cover = buildPosterDataUrl({
-    packet,
-    claim: leadClaim,
-    audience,
-    bundle: packet.outputBundles?.[getWorkspace(packet.id)?.selectedFormat] || packet.outputBundles?.creator,
-    mode: "thumb"
-  });
+  const cover = getDisplayImageAsset(packet.id, getWorkspace(packet.id)?.selectedFormat)?.dataUrl
+    || buildPosterDataUrl({
+      packet,
+      claim: leadClaim,
+      audience,
+      bundle: packet.outputBundles?.[getWorkspace(packet.id)?.selectedFormat] || packet.outputBundles?.creator,
+      mode: "thumb"
+    });
 
   return `
     <button
@@ -1030,6 +1057,72 @@ function packetTabMarkup(packet) {
         <strong>${escapeHtml(packet.label)}</strong>
         <span>${escapeHtml(leadClaim?.title || packet.summary)}</span>
         <span class="history-meta">${escapeHtml(`${audience?.label || "Creator"} / ${feed.correctionMode}`)}</span>
+      </span>
+    </button>
+  `;
+}
+
+function feedPacketMarkup(packet) {
+  const active = packet.id === store.workspace?.activePacketId;
+  const feed = getFeedSignals(packet.id);
+  const audience = getAudience(packet.id);
+  const claim = getClaim(packet.id);
+  const bundle = getBundle(packet.id);
+  const cover = getDisplayImageAsset(packet.id, getWorkspace(packet.id)?.selectedFormat)?.dataUrl
+    || buildPosterDataUrl({
+      packet,
+      claim,
+      audience,
+      bundle,
+      mode: "thumb"
+    });
+
+  return `
+    <button
+      class="feed-packet-card${active ? " is-active" : ""}"
+      type="button"
+      data-packet-id="${escapeHtml(packet.id)}"
+      aria-pressed="${active}"
+      ${readonlyMode ? "disabled" : ""}
+    >
+      <img class="feed-packet-art" src="${cover}" alt="">
+      <span class="feed-packet-copy">
+        <span class="feed-packet-meta">${escapeHtml(`${feed.spreadHeat.toUpperCase()} heat / ${feed.detectorLabel}`)}</span>
+        <strong>${escapeHtml(packet.shortLabel)}</strong>
+        <span>${escapeHtml(sliceWords(claim?.title || packet.question, 11))}</span>
+        <span class="history-meta">${escapeHtml(`${audience?.label || "Creator"} / ${bundle?.label || feed.correctionMode}`)}</span>
+      </span>
+    </button>
+  `;
+}
+
+function feedBundleMarkup(format, bundle, packetId = getPacket()?.id) {
+  const packet = getPacket(packetId);
+  const audience = getAudience(packetId);
+  const claim = getClaim(packetId);
+  const workspace = getWorkspace(packetId);
+  const active = format === workspace?.selectedFormat;
+  const cover = buildPosterDataUrl({
+    packet,
+    claim,
+    audience,
+    bundle,
+    mode: "thumb"
+  });
+
+  return `
+    <button
+      class="feed-bundle-card${active ? " is-active" : ""}"
+      type="button"
+      data-format="${escapeHtml(format)}"
+      aria-pressed="${active}"
+      ${readonlyMode ? "disabled" : ""}
+    >
+      <img class="feed-bundle-art" src="${cover}" alt="">
+      <span class="feed-bundle-copy">
+        <span class="feed-bundle-kicker">${escapeHtml(bundle.label || format)}</span>
+        <strong>${escapeHtml(sliceWords(bundle.hook || bundle.title || bundle.summary, 9))}</strong>
+        <span>${escapeHtml(sliceWords(bundle.shareSummary || bundle.summary || bundle.note, 16))}</span>
       </span>
     </button>
   `;
@@ -1322,6 +1415,9 @@ function renderAiStudio() {
   const videoPrompt = buildVideoPrompt(bundle, packet, audience, claim);
   const videoState = readableVideoStatus(videoAsset?.status);
   const videoUnlocked = Boolean(generatedBundle || videoAsset?.id);
+  const draftCover = imageAsset?.dataUrl || buildPosterDataUrl({ packet, audience, claim, bundle });
+
+  setImageSource(elements.draftCover, draftCover, `${packet.label} draft cover`);
 
   elements.visualBriefText.textContent = packet.thumbnailTheme
     ? `${packet.thumbnailTheme}. ${sliceWords(visualPrompt, 18)}`
@@ -1444,6 +1540,86 @@ function renderAiStudio() {
   elements.downloadVideo.disabled = !videoIsReady(videoAsset) || videoAsset?.demo;
 }
 
+function applyPacketTheme() {
+  const packet = getPacket();
+  const theme = getPacketVisualTheme(packet);
+
+  document.documentElement.style.setProperty("--packet-accent", theme.accent);
+  document.documentElement.style.setProperty("--packet-glow", theme.glow);
+  document.documentElement.style.setProperty("--packet-base", theme.base);
+  document.body.dataset.packet = packet?.id || "";
+}
+
+function renderFeedHome() {
+  const packet = getPacket();
+  const workspace = getWorkspace(packet.id);
+  const audience = getAudience(packet.id);
+  const bundle = getBundle(packet.id);
+  const claim = getClaim(packet.id);
+  const feed = getFeedSignals(packet.id);
+  const detector = getClaimDetector(packet.id);
+  const imageAsset = getDisplayImageAsset(packet.id, workspace?.selectedFormat);
+  const videoAsset = getVideoAsset(packet.id, workspace?.selectedFormat);
+  const featureCover = imageAsset?.dataUrl || buildPosterDataUrl({ packet, audience, claim, bundle });
+
+  setImageSource(elements.feedFeatureCover, featureCover, `${packet.label} feature cover`);
+  elements.feedFeatureStatus.textContent = `${claimStatusText(claim.status)} / ${feed.detectorLabel}`;
+  elements.feedFeatureStatus.dataset.status = claim.status;
+  elements.feedFeatureTitle.textContent = claim.title;
+  elements.feedFeatureSummary.textContent = `${bundle.shareSummary} ${detector.riskToAudience}`;
+  elements.feedFeaturePlatform.textContent = packet.thumbnailTheme || feed.platform;
+  elements.feedFeatureMode.textContent = feed.correctionMode;
+  elements.feedFeatureAudience.textContent = `${audience.label} mode`;
+  elements.feedFeatureReceipts.innerHTML = createListMarkup([
+    claim.citations[0] || "",
+    claim.citations[1] || "",
+    `Spread pattern: ${feed.spreadPattern}`
+  ].filter(Boolean));
+
+  elements.feedLiveList.innerHTML = store.packets.map(feedPacketMarkup).join("");
+  elements.feedBundleList.innerHTML = Object.entries(packet.outputBundles || {})
+    .map(([format, candidateBundle]) => feedBundleMarkup(format, candidateBundle, packet.id))
+    .join("");
+
+  if (videoIsReady(videoAsset) && videoAsset?.download?.video) {
+    elements.feedMediaFrame.dataset.state = "ready";
+    elements.feedMediaVideo.hidden = false;
+    if (elements.feedMediaVideo.getAttribute("src") !== videoAsset.download.video) {
+      elements.feedMediaVideo.src = videoAsset.download.video;
+    }
+    setImageSource(elements.feedMediaImage, "");
+    elements.feedMediaDemo.hidden = true;
+    elements.feedMediaDemo.textContent = "";
+    elements.feedMediaCopy.textContent = `${bundle.label} motion pass is ready to review or export.`;
+    return;
+  }
+
+  elements.feedMediaVideo.hidden = true;
+  elements.feedMediaVideo.removeAttribute("src");
+
+  if (videoIsReady(videoAsset) && videoAsset?.demo) {
+    elements.feedMediaFrame.dataset.state = "demo";
+    setImageSource(elements.feedMediaImage, "");
+    elements.feedMediaDemo.hidden = false;
+    elements.feedMediaDemo.innerHTML = `
+      <strong>${escapeHtml(videoAsset.demoTitle || "Motion concept ready")}</strong>
+      <p>${escapeHtml(videoAsset.demoSummary || "This case already has a local motion concept attached.")}</p>
+    `;
+    elements.feedMediaCopy.textContent = "Motion is attached to the same packet, so visual handoff and script stay aligned.";
+    return;
+  }
+
+  elements.feedMediaFrame.dataset.state = videoAsset?.id ? "loading" : "image";
+  setImageSource(elements.feedMediaImage, featureCover, `${packet.label} media preview`);
+  elements.feedMediaDemo.hidden = true;
+  elements.feedMediaDemo.textContent = "";
+  elements.feedMediaCopy.textContent = videoAsset?.id
+    ? "Motion is rendering. The cover stays live so the package still reads as one visual system."
+    : imageAsset?.status === "seeded"
+      ? "Starter media is connected by default. Generate a new cover or video when the draft is locked."
+      : "Generated media is already attached to this case and mirrored across feed, draft, and share.";
+}
+
 function renderHero() {
   const packet = getPacket();
   const audience = getAudience();
@@ -1451,19 +1627,20 @@ function renderHero() {
   const queue = store.workspace?.queue || [];
   const claim = getClaim();
   const feed = getFeedSignals(packet.id);
-  const heroCover = buildPosterDataUrl({ packet, audience, claim, bundle, mode: "case" });
+  const heroCover = getDisplayImageAsset(packet.id, getWorkspace(packet.id)?.selectedFormat)?.dataUrl
+    || buildPosterDataUrl({ packet, audience, claim, bundle, mode: "case" });
 
   elements.heroQuestion.textContent = queue[0] || packet.question;
-  elements.heroBefore.textContent = `${packet.vibeLabel || packet.summary}`;
-  elements.heroAfter.textContent = sliceWords(bundle.caption, 26);
+  elements.heroBefore.textContent = `${feed.detectorLabel}. ${sliceWords(packet.summary, 20)}`;
+  elements.heroAfter.textContent = sliceWords(bundle.shareSummary || bundle.caption, 22);
   elements.heroOutputLabel.textContent = `${feed.spreadHeat.toUpperCase()} heat / ${feed.correctionMode} / ${audience.label}`;
   setImageSource(elements.heroCover, heroCover, `${packet.label} cover`);
   elements.visualPacket.textContent = `${packet.shortLabel} / ${packet.thumbnailTheme || feed.platform}`;
   elements.visualClaim.textContent = `${claimStatusText(claim.status)} / ${sliceWords(claim.title, 10)}`;
-  elements.visualShareSummary.textContent = `${bundle.label} / ${packet.creatorArchetype || feed.correctionMode}`;
+  elements.visualShareSummary.textContent = `${bundle.label} / ${feed.correctionMode}`;
   elements.visualHook.textContent = bundle.hook;
   elements.visualSlides.innerHTML = createListMarkup(bundle.slides.slice(0, 3));
-  elements.visualComment.textContent = `${bundle.commentPrompt} Keep the receipts visible.`;
+  elements.visualComment.textContent = `${bundle.commentPrompt} ${claim.citations[0] || "Keep one receipt visible."}`;
   elements.visualSource.textContent = `${feed.detectorLabel} / ${packet.artDirection || formatFeedReadout(feed)}`;
 }
 
@@ -1496,13 +1673,14 @@ function renderPackets() {
 function renderPacketDetail() {
   const packet = getPacket();
   const feed = getFeedSignals(packet.id);
-  const packetCover = buildPosterDataUrl({
-    packet,
-    audience: getAudience(packet.id),
-    claim: getClaim(packet.id),
-    bundle: getBundle(packet.id),
-    mode: "case"
-  });
+  const packetCover = getDisplayImageAsset(packet.id, getWorkspace(packet.id)?.selectedFormat)?.dataUrl
+    || buildPosterDataUrl({
+      packet,
+      audience: getAudience(packet.id),
+      claim: getClaim(packet.id),
+      bundle: getBundle(packet.id),
+      mode: "case"
+    });
 
   elements.packetType.textContent = `${packet.type} / ${packet.creatorArchetype || "Response kit"}`;
   elements.packetType.dataset.status = "packet";
@@ -1692,6 +1870,7 @@ function renderExportCard() {
     rawImageAsset?.dataUrl ? "AI cover ready." : imageAsset?.dataUrl ? "Starter cover ready." : "",
     videoIsReady(videoAsset) ? "Short video ready." : videoAsset?.id ? "Short video rendering." : ""
   ].filter(Boolean).join(" ");
+  const exportCover = imageAsset?.dataUrl || buildPosterDataUrl({ packet, audience, claim, bundle });
 
   elements.exportTitle.textContent = approved
     ? "Share package ready"
@@ -1708,6 +1887,7 @@ function renderExportCard() {
   elements.exportAvoidLine.textContent = detector.deceptionPatterns[0] || "Avoid mirroring the hottest misleading framing.";
   elements.exportModerationNote.textContent = `${detector.riskToAudience}. Keep replies tied to the record.`;
   elements.exportReceiptsLine.textContent = [claim.citations[0], claim.citations[1]].filter(Boolean).join(" | ") || bundle.citations.slice(0, 2).join(" | ");
+  setImageSource(elements.exportPreviewCover, exportCover, `${packet.label} export preview cover`);
   elements.exportPreviewTitle.textContent = bundle.hook;
   elements.exportPreviewSummary.textContent = bundle.shareSummary;
   elements.exportPreviewPrompt.textContent = bundle.commentPrompt;
@@ -1780,7 +1960,9 @@ function renderStepRail() {
     panel.classList.toggle("is-active", panel.dataset.stagePanel === activeStage);
   });
 
-  document.title = `Puentes | ${packet.shortLabel} -> ${bundle.label}`;
+  document.title = readonlyMode
+    ? "Puentes | Public share preview"
+    : "Puentes | Feed-first civic response";
 }
 
 function revealActiveStepCard() {
@@ -1811,6 +1993,8 @@ function renderReadonlyState() {
     const claim = getClaim(packet?.id);
     const feed = getFeedSignals(packet?.id);
     const detector = getClaimDetector(packet?.id);
+    const shareCover = getDisplayImageAsset(packet?.id, workspace?.selectedFormat)?.dataUrl
+      || buildPosterDataUrl({ packet, audience, claim, bundle });
 
     elements.readonlyBanner.textContent = `Readonly public preview for ${packet.label}. This link is for review and sharing, not editing.`;
     elements.shareTitle.textContent = bundle.title;
@@ -1818,6 +2002,7 @@ function renderReadonlyState() {
     elements.shareDetectorBadge.textContent = feed.detectorLabel;
     elements.shareMetaBadge.textContent = `${audience.label} | ${workspace.selectedFormat}`;
     elements.shareResponseMode.textContent = feed.correctionMode;
+    setImageSource(elements.shareCover, shareCover, `${packet.label} public share cover`);
     elements.shareHook.textContent = bundle.hook;
     elements.shareSummary.textContent = bundle.caption;
     elements.sharePinnedComment.textContent = `${bundle.commentPrompt} Sources are attached in the caption and the first comment.`;
@@ -1828,7 +2013,10 @@ function renderReadonlyState() {
     elements.shareDetectorSummary.textContent = `${feed.spreadPattern}. ${detector.riskToAudience}`;
     elements.shareReceipts.innerHTML = createListMarkup(bundle.citations.slice(0, 3), "No receipts attached.");
     elements.shareGuidance.textContent = `${detector.missingContextType} Repost only with the detector line and receipts still visible.`;
+    return;
   }
+
+  setImageSource(elements.shareCover, "");
 }
 
 function renderNextAction() {
@@ -1905,9 +2093,97 @@ function renderNextAction() {
   elements.nextActionButton.dataset.stageTrigger = config.stage;
 }
 
+function getSurfaceFromHash(hash = window.location.hash) {
+  if (hash === "#case" || hash === "#workspace") {
+    return "case";
+  }
+
+  if (hash === "#share" || hash === "#share-artifact") {
+    return "share";
+  }
+
+  return "feed";
+}
+
+function getSurfaceHash(surface = activeSurface) {
+  if (surface === "case") {
+    return "#case";
+  }
+
+  if (surface === "share") {
+    return "#share";
+  }
+
+  return "#top";
+}
+
+function applySurfaceFromUrl() {
+  if (readonlyMode) {
+    activeSurface = "share";
+    activeStage = "export";
+    return;
+  }
+
+  activeSurface = getSurfaceFromHash();
+  if (activeSurface === "share") {
+    activeStage = "export";
+  }
+}
+
+function renderSurfaceShell() {
+  const packet = getPacket();
+  const workspace = getWorkspace(packet?.id);
+  const audience = getAudience(packet?.id);
+  const bundle = getBundle(packet?.id);
+  const claim = getClaim(packet?.id);
+  const overlayOpen = readonlyMode || activeSurface !== "feed";
+  const shareSurface = readonlyMode || activeSurface === "share";
+
+  document.body.classList.toggle("is-feed-surface", !overlayOpen);
+  document.body.classList.toggle("is-case-surface", overlayOpen && !shareSurface);
+  document.body.classList.toggle("is-share-surface", shareSurface);
+  document.body.classList.toggle("is-surface-open", overlayOpen);
+  document.body.classList.toggle("has-surface-lock", overlayOpen && !readonlyMode);
+
+  if (elements.workflowShell) {
+    elements.workflowShell.setAttribute("aria-hidden", String(!overlayOpen));
+  }
+
+  if (elements.surfaceKicker && elements.surfaceTitle && elements.surfaceDescription) {
+    if (shareSurface) {
+      elements.surfaceKicker.textContent = readonlyMode ? "Public share" : "Share surface";
+      elements.surfaceTitle.textContent = readonlyMode
+        ? `${packet.shortLabel} public handoff`
+        : `Review and ship ${packet.shortLabel}.`;
+      elements.surfaceDescription.textContent = readonlyMode
+        ? "Readonly view with the claim, correction, and receipts intact."
+        : workspace.reviewStatus === "approved"
+          ? `${bundle.label} is approved for ${audience.label.toLowerCase()} mode.`
+          : "Finish the checklist, unlock the handoff, and open the public preview.";
+    } else {
+      elements.surfaceKicker.textContent = "Case surface";
+      elements.surfaceTitle.textContent = `${packet.shortLabel} live case`;
+      elements.surfaceDescription.textContent = `${claimStatusText(claim.status)} claim / ${bundle.label} / ${audience.label} mode.`;
+    }
+  }
+
+  if (elements.closeSurface) {
+    elements.closeSurface.hidden = readonlyMode;
+  }
+
+  document.querySelectorAll("[data-open-surface]").forEach((link) => {
+    const isActive = link.dataset.openSurface === (shareSurface ? "share" : activeSurface);
+    link.classList.toggle("is-active", isActive);
+    link.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+}
+
 function renderAll() {
+  applyPacketTheme();
   renderReadonlyState();
+  renderSurfaceShell();
   renderHero();
+  renderFeedHome();
   renderAudience();
   renderQueue();
   renderPackets();
@@ -1939,6 +2215,46 @@ function setActiveStage(stage) {
     renderStepRail();
     revealActiveStepCard();
   }
+}
+
+function setSurface(surface, { syncHash = true } = {}) {
+  const nextSurface = readonlyMode
+    ? "share"
+    : SURFACES.includes(surface)
+      ? surface
+      : "feed";
+  const workspace = getWorkspace();
+
+  activeSurface = nextSurface;
+  if (activeSurface === "share") {
+    activeStage = "export";
+  } else if (activeSurface === "case" && activeStage === "export") {
+    activeStage = workspace?.reviewStatus === "approved" ? "draft" : "verify";
+  }
+
+  if (syncHash && !readonlyMode) {
+    const nextHash = getSurfaceHash(activeSurface);
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+      return;
+    }
+  }
+
+  renderAll();
+}
+
+function focusStage(stage, { syncHash = true } = {}) {
+  if (!STAGES.includes(stage)) {
+    return;
+  }
+
+  activeStage = stage;
+  setSurface(stage === "export" ? "share" : "case", { syncHash });
+}
+
+function handleSurfaceHashChange() {
+  applySurfaceFromUrl();
+  renderAll();
 }
 
 function chooseDefaultStage() {
@@ -2033,6 +2349,7 @@ function applyShareModeFromUrl() {
     return;
   }
 
+  activeSurface = "share";
   activeStage = "export";
 
   const requestedAudience = params.get("audience");
@@ -2060,6 +2377,9 @@ function applyStageFromUrl() {
   }
 
   activeStage = requestedStage;
+  if (!readonlyMode) {
+    activeSurface = requestedStage === "export" ? "share" : "case";
+  }
 }
 
 async function bootstrap() {
@@ -2079,6 +2399,7 @@ async function bootstrap() {
   }
 
   applyShareModeFromUrl();
+  applySurfaceFromUrl();
   applyStageFromUrl();
   renderAll();
 }
@@ -2283,7 +2604,7 @@ async function refreshVideoStatus(packetId = getPacket()?.id, format = getWorksp
 }
 
 async function runSmokeDemoFlow() {
-  setActiveStage("draft");
+  focusStage("draft", { syncHash: false });
   setAppStatus("Running demo smoke flow...", "loading");
 
   await generateTextDraft(elements.generateText);
@@ -2665,10 +2986,28 @@ function bindEvents() {
   document.addEventListener("click", async (event) => {
     const packet = getPacket();
     const workspace = getWorkspace();
+    const surfaceLink = event.target.closest("[data-open-surface]");
     const stageTrigger = event.target.closest("[data-stage-trigger]");
 
+    if (surfaceLink) {
+      event.preventDefault();
+      const surface = surfaceLink.dataset.openSurface;
+      if (surface === "share") {
+        focusStage("export");
+        return;
+      }
+
+      setSurface(surface || "feed");
+      return;
+    }
+
+    if (event.target.id === "close-surface") {
+      setSurface("feed");
+      return;
+    }
+
     if (stageTrigger) {
-      setActiveStage(stageTrigger.dataset.stageTrigger);
+      focusStage(stageTrigger.dataset.stageTrigger);
       return;
     }
 
@@ -2698,7 +3037,7 @@ function bindEvents() {
           `${packet.label} -> ${audience.label} mode`
         );
         setAppStatus("Audience updated.", "success", true);
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2727,7 +3066,7 @@ function bindEvents() {
           nextPacket.label
         );
         setAppStatus("Packet loaded.", "success", true);
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2758,7 +3097,7 @@ function bindEvents() {
           "Opened claim",
           claim.title
         );
-        setActiveStage("draft");
+        focusStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2782,7 +3121,7 @@ function bindEvents() {
           "Switched output",
           formatButton.textContent.trim()
         );
-        setActiveStage("draft");
+        focusStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2910,7 +3249,7 @@ function bindEvents() {
         await queueQuestion(question);
         elements.questionInput.value = "";
         setAppStatus("Question added to the queue.", "success", true);
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -2934,7 +3273,7 @@ function bindEvents() {
           "Opened packet",
           nextPacket.label
         );
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3010,7 +3349,7 @@ function bindEvents() {
           packet.label
         );
         flashFeedback("Export package unlocked.");
-        setActiveStage("export");
+        focusStage("export");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3032,7 +3371,7 @@ function bindEvents() {
           packet.label
         );
         flashFeedback("Packet marked for revision.");
-        setActiveStage("verify");
+        focusStage("verify");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3131,7 +3470,7 @@ function bindEvents() {
         );
         pulseButtonDone(elements.duplicateAudience, "Remixed");
         flashFeedback(`Remixed for ${nextAudience.label.toLowerCase()} mode.`);
-        setActiveStage("draft");
+        focusStage("draft");
       } catch (error) {
         setAppStatus(error.message, "error");
       }
@@ -3174,6 +3513,7 @@ async function init() {
   cacheElements();
   hydrateMediaSnapshot(loadMediaSnapshot());
   bindEvents();
+  window.addEventListener("hashchange", handleSurfaceHashChange);
   setAppStatus("Loading creator workflow...", "loading");
 
   try {
