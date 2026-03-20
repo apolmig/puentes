@@ -243,10 +243,8 @@ async function main() {
     record(
       results,
       "Detector layer renders",
-      typeof heroClaim === "string" && heroClaim.includes("Out-of-context policy clip"),
+      typeof heroClaim === "string" && heroClaim.includes("The vote removed all tenant protections"),
       heroClaim
-      typeof heroText === "string" && /source-linked (cut|handoff)/i.test(heroText),
-      heroText || await page.title()
     );
 
     const audienceCount = await page.locator("#audience-tabs button").count();
@@ -274,7 +272,7 @@ async function main() {
     record(
       results,
       "Audience mode switch works",
-      audienceTitle === "Shaped for classroom use, youth workshops, and guided discussion",
+      audienceTitle === "For classrooms, clubs, and guided discussion",
       audienceTitle
     );
 
@@ -338,16 +336,15 @@ async function main() {
     const exportStatus = await page.locator("#export-handoff-status").textContent();
     const exportSummary = await page.locator("#export-summary").textContent();
     const correctionMode = await page.locator("#export-packaging").textContent();
-    const previewTitle = await page.locator("#export-preview-title").textContent();
     record(
       results,
       "Approval gate updates",
-      gateTitle === "Approved for creator or educator handoff" &&
-        exportStatus === "Handoff ready" &&
+      gateTitle === "Ready to share" &&
+        exportStatus === "Share ready" &&
         typeof correctionMode === "string" &&
         correctionMode.trim().length > 5 &&
         typeof exportSummary === "string" &&
-        exportSummary.includes("Feed read:"),
+        exportSummary.includes("ready for creator mode"),
       `${gateTitle} / ${exportStatus} / ${correctionMode} / ${exportSummary}`
     );
 
@@ -368,9 +365,6 @@ async function main() {
         shareView.shareModeClass === true &&
         shareView.stepRailDisplay === "none",
       JSON.stringify(shareView)
-        typeof previewTitle === "string" &&
-        previewTitle.trim().length > 10,
-      `${gateTitle} / ${exportStatus} / ${previewTitle}`
     );
     await sharePage.close();
 
