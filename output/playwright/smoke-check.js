@@ -235,7 +235,7 @@ async function main() {
     record(
       results,
       "Home hero renders",
-      heroText === "Turn a political fake-news spike into a clean, source-linked response.",
+      heroText === "Catch the spike. Post the fix.",
       heroText || await page.title()
     );
 
@@ -266,14 +266,14 @@ async function main() {
       "Feed home renders",
       liveFeedCount === 3 &&
         publishingCuts === 4 &&
-        feedMediaVisible === true &&
+        feedMediaVisible === false &&
         typeof feedFeatureTitle === "string" &&
         feedFeatureTitle.includes("The vote removed all tenant protections"),
       `live=${liveFeedCount}, cuts=${publishingCuts}, title=${feedFeatureTitle}`
     );
 
     const supportCount = await page.locator(".support-panel").count();
-    record(results, "Support panels remain reachable", supportCount === 3, `supportPanels=${supportCount}`);
+    record(results, "Trust strip remains reachable", supportCount === 1, `supportPanels=${supportCount}`);
 
     await page.locator("a[href='#case']").first().click();
     await page.waitForFunction(() => document.body.classList.contains("is-case-surface"), null, { timeout: 3000 });
@@ -287,6 +287,29 @@ async function main() {
       "Case surface opens",
       caseSurface.hash === "#case" && caseSurface.caseOpen === true && caseSurface.ariaHidden === "false",
       JSON.stringify(caseSurface)
+    );
+    const draftStageState = await page.evaluate(() => ({
+      draftCardActive: document.querySelector("#step-draft-card")?.classList.contains("is-active"),
+      draftPanelActive: document.querySelector("[data-stage-panel='draft']")?.classList.contains("is-active")
+    }));
+    record(
+      results,
+      "Case opens in build mode",
+      draftStageState.draftCardActive === true && draftStageState.draftPanelActive === true,
+      JSON.stringify(draftStageState)
+    );
+    const caseVisibility = await page.evaluate(() => ({
+      readonlyBannerHidden: document.querySelector("#readonly-banner")?.hidden,
+      shareArtifactHidden: document.querySelector("#share-artifact")?.hidden,
+      shareArtifactDisplay: window.getComputedStyle(document.querySelector("#share-artifact")).display
+    }));
+    record(
+      results,
+      "Case keeps public post preview hidden",
+      caseVisibility.readonlyBannerHidden === true &&
+        caseVisibility.shareArtifactHidden === true &&
+        caseVisibility.shareArtifactDisplay === "none",
+      JSON.stringify(caseVisibility)
     );
 
     await page.locator("#step-intake-card").click();
