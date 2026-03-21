@@ -1962,7 +1962,7 @@ function renderStepRail() {
 
   document.title = readonlyMode
     ? "Puentes | Public share preview"
-    : "Puentes | Feed-first civic response";
+    : "Puentes | Creator studio for civic response";
 }
 
 function revealActiveStepCard() {
@@ -1981,11 +1981,13 @@ function revealActiveStepCard() {
 }
 
 function renderReadonlyState() {
-  document.body.classList.toggle("is-share-mode", readonlyMode);
-  elements.readonlyBanner.hidden = !readonlyMode;
-  elements.shareArtifact.hidden = !readonlyMode;
+  const showShareArtifact = readonlyMode || activeSurface === "share";
 
-  if (readonlyMode) {
+  document.body.classList.toggle("is-share-mode", readonlyMode);
+  elements.readonlyBanner.hidden = !showShareArtifact;
+  elements.shareArtifact.hidden = !showShareArtifact;
+
+  if (showShareArtifact) {
     const packet = getPacket();
     const workspace = getWorkspace(packet?.id);
     const audience = getAudience(packet?.id);
@@ -1996,11 +1998,27 @@ function renderReadonlyState() {
     const shareCover = getDisplayImageAsset(packet?.id, workspace?.selectedFormat)?.dataUrl
       || buildPosterDataUrl({ packet, audience, claim, bundle });
 
-    elements.readonlyBanner.textContent = `Readonly public preview for ${packet.label}. This link is for review and sharing, not editing.`;
+    const approved = workspace?.reviewStatus === "approved";
+
+    if (readonlyMode) {
+      elements.readonlyBanner.textContent = `Readonly public preview for ${packet.label}. This link is for review and sharing, not editing.`;
+    } else {
+      elements.readonlyBanner.textContent = approved
+        ? "This is the public-facing post creators can share right now. Review the post, then use the live link or export actions below."
+        : "This is the public-facing post preview. Make it feel ready to post first, then clear review to unlock the live link.";
+    }
     elements.shareTitle.textContent = bundle.title;
-    elements.shareDek.textContent = `${bundle.shareSummary} Built for ${audience.label.toLowerCase()} mode with visible receipts.`;
+    elements.shareDek.textContent = readonlyMode
+      ? `${bundle.shareSummary} Built for ${audience.label.toLowerCase()} mode with visible receipts.`
+      : approved
+        ? `${bundle.shareSummary} This is the exact public-facing post for ${audience.label.toLowerCase()} mode.`
+        : `${bundle.shareSummary} Preview the exact public-facing post before approval so the post surface never feels empty.`;
     elements.shareDetectorBadge.textContent = feed.detectorLabel;
-    elements.shareMetaBadge.textContent = `${audience.label} | ${workspace.selectedFormat}`;
+    elements.shareMetaBadge.textContent = readonlyMode
+      ? `${audience.label} | ${workspace.selectedFormat}`
+      : approved
+        ? `Ready to post | ${workspace.selectedFormat}`
+        : `Preview only | ${workspace.selectedFormat}`;
     elements.shareResponseMode.textContent = feed.correctionMode;
     setImageSource(elements.shareCover, shareCover, `${packet.label} public share cover`);
     elements.shareHook.textContent = bundle.hook;
@@ -2012,7 +2030,11 @@ function renderReadonlyState() {
     elements.shareConfidence.textContent = `${claimStatusText(claim.status)} / ${detector.confidenceBand}`;
     elements.shareDetectorSummary.textContent = `${feed.spreadPattern}. ${detector.riskToAudience}`;
     elements.shareReceipts.innerHTML = createListMarkup(bundle.citations.slice(0, 3), "No receipts attached.");
-    elements.shareGuidance.textContent = `${detector.missingContextType} Repost only with the detector line and receipts still visible.`;
+    elements.shareGuidance.textContent = readonlyMode
+      ? `${detector.missingContextType} Repost only with the detector line and receipts still visible.`
+      : approved
+        ? `${detector.missingContextType} Keep the detector line and visible receipts attached when this leaves Puentes.`
+        : `${detector.missingContextType} Tighten the public post until it already looks share-ready, then unlock the live link.`;
     return;
   }
 
@@ -2127,6 +2149,8 @@ function applySurfaceFromUrl() {
   activeSurface = getSurfaceFromHash();
   if (activeSurface === "share") {
     activeStage = "export";
+  } else if (activeSurface === "case") {
+    activeStage = "draft";
   }
 }
 
@@ -2151,19 +2175,19 @@ function renderSurfaceShell() {
 
   if (elements.surfaceKicker && elements.surfaceTitle && elements.surfaceDescription) {
     if (shareSurface) {
-      elements.surfaceKicker.textContent = readonlyMode ? "Public share" : "Share surface";
+      elements.surfaceKicker.textContent = readonlyMode ? "Public post" : "Post surface";
       elements.surfaceTitle.textContent = readonlyMode
-        ? `${packet.shortLabel} public handoff`
-        : `Review and ship ${packet.shortLabel}.`;
+        ? `${packet.shortLabel} public post`
+        : `${packet.shortLabel} creator post`;
       elements.surfaceDescription.textContent = readonlyMode
         ? "Readonly view with the claim, correction, and receipts intact."
         : workspace.reviewStatus === "approved"
-          ? `${bundle.label} is approved for ${audience.label.toLowerCase()} mode.`
-          : "Finish the checklist, unlock the handoff, and open the public preview.";
+          ? `${bundle.label} is approved for ${audience.label.toLowerCase()} mode and ready to post.`
+          : "Preview the public-facing post now, then clear review to unlock the live link.";
     } else {
-      elements.surfaceKicker.textContent = "Case surface";
-      elements.surfaceTitle.textContent = `${packet.shortLabel} live case`;
-      elements.surfaceDescription.textContent = `${claimStatusText(claim.status)} claim / ${bundle.label} / ${audience.label} mode.`;
+      elements.surfaceKicker.textContent = "Studio surface";
+      elements.surfaceTitle.textContent = `${packet.shortLabel} creator studio`;
+      elements.surfaceDescription.textContent = `${bundle.label} / ${audience.label} mode / source-linked reply build.`;
     }
   }
 
@@ -2217,7 +2241,7 @@ function setActiveStage(stage) {
   }
 }
 
-function setSurface(surface, { syncHash = true } = {}) {
+function setSurface(surface, { syncHash = true, preferredStage = null } = {}) {
   const nextSurface = readonlyMode
     ? "share"
     : SURFACES.includes(surface)
@@ -2228,8 +2252,10 @@ function setSurface(surface, { syncHash = true } = {}) {
   activeSurface = nextSurface;
   if (activeSurface === "share") {
     activeStage = "export";
+  } else if (activeSurface === "case" && STAGES.includes(preferredStage) && preferredStage !== "export") {
+    activeStage = preferredStage;
   } else if (activeSurface === "case" && activeStage === "export") {
-    activeStage = workspace?.reviewStatus === "approved" ? "draft" : "verify";
+    activeStage = "draft";
   }
 
   if (syncHash && !readonlyMode) {
@@ -2997,7 +3023,9 @@ function bindEvents() {
         return;
       }
 
-      setSurface(surface || "feed");
+      setSurface(surface || "feed", {
+        preferredStage: surface === "case" ? "draft" : null
+      });
       return;
     }
 

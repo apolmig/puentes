@@ -18,3 +18,5 @@ output/playwright/*.png
 output/*.log
 output/*.err
 output/playwright/*.log
+output/live-site-*.png
+output/local-*.png

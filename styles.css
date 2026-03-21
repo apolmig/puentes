@@ -81,6 +81,10 @@ a {
   color: inherit;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 :focus-visible {
   outline: 2px solid color-mix(in oklab, var(--accent) 72%, white);
   outline-offset: 3px;
@@ -4023,5 +4027,559 @@ body.is-case-surface .signal-card {
 
   .feed-bundle-art {
     aspect-ratio: 1.16;
+  }
+}
+
+/* Creator-first reduction */
+
+body.is-feed-surface .hero {
+  grid-template-columns: minmax(0, 0.58fr) minmax(440px, 1.42fr);
+  gap: 1rem;
+}
+
+.hero-copy {
+  gap: 0.85rem;
+}
+
+.hero-text {
+  max-width: 30rem;
+}
+
+.hero-case-card {
+  padding: 0.85rem 0.95rem;
+}
+
+.hero-case-head h2 {
+  font-size: 1.5rem;
+}
+
+.feed-meter {
+  display: none;
+}
+
+.hero-case-grid {
+  gap: 0.5rem;
+}
+
+.hero-case-panel {
+  padding: 0.72rem 0.8rem;
+}
+
+.hero-case-panel p {
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.hero-preview {
+  padding: 1.15rem;
+}
+
+.storyboard-stage {
+  grid-template-columns: minmax(420px, 1.24fr) minmax(210px, 0.54fr);
+}
+
+.before-card {
+  display: none;
+}
+
+.feed-home {
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  grid-template-areas: "feature bundles";
+  align-items: stretch;
+}
+
+.feed-media,
+.feed-rail {
+  display: none;
+}
+
+.feed-feature,
+.feed-bundle-panel {
+  min-height: 100%;
+}
+
+.feed-bundle-panel {
+  display: grid;
+  align-content: start;
+}
+
+.feed-bundle-grid {
+  grid-template-columns: 1fr;
+}
+
+.narrative-section {
+  margin-top: 0.3rem;
+}
+
+.support-panel {
+  padding: 1rem 1.05rem;
+}
+
+.workflow-shell {
+  padding: 4.4rem 0.35rem 0.35rem;
+  background: rgba(8, 12, 20, 0.8);
+  backdrop-filter: blur(28px);
+}
+
+.workflow-overlay {
+  width: min(1480px, calc(100% - 0.2rem));
+  max-height: calc(100vh - 4.7rem);
+  border-radius: 1.8rem;
+  box-shadow: 0 36px 120px rgba(8, 12, 20, 0.42);
+}
+
+body.is-surface-open .hero,
+body.is-surface-open .feed-home,
+body.is-surface-open .narrative-section {
+  opacity: 0.1;
+  filter: blur(18px);
+  transform: scale(0.985);
+  pointer-events: none;
+}
+
+.creator-sidebar {
+  position: sticky;
+  top: 0;
+  padding: 1rem;
+  border: 1px solid color-mix(in oklab, var(--packet-accent) 18%, var(--line));
+  border-radius: 1.35rem;
+  background:
+    radial-gradient(circle at 84% 8%, color-mix(in oklab, var(--packet-glow) 10%, transparent), transparent 20%),
+    linear-gradient(180deg, color-mix(in oklab, white 94%, var(--paper)) 0%, color-mix(in oklab, white 88%, var(--paper-deep)) 100%);
+  box-shadow: var(--shadow-soft);
+}
+
+.creator-sidebar > * {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.creator-sidebar > * + * {
+  margin-top: 0.95rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--line);
+}
+
+.creator-visual-card .generated-image-frame,
+.creator-drawer,
+.response-kit-card {
+  background: transparent;
+}
+
+body.is-share-surface .risk-stack,
+body.is-share-surface .blocker-card,
+body.is-share-surface .history-card,
+body.is-share-surface .panel-nav,
+body.is-share-surface .export-panel > .panel-header,
+body.is-share-surface .export-proof-grid.export-kit-grid {
+  display: none;
+}
+
+body.is-share-surface .share-artifact {
+  display: grid;
+  margin-bottom: 0.9rem;
+}
+
+body.is-share-surface .share-artifact-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.is-share-surface .share-proof-card {
+  display: none;
+}
+
+body.is-share-surface .share-phone-shell {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+body.is-share-surface .export-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+body.is-share-surface .export-preview-card {
+  order: -3;
+  background:
+    radial-gradient(circle at 82% 8%, color-mix(in oklab, var(--packet-glow) 16%, transparent), transparent 24%),
+    linear-gradient(180deg, color-mix(in oklab, black 78%, var(--packet-base)) 0%, color-mix(in oklab, black 62%, var(--packet-base)) 100%);
+  color: #fff7f1;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.is-share-surface .export-preview-card h5,
+body.is-share-surface .export-preview-card p,
+body.is-share-surface .export-preview-card .detail-kicker {
+  color: inherit;
+}
+
+body.is-share-surface .share-link-card {
+  order: -2;
+}
+
+body.is-share-surface .export-actions {
+  order: -1;
+}
+
+body.is-share-surface .export-guidance {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  body.is-feed-surface .hero,
+  .feed-home {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "feature"
+      "bundles";
+  }
+
+  .storyboard-stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .workflow-shell {
+    padding: 4rem 0.35rem 0.35rem;
+  }
+
+  body.is-surface-open .hero,
+  body.is-surface-open .feed-home,
+  body.is-surface-open .narrative-section {
+    opacity: 0.04;
+  }
+
+  .creator-sidebar {
+    position: static;
+  }
+}
+
+/* Creator-first reduction */
+
+body.is-feed-surface .hero {
+  grid-template-columns: minmax(0, 0.6fr) minmax(420px, 1.4fr);
+  gap: 1rem;
+  padding-top: clamp(1rem, 3vw, 1.8rem);
+}
+
+.hero-copy {
+  gap: 0.8rem;
+  align-content: start;
+  padding: 1rem 1.05rem 1.15rem;
+}
+
+.hero-copy h1 {
+  max-width: 8.4ch;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.92;
+}
+
+.hero-text {
+  max-width: 31rem;
+  font-size: 1.02rem;
+}
+
+.hero-case-card {
+  display: none;
+}
+
+.hero-preview {
+  min-height: clamp(34rem, 78vh, 46rem);
+  padding: 1rem;
+}
+
+.storyboard-stage {
+  height: 100%;
+  grid-template-columns: minmax(360px, 1fr) minmax(240px, 0.54fr);
+  align-items: stretch;
+}
+
+.hero-phone-shell {
+  height: 100%;
+}
+
+.hero-phone-shell .phone-screen {
+  min-height: 100%;
+  align-content: start;
+}
+
+.preview-proof-stack {
+  grid-template-rows: auto auto 1fr;
+}
+
+.feed-home {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.88fr);
+  grid-template-areas:
+    "feature feature"
+    "rail bundles";
+  gap: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.feed-media {
+  display: none;
+}
+
+.feed-feature {
+  padding: 0.9rem 1rem;
+}
+
+.feed-feature .panel-header h2 {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+.feed-feature-body {
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+}
+
+.feed-feature-cover {
+  min-height: 10rem;
+  max-height: 10rem;
+}
+
+.feed-feature-copy {
+  gap: 0.7rem;
+}
+
+.feed-feature-copy h3 {
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+}
+
+.feed-feature-receipts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feed-feature-receipts li {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--packet-accent) 12%, var(--line));
+  border-radius: 0.95rem;
+  background: color-mix(in oklab, white 95%, var(--packet-accent));
+  color: var(--ink-soft);
+}
+
+.feed-rail,
+.feed-bundle-panel {
+  padding: 0.9rem;
+}
+
+.feed-rail .panel-header h3,
+.feed-bundle-panel .panel-header h3 {
+  font-size: 1.35rem;
+}
+
+.feed-packet-card {
+  gap: 0.55rem;
+}
+
+.feed-packet-art {
+  aspect-ratio: 0.96;
+}
+
+.feed-bundle-card {
+  grid-template-columns: 104px minmax(0, 1fr);
+}
+
+body.is-surface-open main > section:not(.workflow-shell) {
+  opacity: 0.08;
+  filter: blur(18px) saturate(0.88);
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 180ms ease, filter 180ms ease;
+}
+
+.workflow-shell {
+  padding: 4.7rem 0.8rem 0.8rem;
+  background: rgba(11, 15, 28, 0.56);
+  backdrop-filter: blur(30px);
+}
+
+.workflow-overlay {
+  width: min(1460px, 100%);
+  max-height: calc(100vh - 5.35rem);
+  padding: 0.9rem;
+}
+
+body.is-case-surface .workflow-body {
+  grid-template-columns: 1fr;
+}
+
+body.is-case-surface .workflow-body .step-rail {
+  position: static;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(14rem, 1fr);
+  overflow-x: auto;
+  padding: 0 0 0.35rem;
+}
+
+body.is-case-surface .workspace-heading,
+body.is-case-surface .next-action-card,
+body.is-case-surface .signal-board {
+  display: none;
+}
+
+body.is-case-surface .workflow-main {
+  gap: 0.8rem;
+}
+
+body.is-case-surface .surface-overlay-head {
+  margin-bottom: 0.55rem;
+}
+
+body.is-case-surface .surface-overlay-copy {
+  max-width: 30rem;
+}
+
+.narrative-section {
+  margin-top: 1rem;
+}
+
+.support-panel-compact {
+  padding: 1rem 1rem 1.05rem;
+}
+
+.support-panel-compact .support-panel-head {
+  margin-bottom: 0.7rem;
+}
+
+@media (max-width: 1180px) {
+  body.is-feed-surface .hero,
+  .feed-home {
+    grid-template-columns: 1fr;
+  }
+
+  .feed-home {
+    grid-template-areas:
+      "feature"
+      "rail"
+      "bundles";
+  }
+}
+
+@media (max-width: 980px) {
+  .feed-feature-body,
+  .feed-feature-receipts,
+  .storyboard-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-shell {
+    padding: 4.5rem 0.6rem 0.6rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-copy {
+    padding: 0.9rem;
+  }
+
+  .hero-copy h1 {
+    max-width: 10ch;
+    font-size: clamp(2.7rem, 13vw, 4.5rem);
+  }
+
+  .hero-preview {
+    min-height: 0;
+  }
+
+  .feed-feature-cover {
+    max-height: none;
+    min-height: 12rem;
+  }
+
+  .feed-bundle-card {
+    grid-template-columns: 86px minmax(0, 1fr);
+  }
+
+  body.is-surface-open main > section:not(.workflow-shell) {
+    opacity: 0.03;
+    filter: blur(10px);
+  }
+}
+
+/* Creator-first reduction */
+
+.support-cluster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.support-panel {
+  padding: 1rem 1rem 1.05rem;
+}
+
+.support-panel-head {
+  margin-bottom: 0.6rem;
+}
+
+.support-panel-head h2 {
+  font-size: clamp(1.55rem, 2vw, 1.95rem);
+}
+
+.support-card-grid,
+.support-card-grid-tight {
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.support-card {
+  padding: 0.85rem 0.9rem;
+}
+
+.support-card h3 {
+  font-size: 1.18rem;
+}
+
+.support-card p {
+  font-size: 0.92rem;
+}
+
+body.is-share-surface .share-artifact {
+  display: grid;
+  margin-bottom: 0.75rem;
+}
+
+body.is-share-surface .share-artifact-grid {
+  grid-template-columns: minmax(320px, 0.96fr) minmax(0, 0.62fr);
+}
+
+body.is-share-surface .risk-stack,
+body.is-share-surface .history-card,
+body.is-share-surface .export-preview-card {
+  display: none;
+}
+
+body.is-share-surface .export-panel {
+  gap: 0.8rem;
+}
+
+@media (max-width: 1180px) {
+  .feed-home {
+    grid-template-areas:
+      "feature"
+      "media"
+      "rail"
+      "bundles";
+  }
+
+  .support-cluster {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-case-card {
+    display: none;
   }
 }
