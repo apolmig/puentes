@@ -1,22 +1,44 @@
-data/store.json
-.netlify
-.tmp-edge*/
-server.err
-server.out
-desktop.png
-mobile.png
-smoke*.png
-smoke*.html
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-node_modules/
-.npm-cache/
-.localappdata/
-.server.err.log
-.server.out.log
-.server.pid
-output/playwright/*.png
-output/*.log
-output/*.err
-output/playwright/*.log
-output/live-site-*.png
-output/local-*.png
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# env files
+.env*.local
+.env
+
+# local database
+/data/*.db
+/data/*.sqlite
+/data/*.sqlite3
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
