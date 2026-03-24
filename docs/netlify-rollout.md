@@ -7,7 +7,7 @@ This repo is configured for a Netlify-hosted Next.js deployment. Use this checkl
 - Site repo: `apolmig/puentes`
 - Production branch: `main`
 - Node version: leave [.nvmrc](../.nvmrc) in place so Netlify builds with Node `22`
-- pnpm: leave [netlify.toml](../netlify.toml) in place so `PNPM_FLAGS="--shamefully-hoist"` is applied
+- pnpm: leave [netlify.toml](../netlify.toml) in place so `PNPM_FLAGS="--shamefully-hoist"` is applied and Netlify runs `pnpm build` with the Next.js runtime plugin
 - Build settings: remove any legacy publish directory, functions directory, or old plugin overrides from the previous static site if they still exist in the Netlify UI
 
 ## 2. Environment variables
