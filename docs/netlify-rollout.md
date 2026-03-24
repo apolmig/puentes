@@ -6,13 +6,13 @@ This repo is configured for a Netlify-hosted Next.js deployment. Use this checkl
 
 - Site repo: `apolmig/puentes`
 - Production branch: `main`
-- Node version: leave [.nvmrc](/C:/code/Nueva%20carpeta/puentes/.nvmrc) in place so Netlify builds with Node `22`
-- pnpm: leave [netlify.toml](/C:/code/Nueva%20carpeta/puentes/netlify.toml) in place so `PNPM_FLAGS="--shamefully-hoist"` is applied
+- Node version: leave [.nvmrc](../.nvmrc) in place so Netlify builds with Node `22`
+- pnpm: leave [netlify.toml](../netlify.toml) in place so `PNPM_FLAGS="--shamefully-hoist"` is applied
 - Build settings: remove any legacy publish directory, functions directory, or old plugin overrides from the previous static site if they still exist in the Netlify UI
 
 ## 2. Environment variables
 
-Create these as **site environment variables** in Netlify.
+Create these as site environment variables in Netlify.
 
 For `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`:
 - Scope: `Builds` and `Functions`
@@ -89,4 +89,4 @@ If production fails:
 - Production no longer allows local SQLite fallback
 - Production no longer allows local disk uploads
 - Demo seed packets are disabled unless `PUENTES_ENABLE_SEED=true`
-- Client-side packet fetches now send `x-deployment-id` when Netlify provides `NEXT_DEPLOYMENT_ID`, which aligns with Netlify’s skew-protection guidance for explicit `fetch` calls
+- Client-side packet fetches now send `x-deployment-id` when Netlify provides `NEXT_DEPLOYMENT_ID`, which aligns with Netlify's skew-protection guidance for explicit `fetch` calls
