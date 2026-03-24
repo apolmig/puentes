@@ -72,8 +72,22 @@ function updatePacketById(
   return packets.map((packet) => (packet.id === id ? stampPacket(updater(packet)) : packet))
 }
 
+function buildDeploymentHeaders(headers?: HeadersInit) {
+  const nextHeaders = new Headers(headers)
+  const deploymentId = process.env.NEXT_DEPLOYMENT_ID
+
+  if (deploymentId) {
+    nextHeaders.set("x-deployment-id", deploymentId)
+  }
+
+  return nextHeaders
+}
+
 async function requestJson<T>(input: RequestInfo, init?: RequestInit) {
-  const response = await fetch(input, init)
+  const response = await fetch(input, {
+    ...init,
+    headers: buildDeploymentHeaders(init?.headers),
+  })
 
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`)
@@ -114,9 +128,9 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
   const patchPacketRequest = React.useCallback((id: string, body: object) => {
     void fetch(`/api/packets/${id}`, {
       method: "PATCH",
-      headers: {
+      headers: buildDeploymentHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(body),
     })
   }, [])
@@ -207,6 +221,7 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
 
     const response = await fetch(`/api/packets/${id}/assets/${assetId}`, {
       method: "DELETE",
+      headers: buildDeploymentHeaders(),
     })
 
     if (!response.ok) {
