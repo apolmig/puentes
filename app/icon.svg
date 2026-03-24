@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="faviconTitle faviconDesc">
+  <title id="faviconTitle">Puentes icon</title>
+  <desc id="faviconDesc">A stylized P and bridge mark for Puentes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff7b4e"/>
+      <stop offset="100%" stop-color="#cb4920"/>
+    </linearGradient>
+    <linearGradient id="bridge" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff7f1"/>
+      <stop offset="100%" stop-color="#ffe8d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="132" fill="url(#bg)"/>
+  <circle cx="404" cy="122" r="74" fill="#ffd28e" opacity="0.32"/>
+  <circle cx="128" cy="398" r="116" fill="#0f8a87" opacity="0.16"/>
+  <path
+    d="M162 112h116c86 0 142 55 142 132s-56 132-142 132H232v58c0 15-12 27-27 27h-43V112Zm70 74v116h46c38 0 68-23 68-58 0-35-30-58-68-58h-46Z"
+    fill="url(#bridge)"
+  />
+  <path d="M132 324h248" fill="none" stroke="#102337" stroke-linecap="round" stroke-width="22"/>
+  <path d="M164 324c20 0 38 26 54 76" fill="none" stroke="#102337" stroke-linecap="round" stroke-width="18"/>
+  <path d="M256 324c0 0 18 24 30 76" fill="none" stroke="#102337" stroke-linecap="round" stroke-width="18"/>
+  <path d="M348 324c-20 0-38 26-54 76" fill="none" stroke="#102337" stroke-linecap="round" stroke-width="18"/>
+</svg>
