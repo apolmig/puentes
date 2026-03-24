@@ -1,2 +1,5 @@
+[build]
+command = "pnpm build"
+
 [build.environment]
 PNPM_FLAGS = "--shamefully-hoist"
