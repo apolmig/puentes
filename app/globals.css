@@ -5,7 +5,11 @@
   --font-mono: var(--font-code);
 }
 
+
 :root {
+  --font-space: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  --font-code: "IBM Plex Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bg: #f5ece3;
   --bg-strong: #fff8f1;
   --ink: #0f1726;
