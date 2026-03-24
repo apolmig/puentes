@@ -116,7 +116,7 @@ The repo is prepared for Netlify, but dashboard-side setup is still required.
 
 Already done in repo:
 - `.nvmrc` pins Node `22`
-- `netlify.toml` sets `PNPM_FLAGS="--shamefully-hoist"`, `pnpm build`, and enables `@netlify/plugin-nextjs`
+- `netlify.toml` sets `PNPM_FLAGS="--shamefully-hoist"` and `pnpm build`
 - client-side packet fetches send `x-deployment-id` when `NEXT_DEPLOYMENT_ID` is available
 - production runtime requires hosted DB and hosted uploads
 

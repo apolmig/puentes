@@ -3,6 +3,3 @@ command = "pnpm build"
 
 [build.environment]
 PNPM_FLAGS = "--shamefully-hoist"
-
-[[plugins]]
-package = "@netlify/plugin-nextjs"
