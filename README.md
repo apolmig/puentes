@@ -11,13 +11,20 @@ pnpm install
 pnpm dev
 ```
 
-The current local prototype stores packet data in SQLite and uploaded files on disk.
+Local development still supports a file-backed workflow:
 
-## Netlify note
+- SQLite writes can use `PUENTES_DATABASE_URL=file:./data/puentes.db`
+- uploaded evidence can fall back to `public/uploads`
+- demo packets seed automatically unless `PUENTES_ENABLE_SEED=false`
 
-This repo is prepared for Netlify with pnpm and Next.js, but the current persistence layer is still local-only:
+## Netlify production setup
 
-- SQLite writes go to `data/puentes.db`
-- file uploads go to `public/uploads`
+This repo is now prepared to run safely on Netlify, but production must use hosted services:
 
-That works locally, but it is not a production-safe persistence model for Netlify. Before replacing the live `puentes.info` site, move packet data and uploads to hosted services such as Postgres plus object storage.
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+In production, the app refuses to use local SQLite or local disk uploads. Packet data is expected to live in Turso/libSQL, and uploads are expected to go through Cloudinary. That keeps Netlify deploys stateless while preserving the same workspace flows.

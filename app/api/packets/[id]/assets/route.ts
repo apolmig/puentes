@@ -24,16 +24,24 @@ export async function POST(
 
   if (file.size > 25 * 1024 * 1024) {
     return NextResponse.json(
-      { message: "Upload exceeds the 25 MB local size limit" },
+      { message: "Upload exceeds the 25 MB size limit" },
       { status: 413 },
     )
   }
 
-  const asset = await storePacketAsset({
-    packetId: id,
-    file,
-    label: typeof label === "string" ? label : undefined,
-  })
+  try {
+    const asset = await storePacketAsset({
+      packetId: id,
+      file,
+      label: typeof label === "string" ? label : undefined,
+    })
 
-  return NextResponse.json(asset, { status: 201 })
+    return NextResponse.json(asset, { status: 201 })
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Could not upload the packet asset."
+
+    console.error("Packet asset upload failed", error)
+    return NextResponse.json({ message }, { status: 500 })
+  }
 }

@@ -45,6 +45,10 @@ export const packetAssetsTable = sqliteTable("packet_assets", {
   size: integer("size").notNull().default(0),
   url: text("url").notNull(),
   createdAt: text("created_at").notNull(),
+  storageProvider: text("storage_provider").notNull().default("local"),
+  storageKey: text("storage_key").notNull().default(""),
+  storageAssetId: text("storage_asset_id").notNull().default(""),
+  storageResourceType: text("storage_resource_type").notNull().default("raw"),
   sortOrder: integer("sort_order").notNull().default(0),
 })
 

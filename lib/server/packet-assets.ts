@@ -6,10 +6,15 @@ import {
   deriveAssetKindFromMimeType,
 } from "@/lib/bridgebeat"
 import {
+  deletePacketAssetFromCloudinary,
+  uploadPacketAssetToCloudinary,
+} from "@/lib/server/cloudinary"
+import {
   addAssetInDb,
   getPacketAssetFromDb,
   removeAssetInDb,
 } from "@/lib/server/bridgebeat-db"
+import { getCloudinaryRuntimeConfig } from "@/lib/server/runtime-config"
 
 function sanitizeSegment(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "")
@@ -47,10 +52,11 @@ function assetUrlToFilePath(url: string) {
   return join(process.cwd(), "public", url.replace(/^\//, ""))
 }
 
-export async function storePacketAsset(input: {
+async function storePacketAssetLocally(input: {
   packetId: string
   file: File
   label?: string
+  kind: PacketAsset["kind"]
 }) {
   const packetDirectory = join(process.cwd(), "public", "uploads", "packets", input.packetId)
   await mkdir(packetDirectory, { recursive: true })
@@ -61,16 +67,57 @@ export async function storePacketAsset(input: {
 
   await writeFile(targetPath, buffer)
 
-  const asset: PacketAsset = {
-    id: `asset-${crypto.randomUUID().slice(0, 8)}`,
-    kind: deriveAssetKindFromMimeType(input.file.type),
+  return {
+    kind: input.kind,
     label: input.label?.trim() || input.file.name,
     fileName: input.file.name,
     mimeType: input.file.type || "application/octet-stream",
     size: input.file.size,
     url: `/uploads/packets/${input.packetId}/${storedName}`,
     createdAt: new Date().toISOString(),
+    storageProvider: "local" as const,
+    storageKey: `/uploads/packets/${input.packetId}/${storedName}`,
+    storageAssetId: "",
+    storageResourceType: "raw",
   }
+}
+
+export async function storePacketAsset(input: {
+  packetId: string
+  file: File
+  label?: string
+}) {
+  const kind = deriveAssetKindFromMimeType(input.file.type)
+  const uploadedAsset = await uploadPacketAssetToCloudinary({
+    packetId: input.packetId,
+    file: input.file,
+    kind,
+  })
+
+  const asset: PacketAsset = uploadedAsset
+    ? {
+        id: `asset-${crypto.randomUUID().slice(0, 8)}`,
+        kind,
+        label: input.label?.trim() || input.file.name,
+        fileName: input.file.name,
+        mimeType: input.file.type || "application/octet-stream",
+        size: input.file.size,
+        url: uploadedAsset.secureUrl,
+        createdAt: new Date().toISOString(),
+        storageProvider: "cloudinary",
+        storageKey: uploadedAsset.publicId,
+        storageAssetId: uploadedAsset.assetId,
+        storageResourceType: uploadedAsset.resourceType,
+      }
+    : {
+        id: `asset-${crypto.randomUUID().slice(0, 8)}`,
+        ...(await storePacketAssetLocally({
+          packetId: input.packetId,
+          file: input.file,
+          label: input.label,
+          kind,
+        })),
+      }
 
   await addAssetInDb(input.packetId, asset)
   return asset
@@ -83,12 +130,23 @@ export async function deletePacketAsset(packetId: string, assetId: string) {
     return null
   }
 
-  try {
-    await unlink(assetUrlToFilePath(asset.url))
-  } catch {
-    // Ignore missing files and keep the database clean.
+  if (asset.storageProvider === "cloudinary" && asset.storageKey) {
+    await deletePacketAssetFromCloudinary({
+      publicId: asset.storageKey,
+      resourceType: asset.storageResourceType,
+    })
+  } else {
+    try {
+      await unlink(assetUrlToFilePath(asset.url))
+    } catch {
+      // Ignore missing files and keep the database clean.
+    }
   }
 
   await removeAssetInDb(packetId, assetId)
   return asset
+}
+
+export function hasHostedAssetStorage() {
+  return Boolean(getCloudinaryRuntimeConfig())
 }

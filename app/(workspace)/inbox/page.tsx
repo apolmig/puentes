@@ -365,7 +365,7 @@ export default function InboxPage() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                    Local uploads
+                    Evidence uploads
                   </p>
                   <p className="text-sm leading-7 text-[color:var(--muted)]">
                     Attach screenshots, clips, audio notes, or PDFs directly to the packet.
@@ -386,7 +386,7 @@ export default function InboxPage() {
 
               {attachments.length === 0 ? (
                 <div className="rounded-[1.4rem] border border-dashed border-black/10 bg-[#fff9f0] p-4 text-sm leading-7 text-[color:var(--muted)]">
-                  No local files selected yet.
+                  No files selected yet.
                 </div>
               ) : (
                 <div className="grid gap-3">

@@ -487,7 +487,7 @@ export default function PacketEditorPage() {
 
             {packet.assets.length === 0 ? (
               <div className="rounded-[1.4rem] border border-dashed border-black/10 bg-[#fff9f0] p-5 text-sm leading-7 text-[color:var(--muted)]">
-                No local files attached yet.
+                No evidence files attached yet.
               </div>
             ) : (
               <div className="grid gap-4 lg:grid-cols-2">

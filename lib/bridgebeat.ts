@@ -22,6 +22,10 @@ export type PacketAsset = {
   size: number
   url: string
   createdAt: string
+  storageProvider?: "local" | "cloudinary"
+  storageKey?: string
+  storageAssetId?: string
+  storageResourceType?: string
 }
 
 export type PacketSource = {
@@ -705,7 +709,7 @@ export function buildExportText(packet: PacketRecord, audience: AudienceMode) {
     signalLines,
     "",
     "Uploaded Assets",
-    assetLines || "No local uploads attached.",
+    assetLines || "No uploaded evidence attached.",
     "",
     "Format",
     variant.format,

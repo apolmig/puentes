@@ -23,14 +23,16 @@ import {
   audienceModes,
   seedPackets,
 } from "@/lib/bridgebeat"
+import {
+  getDatabaseRuntimeConfig,
+  shouldSeedPackets,
+} from "@/lib/server/runtime-config"
 
-const databaseUrl =
-  process.env.PUENTES_DATABASE_URL ??
-  process.env.BRIDGEBEAT_DATABASE_URL ??
-  "file:./data/puentes.db"
+const databaseConfig = getDatabaseRuntimeConfig()
 
 const client = createClient({
-  url: databaseUrl,
+  url: databaseConfig.url,
+  authToken: databaseConfig.authToken,
 })
 
 const db = drizzle(client)
@@ -38,6 +40,10 @@ const db = drizzle(client)
 let initPromise: Promise<void> | null = null
 
 async function ensureDatabaseDirectory() {
+  if (!databaseConfig.isLocal) {
+    return
+  }
+
   await mkdir(join(process.cwd(), "data"), { recursive: true })
 }
 
@@ -53,6 +59,38 @@ async function ensurePacketColumns() {
     { name: "urgency", statement: "ALTER TABLE packets ADD COLUMN urgency TEXT NOT NULL DEFAULT 'watch'" },
     { name: "confidence", statement: "ALTER TABLE packets ADD COLUMN confidence TEXT NOT NULL DEFAULT 'unverified'" },
     { name: "lead_audience", statement: "ALTER TABLE packets ADD COLUMN lead_audience TEXT NOT NULL DEFAULT 'creator'" },
+  ] as const
+
+  for (const column of pendingColumns) {
+    if (!existingColumns.has(column.name)) {
+      await client.execute(column.statement)
+    }
+  }
+}
+
+async function ensurePacketAssetColumns() {
+  const tableInfo = await client.execute("PRAGMA table_info(packet_assets)")
+  const existingColumns = new Set(
+    tableInfo.rows.map((row) => String((row as Record<string, unknown>).name)),
+  )
+
+  const pendingColumns = [
+    {
+      name: "storage_provider",
+      statement: "ALTER TABLE packet_assets ADD COLUMN storage_provider TEXT NOT NULL DEFAULT 'local'",
+    },
+    {
+      name: "storage_key",
+      statement: "ALTER TABLE packet_assets ADD COLUMN storage_key TEXT NOT NULL DEFAULT ''",
+    },
+    {
+      name: "storage_asset_id",
+      statement: "ALTER TABLE packet_assets ADD COLUMN storage_asset_id TEXT NOT NULL DEFAULT ''",
+    },
+    {
+      name: "storage_resource_type",
+      statement: "ALTER TABLE packet_assets ADD COLUMN storage_resource_type TEXT NOT NULL DEFAULT 'raw'",
+    },
   ] as const
 
   for (const column of pendingColumns) {
@@ -114,10 +152,15 @@ async function bootstrapTables() {
       size INTEGER NOT NULL DEFAULT 0,
       url TEXT NOT NULL,
       created_at TEXT NOT NULL,
+      storage_provider TEXT NOT NULL DEFAULT 'local',
+      storage_key TEXT NOT NULL DEFAULT '',
+      storage_asset_id TEXT NOT NULL DEFAULT '',
+      storage_resource_type TEXT NOT NULL DEFAULT 'raw',
       sort_order INTEGER NOT NULL DEFAULT 0,
       FOREIGN KEY(packet_id) REFERENCES packets(id) ON DELETE CASCADE
     )
   `)
+  await ensurePacketAssetColumns()
 
   await db.run(sql`
     CREATE TABLE IF NOT EXISTS packet_sources (
@@ -232,6 +275,10 @@ async function mapPacket(packetId: string): Promise<PacketRecord> {
       size: asset.size,
       url: asset.url,
       createdAt: asset.createdAt,
+      storageProvider: asset.storageProvider as PacketAsset["storageProvider"],
+      storageKey: asset.storageKey,
+      storageAssetId: asset.storageAssetId,
+      storageResourceType: asset.storageResourceType,
     })),
     sources: sources.map((source) => ({
       id: source.id,
@@ -312,6 +359,10 @@ async function insertPacketRecord(record: PacketRecord) {
         size: asset.size,
         url: asset.url,
         createdAt: asset.createdAt,
+        storageProvider: asset.storageProvider ?? "local",
+        storageKey: asset.storageKey ?? "",
+        storageAssetId: asset.storageAssetId ?? "",
+        storageResourceType: asset.storageResourceType ?? "raw",
         sortOrder: index,
       })),
     )
@@ -355,6 +406,10 @@ async function insertPacketRecord(record: PacketRecord) {
 }
 
 async function seedIfEmpty() {
+  if (!shouldSeedPackets()) {
+    return
+  }
+
   const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(packetsTable)
 
   if (Number(count) > 0) {
@@ -471,6 +526,10 @@ export async function getPacketAssetFromDb(id: string, assetId: string) {
     size: asset.size,
     url: asset.url,
     createdAt: asset.createdAt,
+    storageProvider: asset.storageProvider as PacketAsset["storageProvider"],
+    storageKey: asset.storageKey,
+    storageAssetId: asset.storageAssetId,
+    storageResourceType: asset.storageResourceType,
   } satisfies PacketAsset
 }
 
@@ -546,6 +605,10 @@ export async function addAssetInDb(id: string, asset: PacketAsset) {
     size: asset.size,
     url: asset.url,
     createdAt: asset.createdAt,
+    storageProvider: asset.storageProvider ?? "local",
+    storageKey: asset.storageKey ?? "",
+    storageAssetId: asset.storageAssetId ?? "",
+    storageResourceType: asset.storageResourceType ?? "raw",
     sortOrder: Number(existing[0]?.count ?? 0),
   })
 
