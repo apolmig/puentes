@@ -87,86 +87,86 @@ const pathways: Pathway[] = [
   {
     id: "creator",
     label: "Creator Mode",
-    eyebrow: "Scroll-stopping civic response",
-    title: "Turn a fast rumor cycle into something a creator would actually post.",
-    text: "This mode builds hooks, scene beats, captions, and pinned comments that feel native to TikTok, Reels, and carousel explainers.",
-    move: "Lead with the correction, keep the best receipt on screen, and never amplify the juiciest version of the lie for clicks.",
-    audience: "Independent creators, youth-led news accounts, and civic explainers.",
-    outputs: ["cold open", "caption spine", "comment rescue", "receipt stack"],
+    eyebrow: "Creator response",
+    title: "Build a creator-ready explainer without repeating the rumor.",
+    text: "Puentes turns a verified packet into hooks, scene beats, captions, and pinned comments designed for short-form video and carousel posts.",
+    move: "Lead with what is true, put the strongest receipt on screen early, and make the correction easier to share than the rumor.",
+    audience: "Independent creators, youth-led media teams, and civic explainers.",
+    outputs: ["video hook", "caption draft", "pinned comment", "citation notes"],
     photo: "creator",
     accentClass: "bg-[#ff6b3d] text-white",
   },
   {
     id: "educator",
     label: "Educator Mode",
-    eyebrow: "Media literacy that looks alive",
-    title: "Translate the same signal into classroom prompts, source ladders, and discussion moves.",
-    text: "Instead of flattening students with a generic fact-check, Puentes.info turns each rumor into a visible chain of evidence they can inspect together.",
-    move: "Slow down the rumor, show where context broke, and turn verification into a shared practice instead of a lecture.",
+    eyebrow: "Classroom response",
+    title: "Turn the same packet into a lesson, prompt, or workshop guide.",
+    text: "Puentes helps teachers and facilitators show how a claim spread, what the record says, and where uncertainty still remains.",
+    move: "Begin with the claim students saw, compare it with the full context, and turn verification into a discussion instead of a lecture.",
     audience: "Teachers, workshop leaders, librarians, and youth civic educators.",
-    outputs: ["warm-up slide", "source ladder", "discussion prompt", "exit ticket"],
+    outputs: ["slide outline", "source ladder", "discussion prompt", "exit ticket"],
     photo: "classroom",
     accentClass: "bg-[#2ec4b6] text-[#072924]",
   },
   {
     id: "collective",
     label: "Collective Mode",
-    eyebrow: "Group-chat-ready civic trust",
-    title: "Equip campus teams and community groups with a response kit that corrects without clowning the sharer.",
-    text: "This lane is built for peer networks: student orgs, mutual-aid crews, democracy clubs, and local groups trying to stop a rumor before it hardens.",
-    move: "Reply in the same channel, use one line of proof, and give people a safer thing to resend right away.",
-    audience: "Campus organizers, group-chat admins, and community trust networks.",
-    outputs: ["group-chat reply", "tabling script", "share-safe CTA", "community note"],
+    eyebrow: "Community response",
+    title: "Give organizers and group admins something accurate to forward fast.",
+    text: "This mode is built for campus groups, mutual-aid networks, and community teams that need a calm correction people can resend right away.",
+    move: "Reply in the same channel, keep the proof short and visible, and send out a safer message than the rumor.",
+    audience: "Campus organizers, community groups, and group-chat admins.",
+    outputs: ["group reply", "briefing note", "share-safe CTA", "meeting script"],
     photo: "protest",
     accentClass: "bg-[#f4c95d] text-[#2f2202]",
   },
 ]
 
 const tickerItems = [
-  "deepfake panic",
-  "voter-rule rumor",
-  "cropped clip spiral",
+  "voice-note rumor",
+  "voter-rule confusion",
+  "cropped policy clip",
   "group-chat correction",
-  "source-linked creator cut",
-  "classroom rumor map",
-  "receipt-first civic design",
+  "creator explainer",
+  "classroom prompt",
+  "source-linked handoff",
 ]
 
 const protocol = [
   {
     number: "01",
-    title: "Spot the spike",
-    text: "Start with the exact post format Gen Z is seeing, not a cleaned-up summary.",
+    title: "Capture the claim",
+    text: "Start with the exact screenshot, clip, or voice note people are already sharing.",
   },
   {
     number: "02",
-    title: "Trace the receipts",
-    text: "Map the source trail and surface where the context got cut, clipped, or rewritten.",
+    title: "Verify the record",
+    text: "Pull together official sources, reporting, and context so the correction is defensible.",
   },
   {
     number: "03",
-    title: "Remix for trust",
-    text: "Translate the truth into creator language, classroom language, and community language.",
+    title: "Adapt for the audience",
+    text: "Turn one verified packet into creator copy, classroom material, or a community response.",
   },
   {
     number: "04",
-    title: "Ship the fix",
-    text: "Publish something source-linked, culturally native, and safe to pass on.",
+    title: "Review before sharing",
+    text: "Check tone, citations, and risk before anything leaves the room.",
   },
 ]
 
 const outputRails = [
   {
-    title: "Signal brief",
-    text: "A concise myth packet with the claim, what is true, what is missing, and the best public-facing framing.",
+    title: "Verification brief",
+    text: "A concise packet with the claim, the findings, the open questions, and the sources behind each point.",
   },
   {
-    title: "Creator handoff",
-    text: "Hooks, scene beats, pinned comments, and citation logic built for video and carousel formats.",
+    title: "Creator package",
+    text: "A hook, outline, caption, and pinned comment with citation notes for video and carousel formats.",
   },
   {
-    title: "Classroom remix",
-    text: "Slide prompts, source ladders, and reflection cues for teachers and workshop leaders.",
+    title: "Education pack",
+    text: "Discussion prompts, source comparisons, and facilitation notes for classrooms and workshops.",
   },
 ]
 
@@ -206,7 +206,7 @@ const packets: Packet[] = [
         format: "vertical video cut",
         hook: "That viral voice note is not an official update, and campus voting rules did not change.",
         body:
-          "The panic came from a volunteer memo, not from the election office. The safest thing to repost is the actual county update plus the campus FAQ.",
+          "The confusion came from a volunteer memo, not from the election office. The safest thing to repost is the county update plus the campus FAQ.",
         cta: "Pin the official link and tell people to resend that instead of the audio.",
       },
       educator: {
@@ -260,7 +260,7 @@ const packets: Packet[] = [
         format: "carousel",
         hook: "This screenshot is leaving out the part that tells you what counts if you do not have one specific ID.",
         body:
-          "Instead of reposting panic, show the real rule, the accepted alternatives, and the one line students should screenshot before they head to vote.",
+          "Show the real rule, the accepted alternatives, and the one line students should screenshot before they head to vote.",
         cta: "End with a saveable slide: bring this list, not the rumor.",
       },
       educator: {
@@ -319,7 +319,7 @@ const packets: Packet[] = [
       },
       educator: {
         format: "timeline exercise",
-        hook: "This is what context collapse looks like in motion.",
+        hook: "This is how a clipped video changes the meaning of a public meeting.",
         body:
           "Build a three-part timeline: viral clip, missing moment, official record. Let students name how the edit changed the claim.",
         cta: "Close with: what would you need to see before reposting a political clip?",
@@ -337,20 +337,20 @@ const packets: Packet[] = [
 
 const featureStrip = [
   {
-    title: "Signal radar",
-    text: "Track rumor formats, not just topics: audio notes, screenshots, clipped hearings, stitched videos.",
+    title: "Claim intake",
+    text: "Capture the original screenshot, clip, or voice note instead of rewriting the rumor from memory.",
   },
   {
-    title: "Source ladder",
-    text: "Click through the evidence chain and show exactly where context broke.",
+    title: "Evidence view",
+    text: "Show what each source confirms, clarifies, or still leaves unresolved.",
   },
   {
-    title: "Remix engine",
-    text: "One packet becomes creator copy, classroom material, and community responses.",
+    title: "Role-based outputs",
+    text: "Turn one verified packet into creator, classroom, and community versions of the same response.",
   },
   {
-    title: "Share-safe handoff",
-    text: "Outputs stay source-linked and human-approved before they travel.",
+    title: "Review gate",
+    text: "Keep every response source-linked and checked before it is sent or posted.",
   },
 ]
 
@@ -436,20 +436,20 @@ export default function Page() {
                 <span className="flex flex-col">
                   <span className="text-lg font-semibold tracking-[-0.04em]">Puentes.info</span>
                   <span className="text-xs uppercase tracking-[0.24em] text-[color:var(--muted)]">
-                    Creator studio for civic response
+                    Source-linked civic response
                   </span>
                 </span>
               </a>
 
               <nav className="hidden items-center gap-6 text-sm text-[color:var(--muted)] md:flex">
                 <a className="transition hover:text-[color:var(--ink)]" href="#modes">
-                  Modes
+                  Use cases
                 </a>
                 <a className="transition hover:text-[color:var(--ink)]" href="#features">
-                  Features
+                  Demo
                 </a>
                 <a className="transition hover:text-[color:var(--ink)]" href="#protocol">
-                  Protocol
+                  Workflow
                 </a>
                 <a className="transition hover:text-[color:var(--ink)]" href="#outputs">
                   Outputs
@@ -460,7 +460,7 @@ export default function Page() {
                 href="#modes"
                 className="inline-flex items-center gap-2 rounded-full bg-[color:var(--ink)] px-4 py-2 text-sm font-medium text-white transition hover:bg-black"
               >
-                Open the vibe
+                See how it works
                 <ArrowUpRightIcon className="h-4 w-4" />
               </a>
             </div>
@@ -474,22 +474,25 @@ export default function Page() {
           <div className="relative z-10 space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--muted)] backdrop-blur">
               <SparkIcon className="h-4 w-4 text-[color:var(--accent)]" />
-              creator-led, educator-backed anti-misinfo
+              for creators, educators, and community teams
             </div>
 
             <div className="space-y-6">
               <h1 className="max-w-[10.5ch] text-6xl font-semibold leading-[0.9] tracking-[-0.08em] sm:text-7xl lg:text-[6.9rem]">
-                Fight the lie
+                Turn civic rumors
                 <br />
                 <span className="[font-family:var(--font-display)] italic text-[color:var(--accent)]">
-                  in the feed,
+                  into clear,
                 </span>
                 <br />
-                not after.
+                source-linked
+                <br />
+                responses.
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[color:var(--muted)] sm:text-xl">
-                Puentes.info is a visual civic-response webapp for creators, teachers, and campus
-                organizers who need to catch political misinformation while it is still moving.
+                Puentes helps creators, educators, and community teams verify fast-moving claims,
+                organize the evidence, and turn them into responses people can trust, understand,
+                and share responsibly.
               </p>
             </div>
 
@@ -498,22 +501,22 @@ export default function Page() {
                 href="#modes"
                 className="inline-flex items-center gap-2 rounded-full bg-[color:var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--accent-deep)]"
               >
-                Explore the modes
+                See use cases
                 <ArrowUpRightIcon className="h-4 w-4" />
               </a>
               <a
-                href="#outputs"
+                href="#features"
                 className="inline-flex items-center gap-2 rounded-full border border-black/12 bg-white/72 px-5 py-3 text-sm font-semibold text-[color:var(--ink)] transition hover:bg-white"
               >
-                See what ships
+                View live demo
               </a>
             </div>
 
             <div className="flex flex-wrap gap-3 text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--muted)]">
-              <span>deepfake panic</span>
-              <span>campus rumor spiral</span>
+              <span>voice-note rumors</span>
+              <span>cropped policy clips</span>
               <span>voter-rule confusion</span>
-              <span>receipt-first creator cuts</span>
+              <span>share-ready explainers</span>
             </div>
           </div>
 
@@ -530,9 +533,10 @@ export default function Page() {
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_20%,rgba(8,15,25,0.28)_100%)]" />
               <div className="absolute bottom-6 left-6 max-w-sm text-white">
-                <p className="text-xs uppercase tracking-[0.26em] text-white/70">signal in motion</p>
+                <p className="text-xs uppercase tracking-[0.26em] text-white/70">why this matters</p>
                 <p className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.04em]">
-                  Gen Z does not need another PDF fact-check. It needs a better artifact to share.
+                  When a rumor spreads in a group chat or a feed, people need a clear response
+                  they can trust and resend.
                 </p>
               </div>
               <PhotoCredit photo={photos.friends} className="absolute right-4 top-4" />
@@ -548,7 +552,7 @@ export default function Page() {
                 className="aspect-[4/5] w-full object-cover"
               />
               <div className="p-3 text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                creator lane
+                creator response
               </div>
             </div>
 
@@ -562,7 +566,7 @@ export default function Page() {
                 className="aspect-[4/5] w-full object-cover"
               />
               <div className="p-3 text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                educator lane
+                educator response
               </div>
             </div>
 
@@ -576,12 +580,12 @@ export default function Page() {
                 className="aspect-[3/4] w-full object-cover"
               />
               <div className="p-3 text-xs font-medium uppercase tracking-[0.22em] text-white/70">
-                collective lane
+                community response
               </div>
             </div>
 
             <div className="absolute left-14 top-0 rounded-full bg-[#d9ff57] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#111] shadow-[0_16px_30px_rgba(217,255,87,0.32)] sm:left-20">
-              not another dashboard
+              source-linked by design
             </div>
           </div>
         </section>
@@ -598,7 +602,7 @@ export default function Page() {
         </section>
 
         <section className="grid gap-10 py-20 lg:grid-cols-[0.48fr_0.52fr] lg:items-center">
-            <div className="relative overflow-hidden rounded-[3rem]">
+          <div className="relative overflow-hidden rounded-[3rem]">
               <Image
                 src={photos.mural.src}
                 alt={photos.mural.alt}
@@ -610,8 +614,8 @@ export default function Page() {
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,25,0.18),rgba(8,15,25,0.58))]" />
             <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
               <p className="max-w-lg text-3xl font-semibold leading-tight tracking-[-0.05em] text-white sm:text-4xl">
-                Rebuilt as Puentes.info and pushed further into youth culture, classrooms, and peer
-                trust networks.
+                Built for creators, educators, and community teams that need something accurate to
+                share now.
               </p>
             </div>
               <PhotoCredit photo={photos.mural} className="absolute right-4 top-4" />
@@ -619,40 +623,40 @@ export default function Page() {
 
           <div className="space-y-8">
             <p className="text-xs font-medium uppercase tracking-[0.28em] text-[color:var(--accent-deep)]">
-              The shift
+              Why Puentes
             </p>
             <h2 className="max-w-2xl text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-              Less boxes.
+              When a civic claim starts spreading,
               <br />
               <span className="[font-family:var(--font-display)] italic text-[color:var(--accent)]">
-                More motion,
+                clarity has to move
               </span>
               <br />
-              more faces, more proof.
+              just as fast.
             </h2>
             <p className="max-w-2xl text-lg leading-8 text-[color:var(--muted)]">
-              The redesign treats misinformation response as something cultural, social, and visual.
-              Big images carry the energy. Small overlays carry the evidence. The UI stops behaving
-              like a dashboard and starts behaving like a live editorial object.
+              Puentes is built for the formats where confusion spreads first: voice notes,
+              screenshots, cropped clips, and group chats. It keeps the evidence visible while
+              adapting the response for the people who will actually deliver it.
             </p>
 
             <div className="grid gap-8 sm:grid-cols-3">
               <div>
                 <p className="text-5xl font-semibold tracking-[-0.08em]">01</p>
                 <p className="mt-3 text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                  feed-native
+                  fast-moving claims
                 </p>
               </div>
               <div>
                 <p className="text-5xl font-semibold tracking-[-0.08em]">02</p>
                 <p className="mt-3 text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                  source-linked
+                  visible evidence
                 </p>
               </div>
               <div>
                 <p className="text-5xl font-semibold tracking-[-0.08em]">03</p>
                 <p className="mt-3 text-sm uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                  human-approved
+                  review before share
                 </p>
               </div>
             </div>
@@ -665,11 +669,11 @@ export default function Page() {
               Modes
             </p>
             <h2 className="text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-              Built for the people Gen Z already trusts.
+              One verified packet. Three ways to respond.
             </h2>
             <p className="text-lg leading-8 text-[color:var(--muted)]">
-              Switch the stage between creator, educator, and collective response. The image,
-              tone, and outputs shift with the role, but the evidence stays fixed.
+              Puentes adapts the same evidence base for creators, educators, and community teams.
+              The tone and deliverable change; the facts and citations do not.
             </p>
           </div>
 
@@ -746,11 +750,11 @@ export default function Page() {
               Features
             </p>
             <h2 className="text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-              A live demo of how the product actually works.
+              See one verified packet become a response.
             </h2>
             <p className="text-lg leading-8 text-[color:var(--muted)]">
-              Pick a rumor packet, keep the current audience mode, and watch the response remix in
-              place. This is the product logic, not just marketing copy.
+              Choose a sample claim and a role. Puentes shows the incoming claim, the verified
+              record, the source ladder, and the response package for that audience.
             </p>
           </div>
 
@@ -836,11 +840,11 @@ export default function Page() {
                   Source ladder
                 </p>
                 <h3 className="mt-4 text-3xl font-semibold tracking-[-0.05em]">
-                  Click the evidence chain.
+                  See what each source adds.
                 </h3>
                 <p className="mt-4 text-base leading-8 text-[color:var(--muted)]">
-                  Puentes.info is designed to make the proof legible. Instead of dumping links, it
-                  shows what each source contributes to the correction.
+                  Puentes makes the proof legible. Instead of dropping a pile of links, it shows
+                  what each source confirms, clarifies, or leaves unresolved.
                 </p>
               </div>
 
@@ -887,8 +891,12 @@ export default function Page() {
             Protocol
           </p>
           <h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-            A studio rhythm, not a dashboard ritual.
+            A clear workflow from rumor to responsible response.
           </h2>
+          <p className="mt-4 max-w-3xl text-lg leading-8 text-[color:var(--muted)]">
+            Capture the claim, verify the record, adapt it for the audience, and review it before
+            it is shared.
+          </p>
 
           <div className="relative mt-12">
             <div className="absolute left-0 right-0 top-12 hidden h-px bg-black/10 lg:block" />
@@ -920,27 +928,27 @@ export default function Page() {
             <div className="relative z-10 flex min-h-[38rem] flex-col justify-between p-6 sm:p-8 lg:p-10">
               <div className="max-w-2xl space-y-5">
                 <p className="text-xs font-medium uppercase tracking-[0.28em] text-white/60">
-                  What ships
+                  What Puentes produces
                 </p>
                 <h2 className="text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-5xl">
-                  One rumor in.
+                  One verified packet.
                   <br />
-                  Multiple trust-ready formats out.
+                  Multiple responses ready to review and share.
                 </h2>
                 <p className="text-base leading-8 text-white/74 sm:text-lg">
-                  The same verified packet can become a creator script, a classroom prompt, and a
-                  group-chat correction without losing the source trail.
+                  The same evidence base can become a creator script, a classroom activity, and a
+                  community message without losing the source trail.
                 </p>
               </div>
 
               <div className="mx-auto w-full max-w-md rounded-[2.2rem] border border-white/12 bg-white/8 p-5 backdrop-blur">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-white/52">Sample creator cut</p>
                 <p className="mt-4 text-2xl font-semibold tracking-[-0.04em]">
-                  &ldquo;That viral clip cuts off the part where the policy actually fails.&rdquo;
+                  &ldquo;That clip leaves out the vote where the proposal fails.&rdquo;
                 </p>
                 <div className="mt-5 border-t border-white/12 pt-4 text-sm leading-7 text-white/76">
-                  Hook first. Receipt second. Caption third. No jargon wall, no passive-voice blob,
-                  no hiding the source in tiny print.
+                  Lead with the correction, show the timestamp, and give people the exact line and
+                  source they can repost.
                 </div>
               </div>
 
@@ -969,7 +977,7 @@ export default function Page() {
               <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_15%,rgba(8,15,25,0.64)_100%)]" />
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                 <p className="max-w-lg text-2xl font-semibold tracking-[-0.04em]">
-                  The best anti-misinfo tool for Gen Z is something they can learn from and repost.
+                  The most useful correction is one people can understand, trust, and pass on.
                 </p>
               </div>
               <PhotoCredit photo={photos.classroom} className="absolute right-4 top-4" />
@@ -990,14 +998,14 @@ export default function Page() {
             <div className="relative z-10 grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.68fr_0.32fr] lg:items-end lg:p-12">
               <div className="space-y-6">
                 <p className="text-xs font-medium uppercase tracking-[0.28em] text-white/58">
-                  Final frame
+                  Why it matters
                 </p>
                 <h2 className="max-w-3xl text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
-                  Make civic clarity feel bold enough to live in public.
+                  Give trusted messengers something stronger than the rumor.
                 </h2>
                 <p className="max-w-2xl text-base leading-8 text-white/76 sm:text-lg">
-                  Puentes.info now leans into real photography, editorial scale, brighter motion, and
-                  cleaner evidence language so the product feels closer to culture than compliance.
+                  Puentes helps civic information travel with proof attached: verified,
+                  audience-aware, and reviewed before it is shared.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <a
@@ -1010,7 +1018,7 @@ export default function Page() {
                     href="#modes"
                     className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/16"
                   >
-                    Reopen modes
+                    See use cases
                   </a>
                 </div>
               </div>
