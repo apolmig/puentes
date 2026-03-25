@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://puentes.info"),
-  title: "Puentes.info | Source-Linked Civic Response for Creators, Educators, and Communities",
+  title: "Puentes.info | Civic Response Studio for Creators, Educators, and Organizers",
   description:
-    "Puentes helps creators, educators, and community teams turn civic rumors into clear, source-linked responses people can trust and share responsibly.",
+    "Catch fast-moving civic rumors, verify the record, and ship source-linked responses for feeds, classrooms, and community networks.",
   alternates: {
     canonical: "/",
   },
@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Puentes.info | Source-Linked Civic Response for Creators, Educators, and Communities",
+    title: "Puentes.info | Civic Response Studio for Creators, Educators, and Organizers",
     description:
-      "Turn fast-moving civic rumors into verified, source-linked responses for creators, educators, and community teams.",
+      "Catch fast-moving civic rumors, verify the record, and ship source-linked responses for feeds, classrooms, and community networks.",
     url: "/",
     siteName: "Puentes.info",
     locale: "en_US",
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Puentes.info | Source-Linked Civic Response for Creators, Educators, and Communities",
+    title: "Puentes.info | Civic Response Studio for Creators, Educators, and Organizers",
     description:
-      "Turn civic rumors into clear, source-linked responses without feeding the noise.",
+      "Catch civic rumors early and turn them into source-linked responses people can trust and resend.",
     images: [
       {
         url: "/twitter-image.png",
