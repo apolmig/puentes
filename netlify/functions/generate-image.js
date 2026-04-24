@@ -1,10 +1,12 @@
 const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
+const { requireAccess } = require("./_lib/access");
 const { generateImageAsset } = require("./_lib/openai");
 const { sanitizeModel } = require("../../lib/model-config");
 
-exports.handler = async function handler(event) {
+exports.handler = async function handler(event, context) {
   try {
     requireMethod(event, "POST");
+    requireAccess(event, context, { scope: "ai" });
     const body = await parseJsonBody(event);
 
     if (!body.prompt) {

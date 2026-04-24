@@ -188,8 +188,16 @@
         </article>
       </section>
 
-      <section class="workflow-shell" id="workspace">
-        <div class="workflow-overlay">
+      <section class="workflow-shell" id="workspace" aria-hidden="true">
+        <div
+          class="workflow-overlay"
+          id="workflow-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="surface-title"
+          aria-describedby="surface-description"
+          tabindex="-1"
+        >
           <div class="surface-overlay-head">
             <div class="surface-overlay-copy">
               <p class="eyebrow" id="surface-kicker">Case surface</p>

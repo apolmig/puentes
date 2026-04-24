@@ -1,9 +1,11 @@
 const { requireMethod, createError, handleError } = require("./_lib/http");
-const { downloadVideoAsset } = require("./_lib/openai");
+const { requireAccess } = require("./_lib/access");
+const { downloadVideoAsset, sanitizeVideoId, sanitizeVideoVariant } = require("./_lib/openai");
 
-exports.handler = async function handler(event) {
+exports.handler = async function handler(event, context) {
   try {
     requireMethod(event, "GET");
+    requireAccess(event, context, { scope: "download" });
     const videoId = event.queryStringParameters?.id;
     const variant = event.queryStringParameters?.variant || "video";
 
@@ -11,14 +13,17 @@ exports.handler = async function handler(event) {
       throw createError(400, "Video id is required.");
     }
 
-    const asset = await downloadVideoAsset(videoId, variant);
+    const asset = await downloadVideoAsset(sanitizeVideoId(videoId), sanitizeVideoVariant(variant));
 
     return {
       statusCode: 200,
       isBase64Encoded: true,
       headers: {
-        "Content-Type": asset.headers.get("content-type") || "application/octet-stream",
-        "Cache-Control": "no-store"
+        "Content-Type": asset.contentType,
+        "Content-Length": String(asset.contentLength),
+        "Content-Disposition": `attachment; filename="${asset.filename}"`,
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff"
       },
       body: asset.body.toString("base64")
     };

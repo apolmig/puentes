@@ -1,10 +1,12 @@
 const { json, parseJsonBody, requireMethod, createError, handleError } = require("./_lib/http");
-const { createVideoJob } = require("./_lib/openai");
+const { requireAccess } = require("./_lib/access");
+const { createVideoJob, sanitizeVideoId, videoDownloadUrl } = require("./_lib/openai");
 const { sanitizeModel } = require("../../lib/model-config");
 
-exports.handler = async function handler(event) {
+exports.handler = async function handler(event, context) {
   try {
     requireMethod(event, "POST");
+    requireAccess(event, context, { scope: "ai" });
     const body = await parseJsonBody(event);
 
     if (!body.prompt) {
@@ -17,12 +19,13 @@ exports.handler = async function handler(event) {
       size: body.size || "1280x720",
       seconds: body.seconds || 8
     });
+    const safeVideoId = sanitizeVideoId(video.id);
 
     return json(202, {
       model: sanitizeModel("video", body.model),
       video,
-      pollUrl: `/.netlify/functions/video-status?id=${encodeURIComponent(video.id)}`,
-      downloadUrl: `/.netlify/functions/video-download?id=${encodeURIComponent(video.id)}&variant=video`
+      pollUrl: `/.netlify/functions/video-status?id=${encodeURIComponent(safeVideoId)}`,
+      downloadUrl: videoDownloadUrl(safeVideoId, "video")
     });
   } catch (error) {
     return handleError(error);

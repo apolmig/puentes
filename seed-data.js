@@ -14,6 +14,12 @@ const baseChecklist = [
 ];
 
 const seedTimestamp = "2026-03-16T20:00:00.000Z";
+const defaultAiSettings = {
+  textModel: "gpt-5",
+  reviewModel: "gpt-5-mini",
+  imageModel: "gpt-image-1.5",
+  videoModel: "sora-2"
+};
 
 const audiences = [
   {
@@ -616,6 +622,9 @@ function createWorkspaceState(packetId, overrides = {}) {
   const history = Array.isArray(overrides.history) && overrides.history.length
     ? overrides.history
     : createInitialHistory(packetId);
+  const aiSettings = overrides.aiSettings && typeof overrides.aiSettings === "object"
+    ? overrides.aiSettings
+    : {};
 
   return {
     selectedAudienceId: audienceId,
@@ -632,6 +641,7 @@ function createWorkspaceState(packetId, overrides = {}) {
       : [],
     shareReady: Boolean(overrides.shareReady),
     shareUrl: typeof overrides.shareUrl === "string" ? overrides.shareUrl : "",
+    packagingPreset: typeof overrides.packagingPreset === "string" ? overrides.packagingPreset : "fast_myth_check",
     generatedBundlesByFormat: overrides.generatedBundlesByFormat && typeof overrides.generatedBundlesByFormat === "object"
       ? clone(overrides.generatedBundlesByFormat)
       : {},
@@ -640,7 +650,19 @@ function createWorkspaceState(packetId, overrides = {}) {
       : {},
     generatedVideosByFormat: overrides.generatedVideosByFormat && typeof overrides.generatedVideosByFormat === "object"
       ? clone(overrides.generatedVideosByFormat)
-      : {}
+      : {},
+    aiSettings: {
+      textModel: typeof aiSettings.textModel === "string" ? aiSettings.textModel : defaultAiSettings.textModel,
+      reviewModel: typeof aiSettings.reviewModel === "string" ? aiSettings.reviewModel : defaultAiSettings.reviewModel,
+      imageModel: typeof aiSettings.imageModel === "string" ? aiSettings.imageModel : defaultAiSettings.imageModel,
+      videoModel: typeof aiSettings.videoModel === "string" ? aiSettings.videoModel : defaultAiSettings.videoModel
+    },
+    intakeBrief: overrides.intakeBrief && typeof overrides.intakeBrief === "object" ? clone(overrides.intakeBrief) : null,
+    claimMap: overrides.claimMap && typeof overrides.claimMap === "object" ? clone(overrides.claimMap) : null,
+    angleOptions: Array.isArray(overrides.angleOptions) ? clone(overrides.angleOptions).slice(0, 3) : [],
+    selectedAngleIndex: Number.isInteger(overrides.selectedAngleIndex) ? Math.max(0, overrides.selectedAngleIndex) : 0,
+    reviewFindings: overrides.reviewFindings && typeof overrides.reviewFindings === "object" ? clone(overrides.reviewFindings) : null,
+    generationRuns: Array.isArray(overrides.generationRuns) ? clone(overrides.generationRuns).slice(0, 24) : []
   };
 }
 

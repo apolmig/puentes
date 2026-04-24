@@ -5,6 +5,19 @@ function createError(statusCode, message, extras = {}) {
   return error;
 }
 
+function getHeader(event, name) {
+  const headers = event?.headers || {};
+  const normalizedName = String(name).toLowerCase();
+
+  for (const [key, value] of Object.entries(headers)) {
+    if (String(key).toLowerCase() === normalizedName) {
+      return Array.isArray(value) ? value[0] : value;
+    }
+  }
+
+  return "";
+}
+
 function json(statusCode, payload, headers = {}) {
   return {
     statusCode,
@@ -68,6 +81,7 @@ function handleError(error) {
 
 module.exports = {
   createError,
+  getHeader,
   json,
   text,
   noContent,

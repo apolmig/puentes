@@ -6,6 +6,15 @@ const store = {
 
 const SURFACES = ["feed", "case", "share"];
 const STAGES = ["intake", "verify", "draft", "export"];
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "textarea:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "details > summary:first-of-type",
+  "[tabindex]:not([tabindex='-1'])"
+].join(",");
 const LOCAL_STORAGE_KEY = "puentes-visual-demo-v3";
 const MEDIA_STORAGE_KEY = "puentes-media-demo-v1";
 const DEMO_VIDEO_DELAY_MS = 1800;
@@ -15,6 +24,10 @@ let feedbackTimer = null;
 let persistenceMode = "api";
 let activeSurface = "feed";
 let activeStage = "intake";
+let lastCaseStage = "draft";
+let surfaceWasOpen = false;
+let lastSurfaceFocus = null;
+const backgroundAriaState = new WeakMap();
 const mediaState = { byPacket: {} };
 const pendingState = { text: false, image: false, video: false };
 const videoPollTimers = new Map();
@@ -230,6 +243,7 @@ function buildSeedVisualAsset(packetId = getPacket()?.id, format = getWorkspace(
 function cacheElements() {
   Object.assign(elements, {
     workflowShell: document.getElementById("workspace"),
+    workflowOverlay: document.getElementById("workflow-dialog"),
     surfaceKicker: document.getElementById("surface-kicker"),
     surfaceTitle: document.getElementById("surface-title"),
     surfaceDescription: document.getElementById("surface-description"),
@@ -423,10 +437,10 @@ function getAudience(packetId = getPacket()?.id) {
   return store.audiences.find((audience) => audience.id === workspace?.selectedAudienceId) || store.audiences[0] || null;
 }
 
-function getClaim(packetId = getPacket()?.id) {
+function getClaim(packetId = getPacket()?.id, claimIndex = getWorkspace(packetId)?.selectedClaimIndex) {
   const packet = getPacket(packetId);
-  const workspace = getWorkspace(packetId);
-  return packet?.claims[workspace?.selectedClaimIndex || 0] || packet?.claims?.[0] || null;
+  const selectedClaimIndex = Number.isInteger(Number(claimIndex)) ? Number(claimIndex) : 0;
+  return packet?.claims?.[selectedClaimIndex] || packet?.claims?.[0] || null;
 }
 
 function getDraft(packetId = getPacket()?.id) {
@@ -491,8 +505,8 @@ function getFeedSignals(packetId = getPacket()?.id) {
   };
 }
 
-function getClaimDetector(packetId = getPacket()?.id) {
-  const claim = getClaim(packetId);
+function getClaimDetector(packetId = getPacket()?.id, claimIndex = getWorkspace(packetId)?.selectedClaimIndex) {
+  const claim = getClaim(packetId, claimIndex);
   const detector = claim?.detector || {};
   const status = claim?.status || "unclear";
   const defaultConfidence = status === "supported" ? "High confidence" : status === "mixed" ? "Medium confidence" : "Low confidence";
@@ -1140,7 +1154,7 @@ function claimStatusText(status) {
 
 function claimTabMarkup(claim, index, packetId) {
   const active = index === getWorkspace(packetId)?.selectedClaimIndex;
-  const detector = getClaimDetector(packetId);
+  const detector = getClaimDetector(packetId, index);
 
   return `
     <button
@@ -2139,6 +2153,175 @@ function getSurfaceHash(surface = activeSurface) {
   return "#top";
 }
 
+function rememberCaseStage(stage = activeStage) {
+  if (STAGES.includes(stage) && stage !== "export") {
+    lastCaseStage = stage;
+  }
+}
+
+function surfaceIsOpen() {
+  return readonlyMode || activeSurface !== "feed";
+}
+
+function getSurfaceBackgroundElements() {
+  const backgroundElements = [];
+  const header = document.querySelector(".site-header");
+
+  if (header) {
+    backgroundElements.push(header);
+  }
+
+  document.querySelectorAll("main > section").forEach((section) => {
+    if (section !== elements.workflowShell) {
+      backgroundElements.push(section);
+    }
+  });
+
+  return backgroundElements;
+}
+
+function setBackgroundDisabled(element, disabled) {
+  if (!element) {
+    return;
+  }
+
+  if (disabled) {
+    if (!backgroundAriaState.has(element)) {
+      backgroundAriaState.set(element, {
+        inert: Boolean(element.inert),
+        ariaHidden: element.getAttribute("aria-hidden")
+      });
+    }
+
+    element.inert = true;
+    element.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  if (!backgroundAriaState.has(element)) {
+    return;
+  }
+
+  const previousState = backgroundAriaState.get(element);
+  element.inert = previousState?.inert || false;
+
+  if (previousState?.ariaHidden === null || previousState?.ariaHidden === undefined) {
+    element.removeAttribute("aria-hidden");
+  } else {
+    element.setAttribute("aria-hidden", previousState.ariaHidden);
+  }
+
+  backgroundAriaState.delete(element);
+}
+
+function getFocusableElements(container) {
+  if (!container) {
+    return [];
+  }
+
+  return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter((element) => {
+    if (element.disabled || element.hidden || element.getAttribute("aria-hidden") === "true") {
+      return false;
+    }
+
+    const style = window.getComputedStyle(element);
+    return style.display !== "none"
+      && style.visibility !== "hidden"
+      && element.getClientRects().length > 0;
+  });
+}
+
+function focusSurfaceDialog() {
+  const dialog = elements.workflowOverlay || elements.workflowShell;
+  if (!dialog || dialog.contains(document.activeElement)) {
+    return;
+  }
+
+  const focusTarget = (!readonlyMode && elements.closeSurface && !elements.closeSurface.hidden
+    ? elements.closeSurface
+    : getFocusableElements(dialog)[0]) || dialog;
+
+  focusTarget.focus({ preventScroll: true });
+}
+
+function restoreSurfaceFocus() {
+  const focusTarget = lastSurfaceFocus;
+  lastSurfaceFocus = null;
+
+  if (focusTarget && document.contains(focusTarget) && typeof focusTarget.focus === "function") {
+    focusTarget.focus({ preventScroll: true });
+  }
+}
+
+function syncSurfaceAccessibility(overlayOpen) {
+  const openingSurface = overlayOpen && !surfaceWasOpen;
+
+  if (elements.workflowShell) {
+    elements.workflowShell.setAttribute("aria-hidden", String(!overlayOpen));
+  }
+
+  if (openingSurface) {
+    focusSurfaceDialog();
+  }
+
+  getSurfaceBackgroundElements().forEach((element) => setBackgroundDisabled(element, overlayOpen));
+
+  if (openingSurface) {
+    window.requestAnimationFrame(focusSurfaceDialog);
+  }
+
+  if (!overlayOpen && surfaceWasOpen) {
+    restoreSurfaceFocus();
+  }
+
+  surfaceWasOpen = overlayOpen;
+}
+
+function handleSurfaceKeydown(event) {
+  if (!surfaceIsOpen()) {
+    return;
+  }
+
+  const dialog = elements.workflowOverlay || elements.workflowShell;
+  if (!dialog) {
+    return;
+  }
+
+  if (event.key === "Escape" && !readonlyMode) {
+    event.preventDefault();
+    setSurface("feed");
+    return;
+  }
+
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  const focusableElements = getFocusableElements(dialog);
+  if (!focusableElements.length) {
+    event.preventDefault();
+    dialog.focus({ preventScroll: true });
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+
+  if (!dialog.contains(document.activeElement)) {
+    event.preventDefault();
+    firstElement.focus({ preventScroll: true });
+    return;
+  }
+
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus({ preventScroll: true });
+  } else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus({ preventScroll: true });
+  }
+}
+
 function applySurfaceFromUrl() {
   if (readonlyMode) {
     activeSurface = "share";
@@ -2150,7 +2333,7 @@ function applySurfaceFromUrl() {
   if (activeSurface === "share") {
     activeStage = "export";
   } else if (activeSurface === "case") {
-    activeStage = "draft";
+    activeStage = lastCaseStage;
   }
 }
 
@@ -2168,10 +2351,6 @@ function renderSurfaceShell() {
   document.body.classList.toggle("is-share-surface", shareSurface);
   document.body.classList.toggle("is-surface-open", overlayOpen);
   document.body.classList.toggle("has-surface-lock", overlayOpen && !readonlyMode);
-
-  if (elements.workflowShell) {
-    elements.workflowShell.setAttribute("aria-hidden", String(!overlayOpen));
-  }
 
   if (elements.surfaceKicker && elements.surfaceTitle && elements.surfaceDescription) {
     if (shareSurface) {
@@ -2200,6 +2379,8 @@ function renderSurfaceShell() {
     link.classList.toggle("is-active", isActive);
     link.setAttribute("aria-current", isActive ? "page" : "false");
   });
+
+  syncSurfaceAccessibility(overlayOpen);
 }
 
 function renderAll() {
@@ -2235,6 +2416,7 @@ function setActiveStage(stage) {
   }
 
   activeStage = stage;
+  rememberCaseStage(stage);
   if (store.workspace) {
     renderStepRail();
     revealActiveStepCard();
@@ -2242,20 +2424,25 @@ function setActiveStage(stage) {
 }
 
 function setSurface(surface, { syncHash = true, preferredStage = null } = {}) {
+  const wasOpen = surfaceIsOpen();
   const nextSurface = readonlyMode
     ? "share"
     : SURFACES.includes(surface)
       ? surface
       : "feed";
-  const workspace = getWorkspace();
+
+  if (!wasOpen && nextSurface !== "feed") {
+    lastSurfaceFocus = document.activeElement;
+  }
 
   activeSurface = nextSurface;
   if (activeSurface === "share") {
     activeStage = "export";
   } else if (activeSurface === "case" && STAGES.includes(preferredStage) && preferredStage !== "export") {
     activeStage = preferredStage;
-  } else if (activeSurface === "case" && activeStage === "export") {
-    activeStage = "draft";
+    rememberCaseStage(preferredStage);
+  } else if (activeSurface === "case") {
+    activeStage = lastCaseStage;
   }
 
   if (syncHash && !readonlyMode) {
@@ -2275,6 +2462,7 @@ function focusStage(stage, { syncHash = true } = {}) {
   }
 
   activeStage = stage;
+  rememberCaseStage(stage);
   setSurface(stage === "export" ? "share" : "case", { syncHash });
 }
 
@@ -2288,6 +2476,7 @@ function chooseDefaultStage() {
 
   if (!workspace) {
     activeStage = "intake";
+    rememberCaseStage();
     return;
   }
 
@@ -2298,6 +2487,7 @@ function chooseDefaultStage() {
 
   if (store.workspace.queue.length && activeStage === "intake") {
     activeStage = "verify";
+    rememberCaseStage();
   }
 }
 
@@ -2403,6 +2593,7 @@ function applyStageFromUrl() {
   }
 
   activeStage = requestedStage;
+  rememberCaseStage(requestedStage);
   if (!readonlyMode) {
     activeSurface = requestedStage === "export" ? "share" : "case";
   }
@@ -3023,9 +3214,7 @@ function bindEvents() {
         return;
       }
 
-      setSurface(surface || "feed", {
-        preferredStage: surface === "case" ? "draft" : null
-      });
+      setSurface(surface || "feed");
       return;
     }
 
@@ -3534,6 +3723,8 @@ function bindEvents() {
       setAppStatus(error.message, "error");
     }
   });
+
+  document.addEventListener("keydown", handleSurfaceKeydown);
 }
 
 async function init() {
