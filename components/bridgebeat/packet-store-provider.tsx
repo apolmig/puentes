@@ -36,23 +36,23 @@ type PacketStoreValue = {
     patch: Partial<
       Omit<PacketRecord, "id" | "signals" | "assets" | "sources" | "variants" | "reviewChecklist">
     >,
-  ) => void
+  ) => Promise<void>
   uploadAsset: (id: string, input: { file: File; label?: string }) => Promise<void>
   removeAsset: (id: string, assetId: string) => Promise<void>
-  addSignal: (id: string) => void
-  updateSignal: (id: string, signalId: string, patch: Partial<PacketSignal>) => void
-  removeSignal: (id: string, signalId: string) => void
-  addSource: (id: string) => void
-  updateSource: (id: string, sourceId: string, patch: Partial<PacketSource>) => void
-  removeSource: (id: string, sourceId: string) => void
+  addSignal: (id: string) => Promise<void>
+  updateSignal: (id: string, signalId: string, patch: Partial<PacketSignal>) => Promise<void>
+  removeSignal: (id: string, signalId: string) => Promise<void>
+  addSource: (id: string) => Promise<void>
+  updateSource: (id: string, sourceId: string, patch: Partial<PacketSource>) => Promise<void>
+  removeSource: (id: string, sourceId: string) => Promise<void>
   updateVariant: (
     id: string,
     audience: AudienceMode,
     patch: Partial<PacketRecord["variants"][AudienceMode]>,
-  ) => void
-  toggleReviewItem: (id: string, itemId: string) => void
-  setReviewNotes: (id: string, notes: string) => void
-  setStatus: (id: string, status: PacketStatus) => void
+  ) => Promise<void>
+  toggleReviewItem: (id: string, itemId: string) => Promise<void>
+  setReviewNotes: (id: string, notes: string) => Promise<void>
+  setStatus: (id: string, status: PacketStatus) => Promise<void>
 }
 
 const PacketStoreContext = React.createContext<PacketStoreValue | null>(null)
@@ -70,6 +70,14 @@ function updatePacketById(
   updater: (packet: PacketRecord) => PacketRecord,
 ) {
   return packets.map((packet) => (packet.id === id ? stampPacket(updater(packet)) : packet))
+}
+
+function replacePacketById(packets: PacketRecord[], nextPacket: PacketRecord) {
+  if (!packets.some((packet) => packet.id === nextPacket.id)) {
+    return [nextPacket, ...packets]
+  }
+
+  return packets.map((packet) => (packet.id === nextPacket.id ? nextPacket : packet))
 }
 
 function buildDeploymentHeaders(headers?: HeadersInit) {
@@ -125,14 +133,37 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
     [packets],
   )
 
-  const patchPacketRequest = React.useCallback((id: string, body: object) => {
-    void fetch(`/api/packets/${id}`, {
-      method: "PATCH",
-      headers: buildDeploymentHeaders({
-        "Content-Type": "application/json",
-      }),
-      body: JSON.stringify(body),
+  const commitPacketPatch = React.useCallback(async (
+    id: string,
+    body: object,
+    optimisticUpdater: (packet: PacketRecord) => PacketRecord,
+  ) => {
+    let previousPacket: PacketRecord | undefined
+
+    setPackets((current) => {
+      previousPacket = current.find((packet) => packet.id === id)
+      return updatePacketById(current, id, optimisticUpdater)
     })
+
+    try {
+      const packet = await requestJson<PacketRecord>(`/api/packets/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+
+      setPackets((current) => replacePacketById(current, packet))
+    } catch (error) {
+      console.error("Packet save failed", error)
+
+      const rollbackPacket = previousPacket
+
+      if (rollbackPacket) {
+        setPackets((current) => replacePacketById(current, rollbackPacket))
+      }
+    }
   }, [])
 
   const createPacket = React.useCallback(
@@ -149,15 +180,15 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
       leadAudience?: AudienceMode
       signals?: PacketSignal[]
     }) => {
-      const packet = createPacketRecord(input)
-      setPackets((current) => [packet, ...current])
-      await requestJson<PacketRecord>("/api/packets", {
+      const packet = await requestJson<PacketRecord>("/api/packets", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(packet),
+        body: JSON.stringify(createPacketRecord(input)),
       })
+
+      setPackets((current) => replacePacketById(current, packet))
       return packet.id
     },
     [],
@@ -172,19 +203,20 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
           "id" | "signals" | "assets" | "sources" | "variants" | "reviewChecklist"
         >
       >,
-    ) => {
-      setPackets((current) =>
-        updatePacketById(current, id, (packet) => ({
+    ) =>
+      commitPacketPatch(
+        id,
+        {
+          type: "updatePacket",
+          patch,
+        },
+        (packet) => ({
           ...packet,
           ...patch,
-        })),
+        }),
       )
-      patchPacketRequest(id, {
-        type: "updatePacket",
-        patch,
-      })
-    },
-    [patchPacketRequest],
+    ,
+    [commitPacketPatch],
   )
 
   const uploadAsset = React.useCallback(
@@ -212,11 +244,17 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
   )
 
   const removeAsset = React.useCallback(async (id: string, assetId: string) => {
+    let previousPacket: PacketRecord | undefined
+
     setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
-        ...packet,
-        assets: packet.assets.filter((asset) => asset.id !== assetId),
-      })),
+      updatePacketById(current, id, (packet) => {
+        previousPacket = packet
+
+        return {
+          ...packet,
+          assets: packet.assets.filter((asset) => asset.id !== assetId),
+        }
+      }),
     )
 
     const response = await fetch(`/api/packets/${id}/assets/${assetId}`, {
@@ -225,6 +263,12 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
     })
 
     if (!response.ok) {
+      const rollbackPacket = previousPacket
+
+      if (rollbackPacket) {
+        setPackets((current) => replacePacketById(current, rollbackPacket))
+      }
+
       throw new Error(`Failed to remove asset ${assetId}`)
     }
   }, [])
@@ -232,108 +276,120 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
   const addSignal = React.useCallback((id: string) => {
     const signal = createSignal()
 
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "addSignal",
+        signal,
+      },
+      (packet) => ({
         ...packet,
         signals: [...packet.signals, signal],
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "addSignal",
-      signal,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const updateSignal = React.useCallback(
-    (id: string, signalId: string, patch: Partial<PacketSignal>) => {
-      setPackets((current) =>
-        updatePacketById(current, id, (packet) => ({
+    (id: string, signalId: string, patch: Partial<PacketSignal>) =>
+      commitPacketPatch(
+        id,
+        {
+          type: "updateSignal",
+          signalId,
+          patch,
+        },
+        (packet) => ({
           ...packet,
           signals: packet.signals.map((signal) =>
             signal.id === signalId ? { ...signal, ...patch } : signal,
           ),
-        })),
+        }),
       )
-      patchPacketRequest(id, {
-        type: "updateSignal",
-        signalId,
-        patch,
-      })
-    },
-    [patchPacketRequest],
+    ,
+    [commitPacketPatch],
   )
 
   const removeSignal = React.useCallback((id: string, signalId: string) => {
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "removeSignal",
+        signalId,
+      },
+      (packet) => ({
         ...packet,
         signals: packet.signals.filter((signal) => signal.id !== signalId),
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "removeSignal",
-      signalId,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const addSource = React.useCallback((id: string) => {
     const source = createSource()
 
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "addSource",
+        source,
+      },
+      (packet) => ({
         ...packet,
         sources: [...packet.sources, source],
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "addSource",
-      source,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const updateSource = React.useCallback(
-    (id: string, sourceId: string, patch: Partial<PacketSource>) => {
-      setPackets((current) =>
-        updatePacketById(current, id, (packet) => ({
+    (id: string, sourceId: string, patch: Partial<PacketSource>) =>
+      commitPacketPatch(
+        id,
+        {
+          type: "updateSource",
+          sourceId,
+          patch,
+        },
+        (packet) => ({
           ...packet,
           sources: packet.sources.map((source) =>
             source.id === sourceId ? { ...source, ...patch } : source,
           ),
-        })),
+        }),
       )
-      patchPacketRequest(id, {
-        type: "updateSource",
-        sourceId,
-        patch,
-      })
-    },
-    [patchPacketRequest],
+    ,
+    [commitPacketPatch],
   )
 
   const removeSource = React.useCallback((id: string, sourceId: string) => {
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "removeSource",
+        sourceId,
+      },
+      (packet) => ({
         ...packet,
         sources:
           packet.sources.length > 1
             ? packet.sources.filter((source) => source.id !== sourceId)
             : packet.sources,
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "removeSource",
-      sourceId,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const updateVariant = React.useCallback(
     (
       id: string,
       audience: AudienceMode,
       patch: Partial<PacketRecord["variants"][AudienceMode]>,
-    ) => {
-      setPackets((current) =>
-        updatePacketById(current, id, (packet) => ({
+    ) =>
+      commitPacketPatch(
+        id,
+        {
+          type: "updateVariant",
+          audience,
+          patch,
+        },
+        (packet) => ({
           ...packet,
           variants: {
             ...packet.variants,
@@ -342,57 +398,55 @@ export function PacketStoreProvider({ children }: { children: React.ReactNode })
               ...patch,
             },
           },
-        })),
+        }),
       )
-      patchPacketRequest(id, {
-        type: "updateVariant",
-        audience,
-        patch,
-      })
-    },
-    [patchPacketRequest],
+    ,
+    [commitPacketPatch],
   )
 
   const toggleReviewItem = React.useCallback((id: string, itemId: string) => {
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "toggleReviewItem",
+        itemId,
+      },
+      (packet) => ({
         ...packet,
         reviewChecklist: packet.reviewChecklist.map((item) =>
           item.id === itemId ? { ...item, checked: !item.checked } : item,
         ),
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "toggleReviewItem",
-      itemId,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const setReviewNotes = React.useCallback((id: string, notes: string) => {
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "setReviewNotes",
+        notes,
+      },
+      (packet) => ({
         ...packet,
         reviewNotes: notes,
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "setReviewNotes",
-      notes,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const setStatus = React.useCallback((id: string, status: PacketStatus) => {
-    setPackets((current) =>
-      updatePacketById(current, id, (packet) => ({
+    return commitPacketPatch(
+      id,
+      {
+        type: "setStatus",
+        status,
+      },
+      (packet) => ({
         ...packet,
         status,
-      })),
+      }),
     )
-    patchPacketRequest(id, {
-      type: "setStatus",
-      status,
-    })
-  }, [patchPacketRequest])
+  }, [commitPacketPatch])
 
   const value = React.useMemo<PacketStoreValue>(
     () => ({

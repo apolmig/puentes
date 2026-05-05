@@ -60,15 +60,10 @@ export default function StudioPage() {
   const params = useParams()
   const packetId = typeof params.id === "string" ? params.id : params.id?.[0] ?? ""
   const { hydrated, getPacket, updateVariant } = usePacketStore()
-  const [audience, setAudience] = React.useState<AudienceMode>("creator")
+  const [selectedAudience, setSelectedAudience] = React.useState<AudienceMode | null>(null)
   const [feedback, setFeedback] = React.useState("")
   const packet = getPacket(packetId)
-
-  React.useEffect(() => {
-    if (packet) {
-      setAudience(packet.leadAudience)
-    }
-  }, [packet])
+  const audience = selectedAudience ?? packet?.leadAudience ?? "creator"
 
   if (!hydrated) {
     return <Surface>Loading studio...</Surface>
@@ -125,7 +120,7 @@ export default function StudioPage() {
           <button
             key={mode}
             type="button"
-            onClick={() => setAudience(mode)}
+            onClick={() => setSelectedAudience(mode)}
             className={
               audience === mode
                 ? `rounded-full px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.18em] ${audienceMeta[mode].accentClass}`

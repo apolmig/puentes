@@ -26,8 +26,9 @@ This repo is now prepared to run safely on Netlify, but production must use host
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
+- `PUENTES_WORKSPACE_PASSWORD`
 
-In production, the app refuses to use local SQLite or local disk uploads. Packet data is expected to live in Turso/libSQL, and uploads are expected to go through Cloudinary. That keeps Netlify deploys stateless while preserving the same workspace flows.
+In production, the app refuses to use local SQLite or local disk uploads. Workspace routes also require HTTP Basic authentication through `PUENTES_WORKSPACE_PASSWORD` and optional `PUENTES_WORKSPACE_USER`. Packet data is expected to live in Turso/libSQL, and uploads are expected to go through Cloudinary. That keeps Netlify deploys stateless while preserving the same workspace flows.
 
 For the exact Netlify rollout checklist, see [docs/netlify-rollout.md](/C:/code/Nueva%20carpeta/puentes/docs/netlify-rollout.md).
 For project handoff context, see [docs/handoff.md](/C:/code/Nueva%20carpeta/puentes/docs/handoff.md).

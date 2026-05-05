@@ -1,5 +1,5 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises"
-import { extname, join } from "node:path"
+import { extname, join, relative, resolve, sep } from "node:path"
 
 import {
   type PacketAsset,
@@ -49,7 +49,32 @@ function buildStoredName(file: File) {
 }
 
 function assetUrlToFilePath(url: string) {
-  return join(process.cwd(), "public", url.replace(/^\//, ""))
+  if (!url.startsWith("/uploads/packets/")) {
+    return null
+  }
+
+  let decodedUrl
+
+  try {
+    decodedUrl = decodeURIComponent(url)
+  } catch {
+    return null
+  }
+
+  const uploadsRoot = resolve(process.cwd(), "public", "uploads", "packets")
+  const targetPath = resolve(process.cwd(), "public", decodedUrl.replace(/^\/+/, ""))
+  const relativeTarget = relative(uploadsRoot, targetPath)
+
+  if (
+    relativeTarget === "" ||
+    relativeTarget.startsWith("..") ||
+    relativeTarget.includes(`..${sep}`) ||
+    resolve(relativeTarget) === relativeTarget
+  ) {
+    return null
+  }
+
+  return targetPath
 }
 
 async function storePacketAssetLocally(input: {
@@ -58,7 +83,8 @@ async function storePacketAssetLocally(input: {
   label?: string
   kind: PacketAsset["kind"]
 }) {
-  const packetDirectory = join(process.cwd(), "public", "uploads", "packets", input.packetId)
+  const safePacketId = sanitizeSegment(input.packetId) || "packet"
+  const packetDirectory = join(process.cwd(), "public", "uploads", "packets", safePacketId)
   await mkdir(packetDirectory, { recursive: true })
 
   const storedName = buildStoredName(input.file)
@@ -73,10 +99,10 @@ async function storePacketAssetLocally(input: {
     fileName: input.file.name,
     mimeType: input.file.type || "application/octet-stream",
     size: input.file.size,
-    url: `/uploads/packets/${input.packetId}/${storedName}`,
+    url: `/uploads/packets/${safePacketId}/${storedName}`,
     createdAt: new Date().toISOString(),
     storageProvider: "local" as const,
-    storageKey: `/uploads/packets/${input.packetId}/${storedName}`,
+    storageKey: `/uploads/packets/${safePacketId}/${storedName}`,
     storageAssetId: "",
     storageResourceType: "raw",
   }
@@ -130,14 +156,22 @@ export async function deletePacketAsset(packetId: string, assetId: string) {
     return null
   }
 
-  if (asset.storageProvider === "cloudinary" && asset.storageKey) {
+  if (
+    asset.storageProvider === "cloudinary" &&
+    asset.storageKey.startsWith("puentes/packets/") &&
+    asset.storageAssetId
+  ) {
     await deletePacketAssetFromCloudinary({
       publicId: asset.storageKey,
       resourceType: asset.storageResourceType,
     })
   } else {
+    const assetPath = assetUrlToFilePath(asset.url)
+
     try {
-      await unlink(assetUrlToFilePath(asset.url))
+      if (assetPath) {
+        await unlink(assetPath)
+      }
     } catch {
       // Ignore missing files and keep the database clean.
     }

@@ -14,12 +14,15 @@ This repo is configured for a Netlify-hosted Next.js deployment. Use this checkl
 
 Create these as site environment variables in Netlify.
 
-For `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`:
+For `PUENTES_WORKSPACE_PASSWORD`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`:
 - Scope: `Builds` and `Functions`
 - Contexts: set values for `Production`
 - Optional: set separate non-production values for `Deploy Previews`
 
 Recommended additional variables:
+- `PUENTES_WORKSPACE_USER=puentes`
+  Scope: `Builds` and `Functions`
+  Context: `Production`
 - `PUENTES_ENABLE_SEED=false`
   Scope: `Builds` and `Functions`
   Context: `Production`
@@ -28,6 +31,10 @@ Recommended additional variables:
   Context: `Production`
 
 ## 3. Service setup
+
+### Workspace password
+
+Set `PUENTES_WORKSPACE_PASSWORD` to a long random value before enabling the production workspace. Hosted deployments fail closed for `/inbox`, `/packets`, `/studio`, `/review`, `/exports`, and `/api/packets` when no workspace password is configured.
 
 ### Turso
 
@@ -86,6 +93,7 @@ If production fails:
 
 ## 7. Notes for this repo
 
+- Production workspace routes require HTTP Basic authentication through `PUENTES_WORKSPACE_USER` and `PUENTES_WORKSPACE_PASSWORD`
 - Production no longer allows local SQLite fallback
 - Production no longer allows local disk uploads
 - Demo seed packets are disabled unless `PUENTES_ENABLE_SEED=true`

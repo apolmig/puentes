@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 
-import type { PacketRecord } from "@/lib/bridgebeat"
 import { createPacketInDb, listPacketsFromDb } from "@/lib/server/bridgebeat-db"
+import {
+  ApiValidationError,
+  parsePacketCreateBody,
+} from "@/lib/server/packet-api-validation"
 
 export async function GET() {
   const packets = await listPacketsFromDb()
@@ -9,7 +12,17 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const packet = (await request.json()) as PacketRecord
-  const created = await createPacketInDb(packet)
-  return NextResponse.json(created, { status: 201 })
+  try {
+    const packet = parsePacketCreateBody(await request.json())
+    const created = await createPacketInDb(packet)
+
+    return NextResponse.json(created, { status: 201 })
+  } catch (error) {
+    if (error instanceof ApiValidationError || error instanceof SyntaxError) {
+      return NextResponse.json({ message: error.message }, { status: 400 })
+    }
+
+    console.error("Packet create failed", error)
+    return NextResponse.json({ message: "Could not create packet" }, { status: 500 })
+  }
 }
